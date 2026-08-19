@@ -1,0 +1,18 @@
+.payments-page {
+  padding-bottom: 40px;
+}
+
+.payment-method-tag {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  font-size: 12.5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.text-emerald {
+  color: #10b981 !important;
+  font-weight: 800 !important;
+}

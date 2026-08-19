@@ -1,0 +1,257 @@
+.groups-page {
+  padding-bottom: 40px;
+}
+
+.page-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.page-subtitle {
+  color: #64748b;
+  font-size: 14.5px;
+  margin: 4px 0 0;
+}
+
+.filter-card {
+  margin-bottom: 28px;
+  padding: 18px 24px;
+}
+
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 450px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+}
+
+.search-field {
+  padding-left: 42px !important;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.pill-btn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.pill-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.group-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.group-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.08);
+  border-color: #c7d2fe;
+}
+
+.group-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.group-id-badge {
+  background: #e0e7ff;
+  color: #4f46e5;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 8px;
+}
+
+.group-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px;
+  letter-spacing: -0.4px;
+}
+
+.group-course {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #6366f1;
+  margin: 0 0 18px;
+}
+
+.group-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-icon {
+  font-size: 20px;
+}
+
+.detail-item label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1px;
+}
+
+.detail-item p {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.text-indigo {
+  color: #4f46e5 !important;
+}
+
+.font-bold {
+  font-weight: 800 !important;
+}
+
+.group-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.group-card-actions .btn {
+  flex: 1;
+}
+
+.close-modal-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.conflict-alert-box {
+  background: #fef2f2;
+  border: 1.5px solid #f87171;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.conflict-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b91c1c;
+  font-size: 14.5px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.conflict-alert-icon {
+  font-size: 18px;
+}
+
+.conflict-list {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.conflict-override-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7f1d1d;
+  cursor: pointer;
+  background: #fee2e2;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.conflict-override-checkbox input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+
+  .page-header-flex,
+  .filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-input-wrap {
+    max-width: 100%;
+    width: 100%;
+  }
+}
