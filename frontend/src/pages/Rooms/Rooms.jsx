@@ -6,6 +6,14 @@ import {
   INITIAL_ROOMS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineBuildingOffice2,
+  HiOutlinePlus,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlineComputerDesktop
+} from "react-icons/hi2";
 
 const Rooms = () => {
   const { canManageGroups } = useEduAuth();
@@ -79,14 +87,17 @@ const Rooms = () => {
     <div className="rooms-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">🏢 9. Xonalar va Jihozlar Inventari</h1>
+          <h1 className="page-title">
+            <HiOutlineBuildingOffice2 style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            9. Xonalar va Jihozlar Inventari
+          </h1>
           <p className="page-subtitle">
             O'quv xonalari, sig'imi va texnik jihozlar boshqaruvi
           </p>
         </div>
         {canManageGroups && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi Xona Qo'shish
+            <HiOutlinePlus /> Yangi Xona Qo'shish
           </button>
         )}
       </div>
@@ -118,13 +129,14 @@ const Rooms = () => {
                     <strong>{r.capacity} kishi</strong>
                   </td>
                   <td>
-                    <span className="text-indigo">
+                    <span className="text-indigo flex items-center gap-1">
+                      <HiOutlineComputerDesktop style={{ verticalAlign: 'middle' }} />
                       {r.computersCount} ta monoblok
                     </span>
                   </td>
                   <td>{r.projector}</td>
                   <td>
-                    <span className="status-badge badge-active">🟢 Faol</span>
+                    <span className="status-badge badge-active">Faol</span>
                   </td>
                   {canManageGroups && (
                     <td className="text-center">
@@ -133,13 +145,13 @@ const Rooms = () => {
                           className="btn btn-secondary btn-sm"
                           onClick={() => openEditModal(r)}
                         >
-                          ✏️ Tahrirlash
+                          <HiOutlinePencilSquare /> Tahrirlash
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(r.id)}
                         >
-                          🗑️ O'chirish
+                          <HiOutlineTrash /> O'chirish
                         </button>
                       </div>
                     </td>
@@ -161,8 +173,9 @@ const Rooms = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
             <form onSubmit={handleFormSubmit} className="admin-modal-form">

@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
+import { 
+  HiBars3, 
+  HiMagnifyingGlass, 
+  HiCalendarDays, 
+  HiLockClosed, 
+  HiXMark, 
+  HiKey 
+} from "react-icons/hi2";
+import { FaCrown, FaChalkboardUser, FaGraduationCap, FaUserTie } from "react-icons/fa6";
+import { MdWavingHand } from "react-icons/md";
 import "./Header.css";
 
 const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
@@ -68,11 +78,15 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             onClick={onToggleMobileMenu}
             aria-label="Menuni ochish"
           >
-            ☰
+            <HiBars3 />
           </button>
           <div className="header-welcome">
-            <h1 className="header-greeting">Xush kelibsiz, {firstName} 👋</h1>
-            <p className="header-date">📅 {currentDate}</p>
+            <h1 className="header-greeting">
+              Xush kelibsiz, {firstName} <MdWavingHand style={{ color: '#f59e0b', verticalAlign: 'middle' }} />
+            </h1>
+            <p className="header-date">
+              <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 4 }} /> {currentDate}
+            </p>
           </div>
         </div>
 
@@ -82,40 +96,46 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             onClick={onOpenCmdPalette}
             title="Tezkor qidiruv modali (Ctrl + K)"
           >
-            🔍 <span>Tezkor Qidiruv</span>{" "}
+            <HiMagnifyingGlass /> <span>Tezkor Qidiruv</span>{" "}
             <code className="cmd-kbd">Ctrl + K</code>
           </button>
 
           <div className="role-switcher-container">
-            <span className="switcher-label">🔒 Rolga Kirish:</span>
+            <span className="switcher-label">
+              <HiLockClosed style={{ verticalAlign: 'middle', marginRight: 3 }} /> Rolga Kirish:
+            </span>
             <div className="role-buttons">
               <button
                 className={`role-btn ${currentRole === "admin" ? "active" : ""}`}
                 onClick={() => openAuthModal("admin")}
                 title="Admin sifati kiring (Parol so'raladi)"
               >
-                👑 Admin
+                <FaCrown /> Admin
               </button>
               <button
                 className={`role-btn ${currentRole === "teacher" ? "active" : ""}`}
                 onClick={() => openAuthModal("teacher")}
                 title="O'qituvchi sifatida kiring (Parol so'raladi)"
               >
-                👨‍🏫 O'qituvchi
+                <FaChalkboardUser /> O'qituvchi
               </button>
               <button
                 className={`role-btn ${currentRole === "student" ? "active" : ""}`}
                 onClick={() => openAuthModal("student")}
                 title="O'quvchi sifatida kiring (Parol so'raladi)"
               >
-                👨‍🎓 O'quvchi
+                <FaGraduationCap /> O'quvchi
               </button>
             </div>
           </div>
 
           <div className="crm-user-profile">
             <div className="user-avatar-wrap">
-              <span className="user-avatar-emoji">{user?.avatar || "👨‍💼"}</span>
+              <span className="user-avatar-emoji">
+                {currentRole === "admin" && <FaCrown />}
+                {currentRole === "teacher" && <FaChalkboardUser />}
+                {currentRole === "student" && <FaGraduationCap />}
+              </span>
             </div>
             <div className="user-info-text">
               <p className="user-display-name">{displayName}</p>
@@ -132,7 +152,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
           <div className="modal-content card auth-modal-card">
             <div className="modal-header">
               <h2>
-                🔒{" "}
+                <HiLockClosed style={{ marginRight: 6, verticalAlign: 'middle' }} />
                 {targetRole === "admin"
                   ? "Admin Paneli Paroli"
                   : targetRole === "teacher"
@@ -142,8 +162,9 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               <button
                 className="close-modal-btn"
                 onClick={() => setAuthModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
 
@@ -194,7 +215,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   Bekor qilish
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  🔑 Kirish va Tasdiqlash
+                  <HiKey /> Kirish va Tasdiqlash
                 </button>
               </div>
             </form>

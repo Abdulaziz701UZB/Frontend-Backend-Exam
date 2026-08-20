@@ -6,6 +6,14 @@ import {
   INITIAL_HOMEWORK,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineBookOpen,
+  HiOutlinePlus,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlineClock
+} from "react-icons/hi2";
 
 const Homework = () => {
   const { canMarkAttendance } = useEduAuth();
@@ -79,14 +87,17 @@ const Homework = () => {
     <div className="homework-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">📖 7. Uyga Vazifalar va Topshiriqlar</h1>
+          <h1 className="page-title">
+            <HiOutlineBookOpen style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            7. Uyga Vazifalar va Topshiriqlar
+          </h1>
           <p className="page-subtitle">
             O'quvchilar uchun topshiriqlar, muddatlar va javoblarni qabul qilish
           </p>
         </div>
         {canMarkAttendance && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi Vazifa Biriktirish
+            <HiOutlinePlus /> Yangi Vazifa Biriktirish
           </button>
         )}
       </div>
@@ -119,14 +130,17 @@ const Homework = () => {
                   <td>
                     <strong className="student-name-text">{h.title}</strong>
                   </td>
-                  <td className="text-danger font-bold">⏰ {h.deadline}</td>
+                  <td className="text-danger font-bold">
+                    <HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                    {h.deadline}
+                  </td>
                   <td>
                     <strong className="text-emerald">
                       {h.totalSubmitted} ta o'quvchi
                     </strong>
                   </td>
                   <td>
-                    <span className="status-badge badge-active">🟢 Faol</span>
+                    <span className="status-badge badge-active">Faol</span>
                   </td>
                   {canMarkAttendance && (
                     <td className="text-center">
@@ -135,13 +149,13 @@ const Homework = () => {
                           className="btn btn-secondary btn-sm"
                           onClick={() => openEditModal(h)}
                         >
-                          ✏️ Tahrirlash
+                          <HiOutlinePencilSquare /> Tahrirlash
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(h.id)}
                         >
-                          🗑️ O'chirish
+                          <HiOutlineTrash /> O'chirish
                         </button>
                       </div>
                     </td>
@@ -163,8 +177,9 @@ const Homework = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
             <form onSubmit={handleFormSubmit} className="admin-modal-form">

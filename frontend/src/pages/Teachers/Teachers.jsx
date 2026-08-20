@@ -6,6 +6,16 @@ import {
   INITIAL_TEACHERS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineUsers,
+  HiOutlinePlus,
+  HiMagnifyingGlass,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlinePhone
+} from "react-icons/hi2";
+import { FaChalkboardUser } from "react-icons/fa6";
 
 const Teachers = () => {
   const { canManageGroups } = useEduAuth();
@@ -22,7 +32,7 @@ const Teachers = () => {
     subject: "Frontend ReactJS",
     salary: 10000000,
     experience: "3 yil",
-    avatar: "👨‍🏫",
+    avatar: "teacher",
   });
 
   const saveToStorage = (updated) => {
@@ -38,7 +48,7 @@ const Teachers = () => {
       subject: "Frontend ReactJS",
       salary: 10000000,
       experience: "3 yil",
-      avatar: "👨‍🏫",
+      avatar: "teacher",
     });
     setIsModalOpen(true);
   };
@@ -51,7 +61,7 @@ const Teachers = () => {
       subject: t.subject,
       salary: t.salary,
       experience: t.experience,
-      avatar: t.avatar,
+      avatar: t.avatar || "teacher",
     });
     setIsModalOpen(true);
   };
@@ -96,7 +106,8 @@ const Teachers = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            👨‍🏫 5. O'qituvchilar va Xodimlar Boshqaruvi
+            <FaChalkboardUser style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            5. O'qituvchilar va Xodimlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
             O'quv markazining barcha o'qituvchilari, mutaxassisliklari va maosh
@@ -105,14 +116,14 @@ const Teachers = () => {
         </div>
         {canManageGroups && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi O'qituvchi Qo'shish
+            <HiOutlinePlus /> Yangi O'qituvchi Qo'shish
           </button>
         )}
       </div>
 
       <div className="card filter-card mb-6">
         <div className="search-input-wrap">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><HiMagnifyingGlass /></span>
           <input
             type="text"
             className="form-input search-field"
@@ -145,14 +156,17 @@ const Teachers = () => {
                   </td>
                   <td>
                     <div className="student-name-cell">
-                      <span className="avatar-circle">{t.avatar}</span>
+                      <span className="avatar-circle"><FaChalkboardUser /></span>
                       <strong className="student-name-text">{t.name}</strong>
                     </div>
                   </td>
                   <td>
                     <span className="group-tag-pill">{t.subject}</span>
                   </td>
-                  <td>📞 {t.phone}</td>
+                  <td>
+                    <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} />
+                    {t.phone}
+                  </td>
                   <td>{t.experience}</td>
                   <td>
                     <strong className="text-emerald">
@@ -166,13 +180,13 @@ const Teachers = () => {
                           className="btn btn-secondary btn-sm"
                           onClick={() => openEditModal(t)}
                         >
-                          ✏️ Tahrirlash
+                          <HiOutlinePencilSquare /> Tahrirlash
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(t.id)}
                         >
-                          🗑️ O'chirish
+                          <HiOutlineTrash /> O'chirish
                         </button>
                       </div>
                     </td>
@@ -196,8 +210,9 @@ const Teachers = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
             <form onSubmit={handleFormSubmit} className="admin-modal-form">

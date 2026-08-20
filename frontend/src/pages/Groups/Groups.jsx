@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
 import {
   getStoredData,
@@ -8,6 +8,20 @@ import {
   INITIAL_TEACHERS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineAcademicCap,
+  HiOutlinePlus,
+  HiMagnifyingGlass,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlineCalendarDays,
+  HiOutlineClock,
+  HiOutlineMapPin,
+  HiOutlineBanknotes,
+  HiOutlineExclamationTriangle
+} from "react-icons/hi2";
+import { FaChalkboardUser, FaDoorClosed } from "react-icons/fa6";
 import "./Groups.css";
 
 const Groups = () => {
@@ -126,7 +140,7 @@ const Groups = () => {
 
     if (activeConflicts && !allowConflictSave) {
       alert(
-        "⚠️ Diqqat! Xona yoki o'qituvchi dars jadvalida to'qnashuv aniqlandi. Iltimos, xona yoki vaqtni o'zgartiring, yoki 'Ogohlantirishga qaramay saqlash' katakchasini belgilang.",
+        "Diqqat! Xona yoki o'qituvchi dars jadvalida to'qnashuv aniqlandi. Iltimos, xona yoki vaqtni o'zgartiring, yoki 'Ogohlantirishga qaramay saqlash' katakchasini belgilang.",
       );
       return;
     }
@@ -197,7 +211,10 @@ const Groups = () => {
     <div className="groups-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">📚 Kurslar va Guruhlar</h1>
+          <h1 className="page-title">
+            <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Kurslar va Guruhlar
+          </h1>
           <p className="page-subtitle">
             O'quv markazining barcha faol va yakunlangan dars guruhlari hamda
             avtomatik to'qnashuv detektori
@@ -205,7 +222,7 @@ const Groups = () => {
         </div>
         {canManageGroups && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi Guruh Yaratish
+            <HiOutlinePlus /> Yangi Guruh Yaratish
           </button>
         )}
       </div>
@@ -213,7 +230,7 @@ const Groups = () => {
       <div className="card filter-card">
         <div className="filter-row">
           <div className="search-input-wrap">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"><HiMagnifyingGlass /></span>
             <input
               type="text"
               className="form-input search-field"
@@ -262,16 +279,19 @@ const Groups = () => {
                 <span
                   className={`status-badge badge-${group.status.toLowerCase()}`}
                 >
-                  {group.status === "Active" ? "🟢 Faol" : "⚪ Yakunlangan"}
+                  {group.status === "Active" ? "Faol" : "Yakunlangan"}
                 </span>
               </div>
 
               <h3 className="group-name">{group.name}</h3>
-              <p className="group-course">🎓 {group.courseName}</p>
+              <p className="group-course">
+                <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                {group.courseName}
+              </p>
 
               <div className="group-details-list">
                 <div className="detail-item">
-                  <span className="detail-icon">👨‍🏫</span>
+                  <span className="detail-icon"><FaChalkboardUser /></span>
                   <div>
                     <label>O'qituvchi</label>
                     <p>{group.teacherName}</p>
@@ -279,7 +299,7 @@ const Groups = () => {
                 </div>
 
                 <div className="detail-item">
-                  <span className="detail-icon">🗓️</span>
+                  <span className="detail-icon"><HiOutlineCalendarDays /></span>
                   <div>
                     <label>Dars Kunlari</label>
                     <p>{group.scheduleDays}</p>
@@ -287,7 +307,7 @@ const Groups = () => {
                 </div>
 
                 <div className="detail-item">
-                  <span className="detail-icon">⏰</span>
+                  <span className="detail-icon"><HiOutlineClock /></span>
                   <div>
                     <label>Dars Vaqti</label>
                     <p>{group.scheduleTime}</p>
@@ -295,7 +315,7 @@ const Groups = () => {
                 </div>
 
                 <div className="detail-item">
-                  <span className="detail-icon">📍</span>
+                  <span className="detail-icon"><HiOutlineMapPin /></span>
                   <div>
                     <label>Xona</label>
                     <p>{group.room}</p>
@@ -303,7 +323,7 @@ const Groups = () => {
                 </div>
 
                 <div className="detail-item">
-                  <span className="detail-icon">💰</span>
+                  <span className="detail-icon"><HiOutlineBanknotes /></span>
                   <div>
                     <label>Oylik To'lov</label>
                     <p className="font-bold text-indigo">
@@ -319,13 +339,13 @@ const Groups = () => {
                     className="btn btn-secondary btn-sm"
                     onClick={() => openEditModal(group)}
                   >
-                    ✏️ Tahrirlash
+                    <HiOutlinePencilSquare /> Tahrirlash
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleDeleteGroup(group.id)}
                   >
-                    🗑️ O'chirish
+                    <HiOutlineTrash /> O'chirish
                   </button>
                 </div>
               )}
@@ -344,8 +364,9 @@ const Groups = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
 
@@ -504,13 +525,14 @@ const Groups = () => {
               {activeConflicts && (
                 <div className="conflict-alert-box">
                   <div className="conflict-alert-header">
-                    <span className="conflict-alert-icon">⚠️</span>
+                    <span className="conflict-alert-icon"><HiOutlineExclamationTriangle /></span>
                     <strong>Jadvalda To'qnashuv (Conflict) Aniqlandi!</strong>
                   </div>
                   <ul className="conflict-list">
                     {activeConflicts.map((c, i) => (
                       <li key={i}>
-                        {c.type === "room" ? "🚪 " : "👨‍🏫 "} {c.message}
+                        {c.type === "room" ? <FaDoorClosed style={{ marginRight: 4 }} /> : <FaChalkboardUser style={{ marginRight: 4 }} />}
+                        {c.message}
                       </li>
                     ))}
                   </ul>

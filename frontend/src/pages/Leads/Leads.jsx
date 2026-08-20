@@ -6,6 +6,14 @@ import {
   INITIAL_LEADS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlinePhoneArrowUpRight,
+  HiOutlinePlus,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlinePhone
+} from "react-icons/hi2";
 
 const Leads = () => {
   const { canManageStudents } = useEduAuth();
@@ -79,7 +87,10 @@ const Leads = () => {
     <div className="leads-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">📞 10. Lidlar va Arizalar - Sales CRM</h1>
+          <h1 className="page-title">
+            <HiOutlinePhoneArrowUpRight style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            10. Lidlar va Arizalar - Sales CRM
+          </h1>
           <p className="page-subtitle">
             Ijtimoiy tarmoqlar va Telegram-botdan tushgan yangi ariza/lidlar
             voronkasi
@@ -87,7 +98,7 @@ const Leads = () => {
         </div>
         {canManageStudents && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi Lid Qo'shish
+            <HiOutlinePlus /> Yangi Lid Qo'shish
           </button>
         )}
       </div>
@@ -117,7 +128,10 @@ const Leads = () => {
                   <td>
                     <strong className="student-name-text">{l.name}</strong>
                   </td>
-                  <td>📞 {l.phone}</td>
+                  <td>
+                    <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} />
+                    {l.phone}
+                  </td>
                   <td>
                     <span className="group-tag-pill">{l.interestedCourse}</span>
                   </td>
@@ -132,13 +146,13 @@ const Leads = () => {
                           className="btn btn-secondary btn-sm"
                           onClick={() => openEditModal(l)}
                         >
-                          ✏️ Tahrirlash
+                          <HiOutlinePencilSquare /> Tahrirlash
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(l.id)}
                         >
-                          🗑️ O'chirish
+                          <HiOutlineTrash /> O'chirish
                         </button>
                       </div>
                     </td>
@@ -158,8 +172,9 @@ const Leads = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
             <form onSubmit={handleFormSubmit} className="admin-modal-form">

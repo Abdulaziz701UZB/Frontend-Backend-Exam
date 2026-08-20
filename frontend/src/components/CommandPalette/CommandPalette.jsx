@@ -8,6 +8,21 @@ import {
   INITIAL_TEACHERS,
   STORAGE,
 } from "../../data/eduData";
+import { 
+  HiMagnifyingGlass, 
+  HiBolt, 
+  HiOutlineUserPlus, 
+  HiOutlineCreditCard, 
+  HiOutlineAcademicCap, 
+  HiOutlineClipboardDocumentCheck, 
+  HiOutlineTrophy, 
+  HiArrowRight,
+  HiOutlineUser,
+  HiOutlineBookOpen,
+  HiOutlineMapPin,
+  HiOutlinePhone
+} from "react-icons/hi2";
+import { FaUserGraduate, FaChalkboardUser, FaLightbulb } from "react-icons/fa6";
 import "./CommandPalette.css";
 
 const CommandPalette = ({ isOpen, onClose }) => {
@@ -67,11 +82,11 @@ const CommandPalette = ({ isOpen, onClose }) => {
     : teachers.slice(0, 2);
 
   const quickActions = [
-    { title: "👨‍🎓 Yangi O'quvchi Qo'shish", path: "/students" },
-    { title: "💳 To'lov Qabul Qilish", path: "/payments" },
-    { title: "📚 Yangi Guruh Yaratish", path: "/groups" },
-    { title: "📝 Davomat Belgilash", path: "/attendance" },
-    { title: "🎯 Imtihon E'lon Qilish", path: "/exams" },
+    { title: "Yangi O'quvchi Qo'shish", icon: <HiOutlineUserPlus />, path: "/students" },
+    { title: "To'lov Qabul Qilish", icon: <HiOutlineCreditCard />, path: "/payments" },
+    { title: "Yangi Guruh Yaratish", icon: <HiOutlineAcademicCap />, path: "/groups" },
+    { title: "Davomat Belgilash", icon: <HiOutlineClipboardDocumentCheck />, path: "/attendance" },
+    { title: "Imtihon E'lon Qilish", icon: <HiOutlineTrophy />, path: "/exams" },
   ];
 
   const handleSelect = (path) => {
@@ -83,7 +98,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
     <div className="cmd-overlay" onClick={onClose}>
       <div className="cmd-modal" onClick={(e) => e.stopPropagation()}>
         <div className="cmd-input-wrap">
-          <span className="cmd-search-icon">🔍</span>
+          <span className="cmd-search-icon"><HiMagnifyingGlass /></span>
           <input
             type="text"
             className="cmd-input"
@@ -100,15 +115,19 @@ const CommandPalette = ({ isOpen, onClose }) => {
         <div className="cmd-results-wrap">
           {!q && (
             <div className="cmd-section">
-              <span className="cmd-section-title">⚡ TEZKOR BUYRUQLAR</span>
+              <span className="cmd-section-title">
+                <HiBolt style={{ verticalAlign: 'middle', marginRight: 4 }} /> TEZKOR BUYRUQLAR
+              </span>
               {quickActions.map((action, idx) => (
                 <div
                   key={idx}
                   className="cmd-item"
                   onClick={() => handleSelect(action.path)}
                 >
-                  <span className="cmd-item-title">{action.title}</span>
-                  <span className="cmd-item-arrow">→</span>
+                  <span className="cmd-item-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {action.icon} {action.title}
+                  </span>
+                  <span className="cmd-item-arrow"><HiArrowRight /></span>
                 </div>
               ))}
             </div>
@@ -117,7 +136,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {filteredStudents.length > 0 && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                👨‍🎓 O'QUVCHILAR ({filteredStudents.length})
+                <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 4 }} /> O'QUVCHILAR ({filteredStudents.length})
               </span>
               {filteredStudents.map((s) => (
                 <div
@@ -125,11 +144,11 @@ const CommandPalette = ({ isOpen, onClose }) => {
                   className="cmd-item"
                   onClick={() => handleSelect("/students")}
                 >
-                  <span className="cmd-item-icon">👤</span>
+                  <span className="cmd-item-icon"><HiOutlineUser /></span>
                   <div className="cmd-item-text">
                     <strong>{s.fullName}</strong>
                     <small>
-                      {s.groupName} • 📞 {s.phone}
+                      {s.groupName} • <HiOutlinePhone style={{ verticalAlign: 'middle' }} /> {s.phone}
                     </small>
                   </div>
                 </div>
@@ -140,7 +159,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {filteredGroups.length > 0 && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                📚 GURUHLAR ({filteredGroups.length})
+                <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 4 }} /> GURUHLAR ({filteredGroups.length})
               </span>
               {filteredGroups.map((g) => (
                 <div
@@ -148,13 +167,13 @@ const CommandPalette = ({ isOpen, onClose }) => {
                   className="cmd-item"
                   onClick={() => handleSelect("/groups")}
                 >
-                  <span className="cmd-item-icon">📖</span>
+                  <span className="cmd-item-icon"><HiOutlineBookOpen /></span>
                   <div className="cmd-item-text">
                     <strong>
                       {g.name} ({g.courseName})
                     </strong>
                     <small>
-                      👨‍🏫 {g.teacherName} • 📍 {g.room}
+                      <FaChalkboardUser style={{ verticalAlign: 'middle', marginRight: 2 }} /> {g.teacherName} • <HiOutlineMapPin style={{ verticalAlign: 'middle', marginRight: 2 }} /> {g.room}
                     </small>
                   </div>
                 </div>
@@ -165,7 +184,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {filteredTeachers.length > 0 && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                👨‍🏫 O'QITUVCHILAR ({filteredTeachers.length})
+                <FaChalkboardUser style={{ verticalAlign: 'middle', marginRight: 4 }} /> O'QITUVCHILAR ({filteredTeachers.length})
               </span>
               {filteredTeachers.map((t) => (
                 <div
@@ -173,11 +192,11 @@ const CommandPalette = ({ isOpen, onClose }) => {
                   className="cmd-item"
                   onClick={() => handleSelect("/teachers")}
                 >
-                  <span className="cmd-item-icon">{t.avatar || "👨‍🏫"}</span>
+                  <span className="cmd-item-icon"><FaChalkboardUser /></span>
                   <div className="cmd-item-text">
                     <strong>{t.name}</strong>
                     <small>
-                      {t.subject} • 📞 {t.phone}
+                      {t.subject} • <HiOutlinePhone style={{ verticalAlign: 'middle' }} /> {t.phone}
                     </small>
                   </div>
                 </div>
@@ -188,7 +207,8 @@ const CommandPalette = ({ isOpen, onClose }) => {
 
         <div className="cmd-footer">
           <span>
-            💡 Maslahat: Qidiruvni yopish uchun <code>ESC</code> yoki qayta{" "}
+            <FaLightbulb style={{ verticalAlign: 'middle', marginRight: 4, color: '#f59e0b' }} />
+            Maslahat: Qidiruvni yopish uchun <code>ESC</code> yoki qayta{" "}
             <code>Ctrl + K</code> bosing
           </span>
         </div>

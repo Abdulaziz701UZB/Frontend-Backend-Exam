@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
 import {
   getStoredData,
@@ -8,6 +8,21 @@ import {
   INITIAL_GROUPS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineCreditCard,
+  HiOutlinePlus,
+  HiOutlineBanknotes,
+  HiOutlineExclamationTriangle,
+  HiOutlineDocumentText,
+  HiMagnifyingGlass,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlinePhone,
+  HiOutlineUser,
+  HiOutlineChatBubbleLeftRight
+} from "react-icons/hi2";
+import { FaUserGraduate, FaMoneyBillWave, FaBuildingColumns } from "react-icons/fa6";
 import "./Payments.css";
 
 const Payments = () => {
@@ -153,14 +168,17 @@ const Payments = () => {
     <div className="payments-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">💳 To'lovlar va Moliya Boshqaruvi</h1>
+          <h1 className="page-title">
+            <HiOutlineCreditCard style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            To'lovlar va Moliya Boshqaruvi
+          </h1>
           <p className="page-subtitle">
             O'quv markazining oylik to'lovlari, qarzdorliklar va tushum hisoboti
           </p>
         </div>
         {canManagePayments && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ To'lov Qabul Qilish
+            <HiOutlinePlus /> To'lov Qabul Qilish
           </button>
         )}
       </div>
@@ -169,7 +187,7 @@ const Payments = () => {
         <div className="stats-grid mb-6">
           <div className="stat-card stat-emerald">
             <div className="stat-icon-wrap">
-              <span className="stat-icon">💰</span>
+              <span className="stat-icon"><HiOutlineBanknotes /></span>
             </div>
             <div className="stat-details">
               <span className="stat-label">Jami Qabul Qilingan Tushum</span>
@@ -182,7 +200,7 @@ const Payments = () => {
 
           <div className="stat-card stat-amber">
             <div className="stat-icon-wrap">
-              <span className="stat-icon">⚠️</span>
+              <span className="stat-icon"><HiOutlineExclamationTriangle /></span>
             </div>
             <div className="stat-details">
               <span className="stat-label">Qarzdorliklar Jami</span>
@@ -205,19 +223,21 @@ const Payments = () => {
                 className={`pill-btn ${activeTab === "history" ? "active" : ""}`}
                 onClick={() => setActiveTab("history")}
               >
-                📜 To'lovlar Tarixi ({payments.length})
+                <HiOutlineDocumentText style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                To'lovlar Tarixi ({payments.length})
               </button>
               <button
                 className={`pill-btn ${activeTab === "debtors" ? "active" : ""}`}
                 onClick={() => setActiveTab("debtors")}
               >
-                ⚠️ Qarzdorlar Ro'yxati ({debtorsList.length})
+                <HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Qarzdorlar Ro'yxati ({debtorsList.length})
               </button>
             </div>
 
             {activeTab === "history" && (
               <div className="search-input-wrap">
-                <span className="search-icon">🔍</span>
+                <span className="search-icon"><HiMagnifyingGlass /></span>
                 <input
                   type="text"
                   className="form-input search-field"
@@ -277,7 +297,7 @@ const Payments = () => {
                       <td>{p.month}</td>
                       <td>
                         <span className="payment-method-tag">
-                          {p.paymentMethod.includes("Card") ? "💳 " : "💵 "}
+                          {p.paymentMethod.includes("Card") ? <HiOutlineCreditCard style={{ marginRight: 3, verticalAlign: 'middle' }} /> : <FaMoneyBillWave style={{ marginRight: 3, verticalAlign: 'middle' }} />}
                           {p.paymentMethod}
                         </span>
                       </td>
@@ -294,7 +314,7 @@ const Payments = () => {
                             className="btn btn-secondary btn-sm"
                             onClick={() => openEditModal(p)}
                           >
-                            ✏️ Tahrirlash
+                            <HiOutlinePencilSquare /> Tahrirlash
                           </button>
                         </td>
                       )}
@@ -325,7 +345,7 @@ const Payments = () => {
                 {debtorsList.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center py-6 text-muted">
-                      Qarzdor o'quvchilar mavjud emas! 🎉
+                      Qarzdor o'quvchilar mavjud emas!
                     </td>
                   </tr>
                 ) : (
@@ -339,9 +359,13 @@ const Payments = () => {
                       <td>
                         <span className="group-tag-pill">{d.groupName}</span>
                       </td>
-                      <td>📞 {d.phone}</td>
+                      <td>
+                        <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                        {d.phone}
+                      </td>
                       <td className="text-muted">
-                        👨‍👩‍👦 {d.parentPhone || "Kiritilmagan"}
+                        <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                        {d.parentPhone || "Kiritilmagan"}
                       </td>
                       <td>
                         <strong className="text-danger">
@@ -355,18 +379,18 @@ const Payments = () => {
                               className="btn btn-secondary btn-sm"
                               onClick={() =>
                                 alert(
-                                  `📲 SMS Eslatnoma yuborildi!\nQabul qiluvchi: ${d.fullName} (${d.phone})\nMatn: "Hurmatli ${d.fullName}, EduControl o'quv markazidagi oylik to'lovingiz muddati o'tdi. Iltimos to'lovni amalga oshiring."`,
+                                  `SMS Eslatnoma yuborildi!\nQabul qiluvchi: ${d.fullName} (${d.phone})\nMatn: "Hurmatli ${d.fullName}, EduControl o'quv markazidagi oylik to'lovingiz muddati o'tdi. Iltimos to'lovni amalga oshiring."`,
                                 )
                               }
-                              title="Avtomatik SMS eslatma yuborish (Admin 3)"
+                              title="Avtomatik SMS eslatma yuborish"
                             >
-                              📲 SMS Eslatish
+                              <HiOutlineChatBubbleLeftRight /> SMS Eslatish
                             </button>
                             <button
                               className="btn btn-primary btn-sm"
                               onClick={openCreateModal}
                             >
-                              💳 To'lov Qabul Qilish
+                              <HiOutlineCreditCard /> To'lov Qabul Qilish
                             </button>
                           </div>
                         </td>
@@ -392,8 +416,9 @@ const Payments = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
 
@@ -417,7 +442,7 @@ const Payments = () => {
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.fullName} ({s.groupName}){" "}
-                      {s.paymentStatus === "Overdue" ? "⚠️ Qarzdor" : ""}
+                      {s.paymentStatus === "Overdue" ? " [Qarzdor]" : ""}
                     </option>
                   ))}
                 </select>
@@ -467,12 +492,10 @@ const Payments = () => {
                       })
                     }
                   >
-                    <option value="Card (Click)">💳 Card (Click)</option>
-                    <option value="Card (Payme)">💳 Card (Payme)</option>
-                    <option value="Naqd pul">💵 Naqd pul</option>
-                    <option value="Bank O'tkazmasi">
-                      🏛️ Bank O'tkazmasi (Перечисление)
-                    </option>
+                    <option value="Card (Click)">Card (Click)</option>
+                    <option value="Card (Payme)">Card (Payme)</option>
+                    <option value="Naqd pul">Naqd pul</option>
+                    <option value="Bank O'tkazmasi">Bank O'tkazmasi</option>
                   </select>
                 </div>
 

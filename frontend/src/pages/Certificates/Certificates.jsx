@@ -6,6 +6,14 @@ import {
   INITIAL_CERTIFICATES,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineDocumentText,
+  HiOutlinePlus,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlineQrCode
+} from "react-icons/hi2";
 
 const Certificates = () => {
   const { canManageGroups } = useEduAuth();
@@ -79,7 +87,10 @@ const Certificates = () => {
     <div className="certificates-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">📜 8. Sertifikatlar va Bitiruvchilar</h1>
+          <h1 className="page-title">
+            <HiOutlineDocumentText style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            8. Sertifikatlar va Bitiruvchilar
+          </h1>
           <p className="page-subtitle">
             QR-kodli raqamli sertifikatlar reestri va bitiruvchilar
             portfoliolari
@@ -87,7 +98,7 @@ const Certificates = () => {
         </div>
         {canManageGroups && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Sertifikat Generatsiya Qilish
+            <HiOutlinePlus /> Sertifikat Generatsiya Qilish
           </button>
         )}
       </div>
@@ -125,7 +136,10 @@ const Certificates = () => {
                     <strong className="text-emerald">{c.grade}</strong>
                   </td>
                   <td>
-                    <code className="text-indigo">{c.qrCode}</code>
+                    <code className="text-indigo flex items-center gap-1">
+                      <HiOutlineQrCode style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                      {c.qrCode}
+                    </code>
                   </td>
                   {canManageGroups && (
                     <td className="text-center">
@@ -134,13 +148,13 @@ const Certificates = () => {
                           className="btn btn-secondary btn-sm"
                           onClick={() => openEditModal(c)}
                         >
-                          ✏️ Tahrirlash
+                          <HiOutlinePencilSquare /> Tahrirlash
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(c.id)}
                         >
-                          🗑️ O'chirish
+                          <HiOutlineTrash /> O'chirish
                         </button>
                       </div>
                     </td>
@@ -164,8 +178,9 @@ const Certificates = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
             <form onSubmit={handleFormSubmit} className="admin-modal-form">

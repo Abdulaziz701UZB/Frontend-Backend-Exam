@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
 import {
   getStoredData,
@@ -7,6 +7,18 @@ import {
   INITIAL_GROUPS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlinePlus,
+  HiMagnifyingGlass,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlinePhone,
+  HiOutlineCheckCircle,
+  HiOutlineExclamationTriangle,
+  HiOutlineUser
+} from "react-icons/hi2";
+import { FaUserGraduate } from "react-icons/fa6";
 import "./Students.css";
 
 const Students = () => {
@@ -132,7 +144,10 @@ const Students = () => {
     <div className="students-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">👨‍🎓 O'quvchilar va Guruhga Biriktirish</h1>
+          <h1 className="page-title">
+            <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            O'quvchilar va Guruhga Biriktirish
+          </h1>
           <p className="page-subtitle">
             O'quv markazining barcha talabalari directoryasi va guruhlar
             bo'yicha taqsimot
@@ -140,7 +155,7 @@ const Students = () => {
         </div>
         {canManageStudents && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi O'quvchi Qo'shish
+            <HiOutlinePlus /> Yangi O'quvchi Qo'shish
           </button>
         )}
       </div>
@@ -148,7 +163,7 @@ const Students = () => {
       <div className="card filter-card">
         <div className="filter-row">
           <div className="search-input-wrap">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"><HiMagnifyingGlass /></span>
             <input
               type="text"
               className="form-input search-field"
@@ -213,22 +228,24 @@ const Students = () => {
                     </td>
                     <td>
                       <div className="student-name-cell">
-                        <span className="avatar-circle">👨‍🎓</span>
+                        <span className="avatar-circle"><FaUserGraduate /></span>
                         <div>
                           <strong className="student-name-text">
                             {student.fullName}
                           </strong>
                           <span className="student-status-tag">
-                            🟢 {student.status}
+                            {student.status}
                           </span>
                         </div>
                       </div>
                     </td>
                     <td>
                       <div className="phone-cell">
-                        <span className="user-phone">📞 {student.phone}</span>
+                        <span className="user-phone">
+                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {student.phone}
+                        </span>
                         <small className="parent-phone">
-                          👨‍👩‍👦 {student.parentPhone || "+998 90 599 06 00"}
+                          <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 2 }} /> {student.parentPhone || "+998 90 599 06 00"}
                         </small>
                       </div>
                     </td>
@@ -242,9 +259,11 @@ const Students = () => {
                       <span
                         className={`status-pill pill-${student.paymentStatus.toLowerCase()}`}
                       >
-                        {student.paymentStatus === "Paid"
-                          ? "✅ To'langan"
-                          : "⚠️ Qarzdor"}
+                        {student.paymentStatus === "Paid" ? (
+                          <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 4 }} /> To'langan</>
+                        ) : (
+                          <><HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 4 }} /> Qarzdor</>
+                        )}
                       </span>
                     </td>
                     <td>
@@ -263,13 +282,13 @@ const Students = () => {
                             className="btn btn-secondary btn-sm"
                             onClick={() => openEditModal(student)}
                           >
-                            ✏️ Tahrirlash
+                            <HiOutlinePencilSquare /> Tahrirlash
                           </button>
                           <button
                             className="btn btn-danger btn-sm"
                             onClick={() => handleDeleteStudent(student.id)}
                           >
-                            🗑️ O'chirish
+                            <HiOutlineTrash /> O'chirish
                           </button>
                         </div>
                       </td>
@@ -294,8 +313,9 @@ const Students = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
 
@@ -377,8 +397,8 @@ const Students = () => {
                       })
                     }
                   >
-                    <option value="Paid">✅ Paid (To'langan)</option>
-                    <option value="Overdue">⚠️ Overdue (Qarzdor)</option>
+                    <option value="Paid">Paid (To'langan)</option>
+                    <option value="Overdue">Overdue (Qarzdor)</option>
                   </select>
                 </div>
               </div>

@@ -9,6 +9,22 @@ import {
   FINANCIAL_ANALYTICS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiRocketLaunch,
+  HiOutlineUserPlus,
+  HiOutlineCreditCard,
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineAcademicCap,
+  HiOutlineBanknotes,
+  HiOutlineExclamationTriangle,
+  HiOutlineChartBar,
+  HiOutlineShieldCheck,
+  HiArrowRight,
+  HiOutlinePhone,
+  HiOutlineUser,
+  HiOutlineCheckCircle
+} from "react-icons/hi2";
+import { FaUserGraduate } from "react-icons/fa6";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -49,7 +65,9 @@ const Dashboard = () => {
     <div className="dashboard-page">
       <div className="dashboard-welcome-banner">
         <div className="banner-text">
-          <h2>EduControl CRM Boshqaruv Markazi 🚀</h2>
+          <h2>
+            EduControl CRM Boshqaruv Markazi <HiRocketLaunch style={{ verticalAlign: 'middle', color: '#6366f1' }} />
+          </h2>
           <p>
             O'quv markazingiz davomati, to'lovlari va dars jadvallarini real
             vaqt rejimida boshqaring.
@@ -59,16 +77,16 @@ const Dashboard = () => {
           {isAdmin && (
             <>
               <Link to="/students" className="btn btn-primary">
-                ➕ O'quvchi Qo'shish
+                <HiOutlineUserPlus /> O'quvchi Qo'shish
               </Link>
               <Link to="/payments" className="btn btn-secondary">
-                💳 To'lov Qabul Qilish
+                <HiOutlineCreditCard /> To'lov Qabul Qilish
               </Link>
             </>
           )}
           {isTeacher && (
             <Link to="/attendance" className="btn btn-primary">
-              📝 Davomat Belgilash
+              <HiOutlineClipboardDocumentCheck /> Davomat Belgilash
             </Link>
           )}
         </div>
@@ -78,7 +96,7 @@ const Dashboard = () => {
         <div className="stats-grid">
           <div className="stat-card stat-indigo">
             <div className="stat-icon-wrap">
-              <span className="stat-icon">👨‍🎓</span>
+              <span className="stat-icon"><FaUserGraduate /></span>
             </div>
             <div className="stat-details">
               <span className="stat-label">Faol O'quvchilar</span>
@@ -89,7 +107,7 @@ const Dashboard = () => {
 
           <div className="stat-card stat-emerald">
             <div className="stat-icon-wrap">
-              <span className="stat-icon">📚</span>
+              <span className="stat-icon"><HiOutlineAcademicCap /></span>
             </div>
             <div className="stat-details">
               <span className="stat-label">Faol Guruhlar</span>
@@ -100,7 +118,7 @@ const Dashboard = () => {
 
           <div className="stat-card stat-blue">
             <div className="stat-icon-wrap">
-              <span className="stat-icon">💰</span>
+              <span className="stat-icon"><HiOutlineBanknotes /></span>
             </div>
             <div className="stat-details">
               <span className="stat-label">Jami Oylik Tushum</span>
@@ -113,7 +131,7 @@ const Dashboard = () => {
 
           <div className="stat-card stat-amber">
             <div className="stat-icon-wrap">
-              <span className="stat-icon">⚠️</span>
+              <span className="stat-icon"><HiOutlineExclamationTriangle /></span>
             </div>
             <div className="stat-details">
               <span className="stat-label">Qarzdorlik Balansi</span>
@@ -133,8 +151,8 @@ const Dashboard = () => {
           <div className="card-header-flex mb-4">
             <div>
               <h3 className="section-title mb-0">
-                📈 Financial Profit & Risk Analytics (Foyda, Zarar & Xavf
-                Tahlili)
+                <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                Financial Profit & Risk Analytics (Foyda, Zarar & Xavf Tahlili)
               </h3>
               <p className="text-muted text-sm">
                 O'quv markazining operatsion xarajatlari, sof foyda marjasi va
@@ -173,7 +191,10 @@ const Dashboard = () => {
 
           <div className="analytics-details-grid">
             <div className="analytics-col">
-              <h4 className="sub-heading">📊 Xarajatlar Taqsimoti:</h4>
+              <h4 className="sub-heading">
+                <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Xarajatlar Taqsimoti:
+              </h4>
               <div className="breakdown-list">
                 {FINANCIAL_ANALYTICS.expensesBreakdown.map((item, idx) => (
                   <div key={idx} className="breakdown-item">
@@ -196,7 +217,8 @@ const Dashboard = () => {
 
             <div className="analytics-col">
               <h4 className="sub-heading">
-                🛡️ Moliyaviy Xavf & Xatar Indikatorlari:
+                <HiOutlineShieldCheck style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Moliyaviy Xavf & Xatar Indikatorlari:
               </h4>
               <div className="risk-indicators-list">
                 {FINANCIAL_ANALYTICS.riskIndicators.map((risk, idx) => (
@@ -221,7 +243,10 @@ const Dashboard = () => {
       {isStudent && (
         <div className="student-personal-grid">
           <div className="card">
-            <h3 className="section-title">🎓 Mening Guruhim</h3>
+            <h3 className="section-title">
+              <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              Mening Guruhim
+            </h3>
             <div className="student-group-box">
               <h4>{myGroup?.name || "Frontend ReactJS"}</h4>
               <p>
@@ -242,14 +267,19 @@ const Dashboard = () => {
           </div>
 
           <div className="card">
-            <h3 className="section-title">💳 To'lov Holatim</h3>
+            <h3 className="section-title">
+              <HiOutlineCreditCard style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              To'lov Holatim
+            </h3>
             <div className="student-payment-box">
               <div
                 className={`status-pill pill-${studentData.paymentStatus.toLowerCase()}`}
               >
-                {studentData.paymentStatus === "Paid"
-                  ? "✅ To'langan (Qarzsiz)"
-                  : "⚠️ Qarzdorlik Mavjud"}
+                {studentData.paymentStatus === "Paid" ? (
+                  <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 4 }} /> To'langan (Qarzsiz)</>
+                ) : (
+                  <><HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 4 }} /> Qarzdorlik Mavjud</>
+                )}
               </div>
               <p className="balance-info">
                 Balans: <strong>{formatMoney(studentData.balance)}</strong>
@@ -274,9 +304,12 @@ const Dashboard = () => {
         <div className="dashboard-content-grid">
           <div className="card">
             <div className="card-header-flex">
-              <h3 className="section-title">📚 Guruhlar va Dars Jadvallari</h3>
+              <h3 className="section-title">
+                <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                Guruhlar va Dars Jadvallari
+              </h3>
               <Link to="/groups" className="link-action">
-                Barchasini ko'rish →
+                Barchasini ko'rish <HiArrowRight style={{ verticalAlign: 'middle' }} />
               </Link>
             </div>
 
@@ -319,26 +352,31 @@ const Dashboard = () => {
 
           <div className="card">
             <div className="card-header-flex">
-              <h3 className="section-title">⚠️ Qarzdor O'quvchilar</h3>
+              <h3 className="section-title">
+                <HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 6, color: '#ef4444' }} />
+                Qarzdor O'quvchilar
+              </h3>
               <Link to="/payments" className="link-action">
-                Moliya bo'limi →
+                Moliya bo'limi <HiArrowRight style={{ verticalAlign: 'middle' }} />
               </Link>
             </div>
 
             {overdueDebtors.length === 0 ? (
               <p className="text-muted text-center py-4">
-                Barcha o'quvchilar to'lovni o'z vaqtida amalga oshirgan! 🎉
+                Barcha o'quvchilar to'lovni o'z vaqtida amalga oshirgan!
               </p>
             ) : (
               <div className="debtors-list">
                 {overdueDebtors.map((s) => (
                   <div key={s.id} className="debtor-item">
                     <div className="debtor-info">
-                      <span className="debtor-avatar">👤</span>
+                      <span className="debtor-avatar"><HiOutlineUser /></span>
                       <div>
                         <h4 className="debtor-name">{s.fullName}</h4>
                         <p className="debtor-group">{s.groupName}</p>
-                        <p className="debtor-phone">📞 {s.phone}</p>
+                        <p className="debtor-phone">
+                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {s.phone}
+                        </p>
                       </div>
                     </div>
                     <div className="debtor-amount">

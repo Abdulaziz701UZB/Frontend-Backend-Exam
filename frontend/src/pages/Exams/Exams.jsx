@@ -6,6 +6,15 @@ import {
   INITIAL_EXAMS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineTrophy,
+  HiOutlinePlus,
+  HiOutlinePencilSquare,
+  HiOutlineTrash,
+  HiXMark,
+  HiOutlineCheckCircle,
+  HiOutlineClock
+} from "react-icons/hi2";
 
 const Exams = () => {
   const { canMarkAttendance } = useEduAuth();
@@ -82,14 +91,17 @@ const Exams = () => {
     <div className="exams-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">🎯 6. Imtihonlar va Baholash</h1>
+          <h1 className="page-title">
+            <HiOutlineTrophy style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            6. Imtihonlar va Baholash
+          </h1>
           <p className="page-subtitle">
             Oraliq va yakuniy imtihonlar jadvallari va baholash natijalari
           </p>
         </div>
         {canMarkAttendance && (
           <button className="btn btn-primary" onClick={openCreateModal}>
-            ➕ Yangi Imtihon E'lon Qilish
+            <HiOutlinePlus /> Yangi Imtihon E'lon Qilish
           </button>
         )}
       </div>
@@ -136,9 +148,11 @@ const Exams = () => {
                     <span
                       className={`status-badge ${ex.status === "Completed" ? "badge-active" : "badge-finished"}`}
                     >
-                      {ex.status === "Completed"
-                        ? "✅ Yakunlangan"
-                        : "⏳ Kutilmoqda"}
+                      {ex.status === "Completed" ? (
+                        <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 3 }} /> Yakunlangan</>
+                      ) : (
+                        <><HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 3 }} /> Kutilmoqda</>
+                      )}
                     </span>
                   </td>
                   {canMarkAttendance && (
@@ -148,13 +162,13 @@ const Exams = () => {
                           className="btn btn-secondary btn-sm"
                           onClick={() => openEditModal(ex)}
                         >
-                          ✏️ Tahrirlash
+                          <HiOutlinePencilSquare /> Tahrirlash
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(ex.id)}
                         >
-                          🗑️ O'chirish
+                          <HiOutlineTrash /> O'chirish
                         </button>
                       </div>
                     </td>
@@ -178,8 +192,9 @@ const Exams = () => {
               <button
                 className="close-modal-btn"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Yopish"
               >
-                ✖
+                <HiXMark />
               </button>
             </div>
             <form onSubmit={handleFormSubmit} className="admin-modal-form">

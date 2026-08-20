@@ -8,14 +8,26 @@ import {
   INITIAL_STUDENTS,
   STORAGE,
 } from "../../data/eduData";
+import {
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineCheck,
+  HiOutlineXMark,
+  HiOutlineExclamationCircle,
+  HiOutlineMapPin,
+  HiOutlineClock,
+  HiOutlineUserGroup,
+  HiOutlineDocumentCheck,
+  HiOutlineChartBar
+} from "react-icons/hi2";
+import { FaUserGraduate } from "react-icons/fa6";
 import "./Attendance.css";
 
 const ABSENCE_REASONS = [
-  { id: "medical", label: "🏥 Salomatlik / Kasallik", tag: "Kasal" },
-  { id: "family", label: "👨‍👩‍👦 Oilaviy Sabab", tag: "Oilaviy" },
-  { id: "competition", label: "🏆 Musobaqa / Olimpiada", tag: "Musobaqa" },
-  { id: "technical", label: "⚡ Texnik / Yo'l / Internet", tag: "Texnik" },
-  { id: "unexcused", label: "❓ Sababsiz", tag: "Sababsiz" },
+  { id: "medical", label: "Salomatlik / Kasallik", tag: "Kasal" },
+  { id: "family", label: "Oilaviy Sabab", tag: "Oilaviy" },
+  { id: "competition", label: "Musobaqa / Olimpiada", tag: "Musobaqa" },
+  { id: "technical", label: "Texnik / Yo'l / Internet", tag: "Texnik" },
+  { id: "unexcused", label: "Sababsiz", tag: "Sababsiz" },
 ];
 
 const Attendance = () => {
@@ -205,7 +217,10 @@ const Attendance = () => {
     <div className="attendance-page">
       <div className="page-header-flex">
         <div>
-          <h1 className="page-title">📝 Davomat va Darslar Boshqaruvi</h1>
+          <h1 className="page-title">
+            <HiOutlineClipboardDocumentCheck style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Davomat va Darslar Boshqaruvi
+          </h1>
           <p className="page-subtitle">
             Har bir dars kuni uchun guruhdagi o'quvchilarning davomati va dars
             qoldirish sabablari tasniflagichi
@@ -242,10 +257,12 @@ const Attendance = () => {
 
           <div className="group-info-pill">
             <span>
-              📍 Xona: <strong>{currentGroupObj?.room}</strong>
+              <HiOutlineMapPin style={{ verticalAlign: 'middle', marginRight: 3 }} />
+              Xona: <strong>{currentGroupObj?.room}</strong>
             </span>
             <span>
-              ⏰ Vaqt: <strong>{currentGroupObj?.scheduleTime}</strong>
+              <HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 3 }} />
+              Vaqt: <strong>{currentGroupObj?.scheduleTime}</strong>
             </span>
           </div>
         </div>
@@ -253,15 +270,15 @@ const Attendance = () => {
 
       {savedSuccess && (
         <div className="alert alert-success">
-          ✅ Davomat muvaffaqiyatli saqlandi!
+          <HiOutlineCheck style={{ verticalAlign: 'middle', marginRight: 4 }} /> Davomat muvaffaqiyatli saqlandi!
         </div>
       )}
 
       <div className="card table-card mb-6">
         <div className="card-header-flex px-6 pt-6">
           <h3 className="section-title">
-            👥 {currentGroupObj?.name} O'quvchilari (
-            {activeGroupStudents.length} ta)
+            <HiOutlineUserGroup style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            {currentGroupObj?.name} O'quvchilari ({activeGroupStudents.length} ta)
           </h3>
           <span className="text-muted text-sm">
             Sana: <strong>{selectedDate}</strong>
@@ -317,7 +334,7 @@ const Attendance = () => {
                             }
                             disabled={!canMarkAttendance}
                           >
-                            🟢 Keldi
+                            <HiOutlineCheck /> Keldi
                           </button>
                           <button
                             type="button"
@@ -328,7 +345,7 @@ const Attendance = () => {
                             }
                             disabled={!canMarkAttendance}
                           >
-                            🔴 Kelmadi
+                            <HiOutlineXMark /> Kelmadi
                           </button>
                           <button
                             type="button"
@@ -339,7 +356,7 @@ const Attendance = () => {
                             }
                             disabled={!canMarkAttendance}
                           >
-                            🟡 Sababli
+                            <HiOutlineExclamationCircle /> Sababli
                           </button>
                         </div>
                       </td>
@@ -376,8 +393,8 @@ const Attendance = () => {
                             />
                           </div>
                         ) : (
-                          <span className="text-success font-semibold">
-                            ✅ Darsda qatnashmoqda
+                          <span className="text-success font-semibold flex items-center gap-1">
+                            <HiOutlineCheck style={{ color: '#16a34a' }} /> Darsda qatnashmoqda
                           </span>
                         )}
                       </td>
@@ -395,7 +412,7 @@ const Attendance = () => {
               className="btn btn-primary btn-lg"
               onClick={handleSaveAttendance}
             >
-              💾 Davomatni Saqlash
+              <HiOutlineDocumentCheck /> Davomatni Saqlash
             </button>
           </div>
         )}
@@ -404,7 +421,8 @@ const Attendance = () => {
       <div className="grid-2-col">
         <div className="card">
           <h3 className="section-title">
-            📊 Guruh bo'yicha Oylik Davomat Statistikasi
+            <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            Guruh bo'yicha Oylik Davomat Statistikasi
           </h3>
           <p className="text-muted text-sm mb-4">
             Jami o'tkazilgan darslar soni:{" "}
@@ -457,7 +475,8 @@ const Attendance = () => {
           <div className="card-header-flex mb-4">
             <div>
               <h3 className="section-title mb-0">
-                📉 Dars Qoldirish Sabablari Tahlili
+                <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                Dars Qoldirish Sabablari Tahlili
               </h3>
               <p className="text-muted text-sm">
                 Guruh o'quvchilari nima sababdan dars qoldirmoqda? (
@@ -469,7 +488,7 @@ const Attendance = () => {
           <div className="absence-breakdown-list">
             <div className="absence-item">
               <div className="absence-header">
-                <span>🏥 Salomatlik / Kasallik</span>
+                <span>Salomatlik / Kasallik</span>
                 <strong>
                   {reasonStats.medical} ta (
                   {totalAbsences
@@ -490,7 +509,7 @@ const Attendance = () => {
 
             <div className="absence-item">
               <div className="absence-header">
-                <span>👨‍👩‍👦 Oilaviy Sabab</span>
+                <span>Oilaviy Sabab</span>
                 <strong>
                   {reasonStats.family} ta (
                   {totalAbsences
@@ -511,7 +530,7 @@ const Attendance = () => {
 
             <div className="absence-item">
               <div className="absence-header">
-                <span>🏆 Musobaqa / Olimpiada</span>
+                <span>Musobaqa / Olimpiada</span>
                 <strong>
                   {reasonStats.competition} ta (
                   {totalAbsences
@@ -534,7 +553,7 @@ const Attendance = () => {
 
             <div className="absence-item">
               <div className="absence-header">
-                <span>⚡ Texnik / Yo'l / Internet</span>
+                <span>Texnik / Yo'l / Internet</span>
                 <strong>
                   {reasonStats.technical} ta (
                   {totalAbsences
@@ -555,7 +574,7 @@ const Attendance = () => {
 
             <div className="absence-item">
               <div className="absence-header">
-                <span>❓ Sababsiz Dars Qoldirish</span>
+                <span>Sababsiz Dars Qoldirish</span>
                 <strong>
                   {reasonStats.unexcused} ta (
                   {totalAbsences
