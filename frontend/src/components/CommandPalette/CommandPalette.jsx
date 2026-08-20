@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  INITIAL_GROUPS,
-  INITIAL_STUDENTS,
-  INITIAL_TEACHERS,
-  STORAGE,
-} from "../../data/eduData";
+import { studentsApi, groupsApi, teachersApi } from "../../services/api";
 import { 
   HiMagnifyingGlass, 
   HiBolt, 
@@ -29,19 +22,28 @@ const CommandPalette = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
-  const [students] = useState(() =>
-    getStoredData(STORAGE.STUDENTS, INITIAL_STUDENTS),
-  );
-  const [groups] = useState(() =>
-    getStoredData(STORAGE.GROUPS, INITIAL_GROUPS),
-  );
-  const [teachers] = useState(() =>
-    getStoredData(STORAGE.TEACHERS, INITIAL_TEACHERS),
-  );
+  const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [teachers, setTeachers] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
       setQuery("");
+      const fetchLiveData = async () => {
+        try {
+          const [sData, gData, tData] = await Promise.all([
+            studentsApi.getAll(),
+            groupsApi.getAll(),
+            teachersApi.getAll(),
+          ]);
+          setStudents(sData);
+          setGroups(gData);
+          setTeachers(tData);
+        } catch (err) {
+          console.error("Command palette load error:", err.message);
+        }
+      };
+      fetchLiveData();
     }
   }, [isOpen]);
 
@@ -61,23 +63,23 @@ const CommandPalette = ({ isOpen, onClose }) => {
 
   const filteredStudents = q
     ? students.filter(
-        (s) => s.fullName.toLowerCase().includes(q) || s.phone.includes(q),
+        (s) => (s.fullName || "").toLowerCase().includes(q) || (s.phone || "").includes(q),
       )
     : students.slice(0, 3);
 
   const filteredGroups = q
     ? groups.filter(
         (g) =>
-          g.name.toLowerCase().includes(q) ||
-          g.courseName.toLowerCase().includes(q),
+          (g.name || "").toLowerCase().includes(q) ||
+          (g.courseName || "").toLowerCase().includes(q),
       )
     : groups.slice(0, 3);
 
   const filteredTeachers = q
     ? teachers.filter(
         (t) =>
-          t.name.toLowerCase().includes(q) ||
-          t.subject.toLowerCase().includes(q),
+          (t.name || "").toLowerCase().includes(q) ||
+          (t.subject || "").toLowerCase().includes(q),
       )
     : teachers.slice(0, 2);
 

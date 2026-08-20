@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_HOMEWORK,
-  STORAGE,
-} from "../../data/eduData";
+import { homeworkApi } from "../../services/api";
 import {
   HiOutlineBookOpen,
   HiOutlinePlus,
@@ -17,9 +12,8 @@ import {
 
 const Homework = () => {
   const { canMarkAttendance } = useEduAuth();
-  const [homework, setHomework] = useState(() =>
-    getStoredData(STORAGE.HOMEWORK, INITIAL_HOMEWORK),
-  );
+  const [homework, setHomework] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHw, setEditingHw] = useState(null);
 
@@ -31,10 +25,21 @@ const Homework = () => {
     status: "Active",
   });
 
-  const saveToStorage = (updated) => {
-    setHomework(updated);
-    setStoredData(STORAGE.HOMEWORK, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const data = await homeworkApi.getAll();
+      setHomework(data);
+    } catch (err) {
+      console.error("Homework load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingHw(null);
@@ -60,26 +65,40 @@ const Homework = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingHw) {
-      const updated = homework.map((h) =>
-        h.id === editingHw.id ? { ...h, ...formData } : h,
-      );
-      saveToStorage(updated);
-    } else {
-      const newHw = {
-        id: `HW-${Math.floor(10 + Math.random() * 90)}`,
-        ...formData,
-      };
-      saveToStorage([newHw, ...homework]);
+    const payload = {
+      group_name: formData.groupName,
+      title: formData.title,
+      deadline: formData.deadline,
+      total_submitted: parseInt(formData.totalSubmitted || 0),
+      status: formData.status,
+    };
+
+    try {
+      if (editingHw) {
+        await homeworkApi.update(editingHw.id, payload);
+      } else {
+        await homeworkApi.create({
+          id: `HW-${Math.floor(10 + Math.random() * 90)}`,
+          ...payload,
+        });
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Uyga vazifani o'chirmoqchisiz?")) {
-      saveToStorage(homework.filter((h) => h.id !== id));
+      try {
+        await homeworkApi.delete(id);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 

@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_ATTENDANCE,
-  INITIAL_GROUPS,
-  INITIAL_STUDENTS,
-  STORAGE,
-} from "../../data/eduData";
+import { attendanceApi, groupsApi, studentsApi } from "../../services/api";
 import {
   HiOutlineClipboardDocumentCheck,
   HiOutlineCheck,
@@ -19,7 +12,6 @@ import {
   HiOutlineDocumentCheck,
   HiOutlineChartBar
 } from "react-icons/hi2";
-import { FaUserGraduate } from "react-icons/fa6";
 import "./Attendance.css";
 
 const ABSENCE_REASONS = [
@@ -33,21 +25,41 @@ const ABSENCE_REASONS = [
 const Attendance = () => {
   const { canMarkAttendance } = useEduAuth();
 
-  const [groups] = useState(() =>
-    getStoredData(STORAGE.GROUPS, INITIAL_GROUPS),
-  );
-  const [students] = useState(() =>
-    getStoredData(STORAGE.STUDENTS, INITIAL_STUDENTS),
-  );
-  const [attendanceRecords, setAttendanceRecords] = useState(() =>
-    getStoredData(STORAGE.ATTENDANCE, INITIAL_ATTENDANCE),
-  );
+  const [groups, setGroups] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [selectedGroup, setSelectedGroup] = useState(groups[0]?.id || "G-101");
+  const [selectedGroup, setSelectedGroup] = useState("G-101");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+      const [gData, sData, aData] = await Promise.all([
+        groupsApi.getAll(),
+        studentsApi.getAll(),
+        attendanceApi.getAll(),
+      ]);
+      setGroups(gData);
+      setStudents(sData);
+      setAttendanceRecords(aData);
+      if (gData.length > 0 && !selectedGroup) {
+        setSelectedGroup(gData[0].id);
+      }
+    } catch (err) {
+      console.error("Attendance initial load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
   const activeGroupStudents = students.filter(
     (s) => s.groupId === selectedGroup,
@@ -78,7 +90,7 @@ const Attendance = () => {
       };
     });
     setAttendanceMap(map);
-  }, [selectedGroup, selectedDate, attendanceRecords]);
+  }, [selectedGroup, selectedDate, attendanceRecords, activeGroupStudents.length]);
 
   const handleStatusChange = (studentId, status) => {
     setAttendanceMap((prev) => ({
@@ -116,44 +128,41 @@ const Attendance = () => {
     }));
   };
 
-  const handleSaveAttendance = () => {
-    let updatedRecords = [...attendanceRecords];
-
-    activeGroupStudents.forEach((s) => {
-      const studentMap = attendanceMap[s.id];
-      if (!studentMap) return;
-
-      const idx = updatedRecords.findIndex(
-        (r) =>
-          r.groupId === selectedGroup &&
-          r.studentId === s.id &&
-          r.date === selectedDate,
-      );
-
-      if (idx >= 0) {
-        updatedRecords[idx] = {
-          ...updatedRecords[idx],
-          status: studentMap.status,
-          note: studentMap.note,
-          reasonCategory: studentMap.reasonCategory,
-        };
-      } else {
-        updatedRecords.push({
-          id: Math.floor(500 + Math.random() * 9000),
-          groupId: selectedGroup,
-          studentId: s.id,
+  const handleSaveAttendance = async () => {
+    try {
+      const promises = activeGroupStudents.map(async (s) => {
+        const studentMap = attendanceMap[s.id] || { status: "Present", note: "", reasonCategory: "" };
+        const payload = {
+          group_id: selectedGroup,
+          student_id: s.id,
           date: selectedDate,
           status: studentMap.status,
           note: studentMap.note,
-          reasonCategory: studentMap.reasonCategory,
-        });
-      }
-    });
+          reason_category: studentMap.reasonCategory,
+        };
 
-    setAttendanceRecords(updatedRecords);
-    setStoredData(STORAGE.ATTENDANCE, updatedRecords);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
+        const existingRec = attendanceRecords.find(
+          (r) =>
+            r.groupId === selectedGroup &&
+            r.studentId === s.id &&
+            r.date === selectedDate,
+        );
+
+        if (existingRec) {
+          return attendanceApi.update(existingRec.id, payload);
+        } else {
+          return attendanceApi.create(payload);
+        }
+      });
+
+      await Promise.all(promises);
+      const updatedList = await attendanceApi.getAll();
+      setAttendanceRecords(updatedList);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
+    } catch (err) {
+      alert("Davomat saqlashda xatolik: " + (err.response?.data?.error || err.message));
+    }
   };
 
   const totalMarkedDays = [
@@ -184,23 +193,23 @@ const Attendance = () => {
       if (r.reasonCategory && stats[r.reasonCategory] !== undefined) {
         stats[r.reasonCategory]++;
       } else if (
-        r.note?.toLowerCase().includes("kasal") ||
-        r.note?.toLowerCase().includes("salomat")
+        (r.note || "").toLowerCase().includes("kasal") ||
+        (r.note || "").toLowerCase().includes("salomat")
       ) {
         stats.medical++;
       } else if (
-        r.note?.toLowerCase().includes("oilaviy") ||
-        r.note?.toLowerCase().includes("to'y")
+        (r.note || "").toLowerCase().includes("oilaviy") ||
+        (r.note || "").toLowerCase().includes("to'y")
       ) {
         stats.family++;
       } else if (
-        r.note?.toLowerCase().includes("musobaqa") ||
-        r.note?.toLowerCase().includes("olimpiada")
+        (r.note || "").toLowerCase().includes("musobaqa") ||
+        (r.note || "").toLowerCase().includes("olimpiada")
       ) {
         stats.competition++;
       } else if (
-        r.note?.toLowerCase().includes("texnik") ||
-        r.note?.toLowerCase().includes("internet")
+        (r.note || "").toLowerCase().includes("texnik") ||
+        (r.note || "").toLowerCase().includes("internet")
       ) {
         stats.technical++;
       } else {

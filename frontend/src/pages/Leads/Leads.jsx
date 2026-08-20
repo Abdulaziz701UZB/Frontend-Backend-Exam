@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_LEADS,
-  STORAGE,
-} from "../../data/eduData";
+import { leadsApi } from "../../services/api";
 import {
   HiOutlinePhoneArrowUpRight,
   HiOutlinePlus,
@@ -17,9 +12,8 @@ import {
 
 const Leads = () => {
   const { canManageStudents } = useEduAuth();
-  const [leads, setLeads] = useState(() =>
-    getStoredData(STORAGE.LEADS, INITIAL_LEADS),
-  );
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
 
@@ -31,10 +25,21 @@ const Leads = () => {
     status: "Yangi",
   });
 
-  const saveToStorage = (updated) => {
-    setLeads(updated);
-    setStoredData(STORAGE.LEADS, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const data = await leadsApi.getAll();
+      setLeads(data);
+    } catch (err) {
+      console.error("Leads load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingLead(null);
@@ -60,26 +65,40 @@ const Leads = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingLead) {
-      const updated = leads.map((l) =>
-        l.id === editingLead.id ? { ...l, ...formData } : l,
-      );
-      saveToStorage(updated);
-    } else {
-      const newLead = {
-        id: `L-${Math.floor(500 + Math.random() * 900)}`,
-        ...formData,
-      };
-      saveToStorage([newLead, ...leads]);
+    const payload = {
+      name: formData.name,
+      phone: formData.phone,
+      interested_course: formData.interestedCourse,
+      source: formData.source,
+      status: formData.status,
+    };
+
+    try {
+      if (editingLead) {
+        await leadsApi.update(editingLead.id, payload);
+      } else {
+        await leadsApi.create({
+          id: `L-${Math.floor(500 + Math.random() * 900)}`,
+          ...payload,
+        });
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Lidni o'chirmoqchisiz?")) {
-      saveToStorage(leads.filter((l) => l.id !== id));
+      try {
+        await leadsApi.delete(id);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 

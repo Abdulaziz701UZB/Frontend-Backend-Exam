@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_EXAMS,
-  STORAGE,
-} from "../../data/eduData";
+import { examsApi } from "../../services/api";
 import {
   HiOutlineTrophy,
   HiOutlinePlus,
@@ -18,9 +13,8 @@ import {
 
 const Exams = () => {
   const { canMarkAttendance } = useEduAuth();
-  const [exams, setExams] = useState(() =>
-    getStoredData(STORAGE.EXAMS, INITIAL_EXAMS),
-  );
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
 
@@ -33,10 +27,21 @@ const Exams = () => {
     status: "Upcoming",
   });
 
-  const saveToStorage = (updated) => {
-    setExams(updated);
-    setStoredData(STORAGE.EXAMS, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const data = await examsApi.getAll();
+      setExams(data);
+    } catch (err) {
+      console.error("Exams load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingExam(null);
@@ -64,26 +69,41 @@ const Exams = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingExam) {
-      const updated = exams.map((ex) =>
-        ex.id === editingExam.id ? { ...ex, ...formData } : ex,
-      );
-      saveToStorage(updated);
-    } else {
-      const newExam = {
-        id: `EX-${Math.floor(100 + Math.random() * 900)}`,
-        ...formData,
-      };
-      saveToStorage([newExam, ...exams]);
+    const payload = {
+      group_name: formData.groupName,
+      title: formData.title,
+      date: formData.date,
+      total_score: parseFloat(formData.totalScore || 100),
+      max_passing_score: parseFloat(formData.maxPassingScore || 70),
+      status: formData.status,
+    };
+
+    try {
+      if (editingExam) {
+        await examsApi.update(editingExam.id, payload);
+      } else {
+        await examsApi.create({
+          id: `EX-${Math.floor(100 + Math.random() * 900)}`,
+          ...payload,
+        });
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Imtihonni o'chirmoqchisiz?")) {
-      saveToStorage(exams.filter((ex) => ex.id !== id));
+      try {
+        await examsApi.delete(id);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 

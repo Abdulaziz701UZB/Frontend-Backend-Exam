@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_TEACHERS,
-  STORAGE,
-} from "../../data/eduData";
+import { teachersApi } from "../../services/api";
 import {
   HiOutlineUsers,
   HiOutlinePlus,
@@ -19,9 +14,8 @@ import { FaChalkboardUser } from "react-icons/fa6";
 
 const Teachers = () => {
   const { canManageGroups } = useEduAuth();
-  const [teachers, setTeachers] = useState(() =>
-    getStoredData(STORAGE.TEACHERS, INITIAL_TEACHERS),
-  );
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null);
@@ -35,10 +29,21 @@ const Teachers = () => {
     avatar: "teacher",
   });
 
-  const saveToStorage = (updated) => {
-    setTeachers(updated);
-    setStoredData(STORAGE.TEACHERS, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const data = await teachersApi.getAll();
+      setTeachers(data);
+    } catch (err) {
+      console.error("Teachers load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingTeacher(null);
@@ -66,40 +71,49 @@ const Teachers = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingTeacher) {
-      const updated = teachers.map((t) =>
-        t.id === editingTeacher.id
-          ? { ...t, ...formData, salary: parseFloat(formData.salary) }
-          : t,
-      );
-      saveToStorage(updated);
-    } else {
-      const newTeacher = {
-        id: Math.floor(100 + Math.random() * 900),
-        ...formData,
-        salary: parseFloat(formData.salary),
-      };
-      saveToStorage([newTeacher, ...teachers]);
+    const payload = {
+      name: formData.name,
+      phone: formData.phone,
+      subject: formData.subject,
+      salary: parseFloat(formData.salary || 0),
+      experience: formData.experience,
+      avatar: formData.avatar,
+    };
+
+    try {
+      if (editingTeacher) {
+        await teachersApi.update(editingTeacher.id, payload);
+      } else {
+        await teachersApi.create(payload);
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("O'qituvchini o'chirmoqchisiz?")) {
-      saveToStorage(teachers.filter((t) => t.id !== id));
+      try {
+        await teachersApi.delete(id);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 
   const filtered = teachers.filter(
     (t) =>
-      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.subject.toLowerCase().includes(searchTerm.toLowerCase()),
+      (t.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.subject || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const formatMoney = (val) =>
-    new Intl.NumberFormat("uz-UZ").format(val) + " so'm";
+    new Intl.NumberFormat("uz-UZ").format(val || 0) + " so'm";
 
   return (
     <div className="teachers-page">

@@ -1,13 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_GROUPS,
-  INITIAL_COURSES,
-  INITIAL_TEACHERS,
-  STORAGE,
-} from "../../data/eduData";
+import { groupsApi, coursesApi, teachersApi } from "../../services/api";
 import {
   HiOutlineAcademicCap,
   HiOutlinePlus,
@@ -27,13 +20,10 @@ import "./Groups.css";
 const Groups = () => {
   const { canManageGroups } = useEduAuth();
 
-  const [groups, setGroups] = useState(() =>
-    getStoredData(STORAGE.GROUPS, INITIAL_GROUPS),
-  );
-  const [courses] = useState(() =>
-    getStoredData(STORAGE.COURSES, INITIAL_COURSES),
-  );
-  const [teachers] = useState(() => INITIAL_TEACHERS);
+  const [groups, setGroups] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [filterStatus, setFilterStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,6 +43,28 @@ const Groups = () => {
     status: "Active",
   });
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [groupsData, coursesData, teachersData] = await Promise.all([
+        groupsApi.getAll(),
+        coursesApi.getAll(),
+        teachersApi.getAll(),
+      ]);
+      setGroups(groupsData);
+      setCourses(coursesData);
+      setTeachers(teachersData);
+    } catch (err) {
+      console.error("Groups load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const checkScheduleConflict = () => {
     if (formData.status !== "Active") return null;
 
@@ -63,15 +75,15 @@ const Groups = () => {
       if (g.id === currentGroupId || g.status !== "Active") return;
 
       const sameDays =
-        g.scheduleDays.trim().toLowerCase() ===
-        formData.scheduleDays.trim().toLowerCase();
+        (g.scheduleDays || "").trim().toLowerCase() ===
+        (formData.scheduleDays || "").trim().toLowerCase();
       const sameTime =
-        g.scheduleTime.trim().toLowerCase() ===
-        formData.scheduleTime.trim().toLowerCase();
+        (g.scheduleTime || "").trim().toLowerCase() ===
+        (formData.scheduleTime || "").trim().toLowerCase();
 
       if (sameDays && sameTime) {
         if (
-          g.room.trim().toLowerCase() === formData.room.trim().toLowerCase()
+          (g.room || "").trim().toLowerCase() === (formData.room || "").trim().toLowerCase()
         ) {
           conflicts.push({
             type: "room",
@@ -98,11 +110,6 @@ const Groups = () => {
 
   const activeConflicts = checkScheduleConflict();
 
-  const saveGroupsToStorage = (updated) => {
-    setGroups(updated);
-    setStoredData(STORAGE.GROUPS, updated);
-  };
-
   const openCreateModal = () => {
     setEditingGroup(null);
     setAllowConflictSave(false);
@@ -113,7 +120,7 @@ const Groups = () => {
       room: "201-xona (Kompyuter zali)",
       scheduleDays: "Dushanba - Chorshanba - Juma",
       scheduleTime: "14:00 - 16:00",
-      monthlyFee: 850000,
+      monthlyFee: courses[0]?.price || 850000,
       status: "Active",
     });
     setIsModalOpen(true);
@@ -135,7 +142,7 @@ const Groups = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     if (activeConflicts && !allowConflictSave) {
@@ -151,42 +158,47 @@ const Groups = () => {
       teachers.find((t) => t.id === parseInt(formData.teacherId)) ||
       teachers[0];
 
-    if (editingGroup) {
-      const updated = groups.map((g) => {
-        if (g.id === editingGroup.id) {
-          return {
-            ...g,
-            ...formData,
-            courseName: courseObj?.name,
-            teacherName: teacherObj?.name || "Abdulaziz Abdulhayev",
-            monthlyFee: parseFloat(formData.monthlyFee),
-          };
-        }
-        return g;
-      });
-      saveGroupsToStorage(updated);
-    } else {
-      const newGroup = {
-        id: `G-${Math.floor(100 + Math.random() * 900)}`,
-        ...formData,
-        courseName: courseObj?.name,
-        teacherName: teacherObj?.name,
-        monthlyFee: parseFloat(formData.monthlyFee),
-        startDate: new Date().toISOString().split("T")[0],
-      };
-      saveGroupsToStorage([newGroup, ...groups]);
+    const payload = {
+      course_id: parseInt(formData.courseId),
+      course_name: courseObj?.name || "",
+      name: formData.name,
+      teacher_id: parseInt(formData.teacherId),
+      teacher_name: teacherObj?.name || "",
+      room: formData.room,
+      schedule_days: formData.scheduleDays,
+      schedule_time: formData.scheduleTime,
+      monthly_fee: parseFloat(formData.monthlyFee),
+      status: formData.status,
+    };
+
+    try {
+      if (editingGroup) {
+        await groupsApi.update(editingGroup.id, payload);
+      } else {
+        await groupsApi.create({
+          id: `G-${Math.floor(100 + Math.random() * 900)}`,
+          ...payload,
+        });
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDeleteGroup = (groupId) => {
+  const handleDeleteGroup = async (groupId) => {
     if (
       window.confirm(
         "Haqiqatan ham ushbu guruhni yopmoqchisiz/o'chirmoqchisiz?",
       )
     ) {
-      const updated = groups.filter((g) => g.id !== groupId);
-      saveGroupsToStorage(updated);
+      try {
+        await groupsApi.delete(groupId);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 
@@ -195,16 +207,16 @@ const Groups = () => {
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
       return (
-        g.name.toLowerCase().includes(s) ||
-        g.courseName.toLowerCase().includes(s) ||
-        g.teacherName.toLowerCase().includes(s)
+        (g.name || "").toLowerCase().includes(s) ||
+        (g.courseName || "").toLowerCase().includes(s) ||
+        (g.teacherName || "").toLowerCase().includes(s)
       );
     }
     return true;
   });
 
   const formatMoney = (amount) => {
-    return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+    return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
 
   return (
@@ -277,7 +289,7 @@ const Groups = () => {
               <div className="group-card-header">
                 <span className="group-id-badge">{group.id}</span>
                 <span
-                  className={`status-badge badge-${group.status.toLowerCase()}`}
+                  className={`status-badge badge-${(group.status || 'active').toLowerCase()}`}
                 >
                   {group.status === "Active" ? "Faol" : "Yakunlangan"}
                 </span>

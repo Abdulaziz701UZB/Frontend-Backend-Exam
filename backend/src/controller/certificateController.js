@@ -3,11 +3,15 @@ import { Certificate } from "../models/index.js";
 export const createCertificate = async (req, res) => {
   try {
     const newCertData = {
-      ...req.body,
       id: req.body.id || `CERT-${Math.floor(8000 + Math.random() * 999)}`,
+      student_name: req.body.student_name || req.body.studentName || "",
+      course_name: req.body.course_name || req.body.courseName || "",
+      issue_date: req.body.issue_date || req.body.issueDate || new Date().toISOString().split("T")[0],
       qr_code:
         req.body.qr_code ||
+        req.body.qrCode ||
         `QR-${Math.floor(1000 + Math.random() * 9000)}-VERIFIED`,
+      grade: req.body.grade || "A+ (98%)",
     };
     const cert = await Certificate.create(newCertData);
     res.status(201).json(cert);
@@ -50,7 +54,14 @@ export const updateCertificate = async (req, res) => {
     const cert = await Certificate.findByPk(req.params.id);
     if (!cert) return res.status(404).json({ error: "Sertifikat topilmadi" });
 
-    await cert.update(req.body);
+    const updateData = {
+      student_name: req.body.student_name || req.body.studentName || cert.student_name,
+      course_name: req.body.course_name || req.body.courseName || cert.course_name,
+      issue_date: req.body.issue_date || req.body.issueDate || cert.issue_date,
+      grade: req.body.grade || cert.grade,
+    };
+
+    await cert.update(updateData);
     res.status(200).json(cert);
   } catch (err) {
     res.status(500).json({ error: err.message });

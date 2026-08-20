@@ -1,12 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_STUDENTS,
-  INITIAL_GROUPS,
-  STORAGE,
-} from "../../data/eduData";
+import { studentsApi, groupsApi } from "../../services/api";
 import {
   HiOutlinePlus,
   HiMagnifyingGlass,
@@ -24,12 +18,9 @@ import "./Students.css";
 const Students = () => {
   const { canManageStudents } = useEduAuth();
 
-  const [students, setStudents] = useState(() =>
-    getStoredData(STORAGE.STUDENTS, INITIAL_STUDENTS),
-  );
-  const [groups] = useState(() =>
-    getStoredData(STORAGE.GROUPS, INITIAL_GROUPS),
-  );
+  const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGroupFilter, setSelectedGroupFilter] = useState("All");
@@ -38,7 +29,7 @@ const Students = () => {
   const [editingStudent, setEditingStudent] = useState(null);
 
   const [formData, setFormData] = useState({
-    fullName: "Abdulaziz Abdulhayev",
+    fullName: "",
     phone: "+998 90 599 06 00",
     parentPhone: "+998 90 599 06 00",
     groupId: "G-101",
@@ -47,10 +38,25 @@ const Students = () => {
     status: "Active",
   });
 
-  const saveStudentsToStorage = (updated) => {
-    setStudents(updated);
-    setStoredData(STORAGE.STUDENTS, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [studentsData, groupsData] = await Promise.all([
+        studentsApi.getAll(),
+        groupsApi.getAll(),
+      ]);
+      setStudents(studentsData);
+      setGroups(groupsData);
+    } catch (err) {
+      console.error("Students load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingStudent(null);
@@ -80,45 +86,47 @@ const Students = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const groupObj = groups.find((g) => g.id === formData.groupId) || groups[0];
-    const groupNameText = `${groupObj?.name} (${groupObj?.courseName})`;
+    const groupNameText = groupObj ? `${groupObj.name} (${groupObj.courseName})` : "";
 
-    if (editingStudent) {
-      const updated = students.map((s) => {
-        if (s.id === editingStudent.id) {
-          return {
-            ...s,
-            ...formData,
-            groupName: groupNameText,
-            balance: parseFloat(formData.balance),
-          };
-        }
-        return s;
-      });
-      saveStudentsToStorage(updated);
-    } else {
-      const newStudent = {
-        id: Math.floor(10 + Math.random() * 900),
-        ...formData,
-        groupName: groupNameText,
-        balance: parseFloat(formData.balance),
-        joinDate: new Date().toISOString().split("T")[0],
-      };
-      saveStudentsToStorage([newStudent, ...students]);
+    const payload = {
+      full_name: formData.fullName,
+      phone: formData.phone,
+      parent_phone: formData.parentPhone,
+      group_id: formData.groupId,
+      group_name: groupNameText,
+      payment_status: formData.paymentStatus,
+      balance: parseFloat(formData.balance || 0),
+      status: formData.status,
+    };
+
+    try {
+      if (editingStudent) {
+        await studentsApi.update(editingStudent.id, payload);
+      } else {
+        await studentsApi.create(payload);
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDeleteStudent = (studentId) => {
+  const handleDeleteStudent = async (studentId) => {
     if (
       window.confirm(
         "Haqiqatan ham ushbu o'quvchini guruhdan chiqarmoqchisiz/arxivlamoqchisiz?",
       )
     ) {
-      const updated = students.filter((s) => s.id !== studentId);
-      saveStudentsToStorage(updated);
+      try {
+        await studentsApi.delete(studentId);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 
@@ -128,16 +136,16 @@ const Students = () => {
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       return (
-        s.fullName.toLowerCase().includes(q) ||
-        s.phone.includes(q) ||
-        s.groupName.toLowerCase().includes(q)
+        (s.fullName || "").toLowerCase().includes(q) ||
+        (s.phone || "").includes(q) ||
+        (s.groupName || "").toLowerCase().includes(q)
       );
     }
     return true;
   });
 
   const formatMoney = (amount) => {
-    return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+    return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
 
   return (
@@ -257,7 +265,7 @@ const Students = () => {
                     <td className="text-muted">{student.joinDate}</td>
                     <td>
                       <span
-                        className={`status-pill pill-${student.paymentStatus.toLowerCase()}`}
+                        className={`status-pill pill-${(student.paymentStatus || 'paid').toLowerCase()}`}
                       >
                         {student.paymentStatus === "Paid" ? (
                           <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 4 }} /> To'langan</>

@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_ROOMS,
-  STORAGE,
-} from "../../data/eduData";
+import { roomsApi } from "../../services/api";
 import {
   HiOutlineBuildingOffice2,
   HiOutlinePlus,
@@ -17,9 +12,8 @@ import {
 
 const Rooms = () => {
   const { canManageGroups } = useEduAuth();
-  const [rooms, setRooms] = useState(() =>
-    getStoredData(STORAGE.ROOMS, INITIAL_ROOMS),
-  );
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
 
@@ -31,10 +25,21 @@ const Rooms = () => {
     status: "Active",
   });
 
-  const saveToStorage = (updated) => {
-    setRooms(updated);
-    setStoredData(STORAGE.ROOMS, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const data = await roomsApi.getAll();
+      setRooms(data);
+    } catch (err) {
+      console.error("Rooms load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingRoom(null);
@@ -60,26 +65,40 @@ const Rooms = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingRoom) {
-      const updated = rooms.map((r) =>
-        r.id === editingRoom.id ? { ...r, ...formData } : r,
-      );
-      saveToStorage(updated);
-    } else {
-      const newRoom = {
-        id: `R-${Math.floor(100 + Math.random() * 900)}`,
-        ...formData,
-      };
-      saveToStorage([newRoom, ...rooms]);
+    const payload = {
+      name: formData.name,
+      capacity: parseInt(formData.capacity || 20),
+      computers_count: parseInt(formData.computersCount || 0),
+      projector: formData.projector,
+      status: formData.status,
+    };
+
+    try {
+      if (editingRoom) {
+        await roomsApi.update(editingRoom.id, payload);
+      } else {
+        await roomsApi.create({
+          id: `R-${Math.floor(100 + Math.random() * 900)}`,
+          ...payload,
+        });
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Xonani o'chirmoqchisiz?")) {
-      saveToStorage(rooms.filter((r) => r.id !== id));
+      try {
+        await roomsApi.delete(id);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 

@@ -1,9 +1,6 @@
-import { createContext, useState, useContext } from "react";
-import {
-  INITIAL_ADMINS,
-  INITIAL_TEACHERS,
-  INITIAL_STUDENTS,
-} from "../data/eduData";
+import { createContext, useState, useEffect, useContext } from "react";
+import { teachersApi, studentsApi } from "../services/api";
+import { INITIAL_ADMINS } from "../data/eduData";
 
 const EduAuthContext = createContext();
 
@@ -14,7 +11,6 @@ const DEFAULT_USER = {
   name: "Abdulaziz Abdulhayev (Bosh Admin)",
   phone: "+998 90 599 06 00",
   roleTitle: "Bosh Administrator",
-  avatar: "👨‍💼",
 };
 
 export const EduAuthProvider = ({ children }) => {
@@ -27,17 +23,33 @@ export const EduAuthProvider = ({ children }) => {
   });
 
   const [authError, setAuthError] = useState("");
+  const [liveTeachers, setLiveTeachers] = useState([]);
+  const [liveStudents, setLiveStudents] = useState([]);
+
+  useEffect(() => {
+    const fetchAuthUsers = async () => {
+      try {
+        const [teachersData, studentsData] = await Promise.all([
+          teachersApi.getAll(),
+          studentsApi.getAll(),
+        ]);
+        setLiveTeachers(teachersData);
+        setLiveStudents(studentsData);
+      } catch (err) {
+        console.error("Auth users fetch error:", err.message);
+      }
+    };
+    fetchAuthUsers();
+  }, []);
 
   const getUserObject = (role, userId) => {
     let found;
     if (role === "admin") {
       found = INITIAL_ADMINS.find((a) => a.id === userId) || INITIAL_ADMINS[0];
     } else if (role === "teacher") {
-      found =
-        INITIAL_TEACHERS.find((t) => t.id === userId) || INITIAL_TEACHERS[0];
+      found = liveTeachers.find((t) => t.id === userId) || liveTeachers[0];
     } else {
-      found =
-        INITIAL_STUDENTS.find((s) => s.id === userId) || INITIAL_STUDENTS[0];
+      found = liveStudents.find((s) => s.id === userId) || liveStudents[0];
     }
     return found || DEFAULT_USER;
   };
@@ -58,7 +70,7 @@ export const EduAuthProvider = ({ children }) => {
       return true;
     } else {
       setAuthError(
-        "❌ Noto'g'ri parol kiritildi! Iltimos qaytadan urinib ko'ring.",
+        "Noto'g'ri parol kiritildi! Iltimos qaytadan urinib ko'ring.",
       );
       return false;
     }
@@ -89,8 +101,8 @@ export const EduAuthProvider = ({ children }) => {
         canMarkAttendance,
         canManagePayments,
         allAdmins: INITIAL_ADMINS,
-        allTeachers: INITIAL_TEACHERS,
-        allStudents: INITIAL_STUDENTS,
+        allTeachers: liveTeachers.length > 0 ? liveTeachers : [{ id: 101, name: "Abdulaziz Abdulhayev", subject: "Frontend ReactJS" }],
+        allStudents: liveStudents.length > 0 ? liveStudents : [{ id: 1, name: "Abdulaziz Abdulhayev", groupName: "F-12 Guruh" }],
       }}
     >
       {children}

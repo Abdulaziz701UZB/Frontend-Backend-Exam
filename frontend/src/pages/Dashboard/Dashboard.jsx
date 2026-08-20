@@ -1,14 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  INITIAL_GROUPS,
-  INITIAL_STUDENTS,
-  INITIAL_PAYMENTS,
-  FINANCIAL_ANALYTICS,
-  STORAGE,
-} from "../../data/eduData";
+import { groupsApi, studentsApi, paymentsApi } from "../../services/api";
+import { FINANCIAL_ANALYTICS } from "../../data/eduData";
 import {
   HiRocketLaunch,
   HiOutlineUserPlus,
@@ -30,15 +24,31 @@ import "./Dashboard.css";
 const Dashboard = () => {
   const { user, isAdmin, isTeacher, isStudent } = useEduAuth();
 
-  const [groups] = useState(() =>
-    getStoredData(STORAGE.GROUPS, INITIAL_GROUPS),
-  );
-  const [students] = useState(() =>
-    getStoredData(STORAGE.STUDENTS, INITIAL_STUDENTS),
-  );
-  const [payments] = useState(() =>
-    getStoredData(STORAGE.PAYMENTS, INITIAL_PAYMENTS),
-  );
+  const [groups, setGroups] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [groupsData, studentsData, paymentsData] = await Promise.all([
+          groupsApi.getAll(),
+          studentsApi.getAll(),
+          paymentsApi.getAll(),
+        ]);
+        setGroups(groupsData);
+        setStudents(studentsData);
+        setPayments(paymentsData);
+      } catch (err) {
+        console.error("Dashboard data load error:", err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
   const activeStudents = students.filter((s) => s.status === "Active");
   const activeGroups = groups.filter((g) => g.status === "Active");
@@ -58,7 +68,7 @@ const Dashboard = () => {
   const myPayments = payments.filter((p) => p.studentId === studentData?.id);
 
   const formatMoney = (amount) => {
-    return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+    return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
 
   return (
@@ -240,7 +250,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {isStudent && (
+      {isStudent && studentData && (
         <div className="student-personal-grid">
           <div className="card">
             <h3 className="section-title">
@@ -273,7 +283,7 @@ const Dashboard = () => {
             </h3>
             <div className="student-payment-box">
               <div
-                className={`status-pill pill-${studentData.paymentStatus.toLowerCase()}`}
+                className={`status-pill pill-${(studentData.paymentStatus || "paid").toLowerCase()}`}
               >
                 {studentData.paymentStatus === "Paid" ? (
                   <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 4 }} /> To'langan (Qarzsiz)</>
@@ -338,7 +348,7 @@ const Dashboard = () => {
                       <td>{g.room}</td>
                       <td>
                         <span
-                          className={`status-badge badge-${g.status.toLowerCase()}`}
+                          className={`status-badge badge-${(g.status || 'active').toLowerCase()}`}
                         >
                           {g.status === "Active" ? "Faol" : "Yakunlangan"}
                         </span>

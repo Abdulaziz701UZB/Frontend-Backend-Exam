@@ -1,13 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_PAYMENTS,
-  INITIAL_STUDENTS,
-  INITIAL_GROUPS,
-  STORAGE,
-} from "../../data/eduData";
+import { paymentsApi, studentsApi, groupsApi } from "../../services/api";
 import {
   HiOutlineCreditCard,
   HiOutlinePlus,
@@ -22,21 +15,16 @@ import {
   HiOutlineUser,
   HiOutlineChatBubbleLeftRight
 } from "react-icons/hi2";
-import { FaUserGraduate, FaMoneyBillWave, FaBuildingColumns } from "react-icons/fa6";
+import { FaMoneyBillWave } from "react-icons/fa6";
 import "./Payments.css";
 
 const Payments = () => {
   const { canManagePayments, isStudent, user } = useEduAuth();
 
-  const [payments, setPayments] = useState(() =>
-    getStoredData(STORAGE.PAYMENTS, INITIAL_PAYMENTS),
-  );
-  const [students, setStudents] = useState(() =>
-    getStoredData(STORAGE.STUDENTS, INITIAL_STUDENTS),
-  );
-  const [groups] = useState(() =>
-    getStoredData(STORAGE.GROUPS, INITIAL_GROUPS),
-  );
+  const [payments, setPayments] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState("history");
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,14 +40,27 @@ const Payments = () => {
     date: new Date().toISOString().split("T")[0],
   });
 
-  const savePaymentsToStorage = (updatedPayments, updatedStudents) => {
-    setPayments(updatedPayments);
-    setStoredData(STORAGE.PAYMENTS, updatedPayments);
-    if (updatedStudents) {
-      setStudents(updatedStudents);
-      setStoredData(STORAGE.STUDENTS, updatedStudents);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [pData, sData, gData] = await Promise.all([
+        paymentsApi.getAll(),
+        studentsApi.getAll(),
+        groupsApi.getAll(),
+      ]);
+      setPayments(pData);
+      setStudents(sData);
+      setGroups(gData);
+    } catch (err) {
+      console.error("Payments load error:", err.message);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingPayment(null);
@@ -88,55 +89,46 @@ const Payments = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const studentObj =
       students.find((s) => s.id === parseInt(formData.studentId)) ||
       students[0];
     const amountVal = parseFloat(formData.amount);
 
-    if (editingPayment) {
-      const updated = payments.map((p) => {
-        if (p.id === editingPayment.id) {
-          return {
-            ...p,
-            ...formData,
-            studentName: studentObj?.fullName,
-            groupName: studentObj?.groupName,
-            amount: amountVal,
-          };
-        }
-        return p;
-      });
-      savePaymentsToStorage(updated);
-    } else {
-      const newPayment = {
-        id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
-        studentId: studentObj.id,
-        studentName: studentObj.fullName,
-        groupName: studentObj.groupName,
-        amount: amountVal,
-        month: formData.month,
-        paymentMethod: formData.paymentMethod,
-        date: formData.date,
-        recordedBy: user.name,
-      };
+    const payload = {
+      student_id: studentObj?.id,
+      student_name: studentObj?.fullName || "",
+      group_name: studentObj?.groupName || "",
+      amount: amountVal,
+      month: formData.month,
+      payment_method: formData.paymentMethod,
+      date: formData.date,
+      recorded_by: user.name,
+    };
 
-      const updatedStudents = students.map((s) => {
-        if (s.id === studentObj.id) {
-          const newBal = (s.balance || 0) + amountVal;
-          return {
-            ...s,
+    try {
+      if (editingPayment) {
+        await paymentsApi.update(editingPayment.id, payload);
+      } else {
+        await paymentsApi.create({
+          id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+          ...payload,
+        });
+
+        if (studentObj) {
+          const newBal = (studentObj.balance || 0) + amountVal;
+          await studentsApi.update(studentObj.id, {
             balance: newBal >= 0 ? 0 : newBal,
-            paymentStatus: newBal >= 0 ? "Paid" : "Overdue",
-          };
+            payment_status: newBal >= 0 ? "Paid" : "Overdue",
+          });
         }
-        return s;
-      });
-
-      savePaymentsToStorage([newPayment, ...payments], updatedStudents);
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
   const displayPayments = isStudent
@@ -145,9 +137,9 @@ const Payments = () => {
         if (searchTerm) {
           const s = searchTerm.toLowerCase();
           return (
-            p.studentName.toLowerCase().includes(s) ||
-            p.id.toLowerCase().includes(s) ||
-            p.paymentMethod.toLowerCase().includes(s)
+            (p.studentName || "").toLowerCase().includes(s) ||
+            (p.id || "").toLowerCase().includes(s) ||
+            (p.paymentMethod || "").toLowerCase().includes(s)
           );
         }
         return true;
@@ -161,7 +153,7 @@ const Payments = () => {
   );
 
   const formatMoney = (amount) => {
-    return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+    return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
 
   return (

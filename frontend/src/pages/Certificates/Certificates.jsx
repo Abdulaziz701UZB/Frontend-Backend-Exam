@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import {
-  getStoredData,
-  setStoredData,
-  INITIAL_CERTIFICATES,
-  STORAGE,
-} from "../../data/eduData";
+import { certificatesApi } from "../../services/api";
 import {
   HiOutlineDocumentText,
   HiOutlinePlus,
@@ -17,9 +12,8 @@ import {
 
 const Certificates = () => {
   const { canManageGroups } = useEduAuth();
-  const [certs, setCerts] = useState(() =>
-    getStoredData(STORAGE.CERTIFICATES, INITIAL_CERTIFICATES),
-  );
+  const [certs, setCerts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState(null);
 
@@ -31,10 +25,21 @@ const Certificates = () => {
     grade: "A+ (98%)",
   });
 
-  const saveToStorage = (updated) => {
-    setCerts(updated);
-    setStoredData(STORAGE.CERTIFICATES, updated);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const data = await certificatesApi.getAll();
+      setCerts(data);
+    } catch (err) {
+      console.error("Certificates load error:", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const openCreateModal = () => {
     setEditingCert(null);
@@ -60,26 +65,40 @@ const Certificates = () => {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingCert) {
-      const updated = certs.map((c) =>
-        c.id === editingCert.id ? { ...c, ...formData } : c,
-      );
-      saveToStorage(updated);
-    } else {
-      const newCert = {
-        id: `CERT-${Math.floor(8000 + Math.random() * 999)}`,
-        ...formData,
-      };
-      saveToStorage([newCert, ...certs]);
+    const payload = {
+      student_name: formData.studentName,
+      course_name: formData.courseName,
+      issue_date: formData.issueDate,
+      qr_code: formData.qrCode,
+      grade: formData.grade,
+    };
+
+    try {
+      if (editingCert) {
+        await certificatesApi.update(editingCert.id, payload);
+      } else {
+        await certificatesApi.create({
+          id: `CERT-${Math.floor(8000 + Math.random() * 999)}`,
+          ...payload,
+        });
+      }
+      await loadData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Sertifikatni bekor qilmoqchisiz?")) {
-      saveToStorage(certs.filter((c) => c.id !== id));
+      try {
+        await certificatesApi.delete(id);
+        await loadData();
+      } catch (err) {
+        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
     }
   };
 

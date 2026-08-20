@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import apiRoutes from "./routes/index.js";
 import setupSwagger from "./swagger/swagger.js";
 import sequelize from "./config/database.js";
+import { seedDatabase } from "./config/seed.js";
 
 dotenv.config();
 
@@ -19,21 +20,21 @@ app.use("/api", apiRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "EduControl CRM API Server faol ishlamoqda 🚀",
-    database: "PostgreSQL (Sequelize ORM) ulangan 🐘",
+    message: "EduControl CRM API Server faol ishlamoqda",
+    database: "PostgreSQL (Sequelize ORM) ulangan",
     swaggerDocs: "http://localhost:5000/api-docs",
     modulesCount: 11,
   });
 });
 
 app.listen(PORT, async () => {
-  console.log(
-    `EduControl Backend server is running on http://localhost:${PORT}`,
-  );
+  console.log(`EduControl Backend server is running on http://localhost:${PORT}`);
   console.log(`Swagger API Documentation: http://localhost:${PORT}/api-docs`);
   try {
     await sequelize.authenticate();
-    console.log("PostgreSQL (Sequelize ORM) muvaffaqiyatli ulandi! 🐘✨");
+    await sequelize.sync();
+    await seedDatabase();
+    console.log("PostgreSQL (Sequelize ORM) muvaffaqiyatli ulandi va ma'lumotlar sinxronlandi!");
   } catch (error) {
     console.log("Sequelize ulanish xatosi:", error.message);
   }
