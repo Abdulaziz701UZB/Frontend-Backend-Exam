@@ -8,7 +8,8 @@ import {
   HiXMark, 
   HiKey 
 } from "react-icons/hi2";
-import { FaCrown, FaChalkboardUser, FaGraduationCap, FaUserTie } from "react-icons/fa6";
+import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
+import { FaHandSparkles } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
 import "./Header.css";
 
@@ -82,7 +83,10 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
           </button>
           <div className="header-welcome">
             <h1 className="header-greeting">
-              Xush kelibsiz, {firstName} <MdWavingHand style={{ color: '#f59e0b', verticalAlign: 'middle' }} />
+              Xush kelibsiz, {firstName}{" "}
+              <span className="waving-hand-wrap" title="Salom!">
+                <MdWavingHand className="waving-hand-icon" />
+              </span>
             </h1>
             <p className="header-date">
               <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 4 }} /> {currentDate}
@@ -173,7 +177,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             <form onSubmit={handlePasswordSubmit} className="admin-modal-form">
               <div className="form-group">
                 <label className="form-label">
-                  Foydalanuvchini Tanlang (Jami 45 ta foydalanuvchi):
+                  Foydalanuvchini Tanlang:
                 </label>
                 <select
                   className="form-select"
