@@ -67,28 +67,38 @@
 
 .reason-categorizer-box {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
   width: 100%;
 }
 
-.reason-categorizer-box .status-pill {
-  height: 36px;
+.attendance-absent-pill {
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
   padding: 0 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   white-space: nowrap;
   flex-shrink: 0;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   border-radius: 10px;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1.5px solid #fecaca;
   box-sizing: border-box;
+  margin: 0;
+  line-height: 1;
 }
 
 .reason-select {
-  height: 36px;
-  max-width: 220px;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  max-width: 230px;
   font-size: 13px !important;
   padding: 0 12px !important;
   background: #ffffff;
@@ -99,10 +109,13 @@
   box-sizing: border-box;
   color: #0f172a;
   font-weight: 600;
+  margin: 0;
 }
 
 .reason-custom-note {
-  height: 36px;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
   flex: 1;
   min-width: 180px;
   font-size: 13px !important;
@@ -113,6 +126,7 @@
   box-sizing: border-box;
   background: #ffffff;
   color: #0f172a;
+  margin: 0;
 }
 
 .reason-select:focus,

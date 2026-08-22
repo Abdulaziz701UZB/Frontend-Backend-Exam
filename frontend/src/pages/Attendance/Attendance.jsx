@@ -414,7 +414,7 @@ const Attendance = () => {
                           </div>
                         ) : isAbsent ? (
                           <div className="reason-categorizer-box">
-                            <span className="status-pill pill-overdue flex items-center gap-1">
+                            <span className="attendance-absent-pill">
                               <HiOutlineXMark /> Sababsiz qoldirdi
                             </span>
                             <input
