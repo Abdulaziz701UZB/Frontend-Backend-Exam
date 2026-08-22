@@ -4,55 +4,53 @@ import { useEduAuth } from "../../context/EduAuthContext";
 import {
   HiBolt,
   HiLockClosed,
+  HiOutlineEnvelope,
   HiEye,
   HiEyeSlash,
   HiArrowRightOnRectangle,
   HiSparkles,
-  HiCheckCircle,
   HiExclamationCircle,
-  HiShieldCheck,
-  HiOutlineUser
+  HiShieldCheck
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
 import "./Login.css";
 
+const ROLE_PRESET_EMAILS = {
+  admin: "admin@educontrol.uz",
+  teacher: "teacher@educontrol.uz",
+  student: "student@educontrol.uz",
+};
+
 const Login = () => {
   const navigate = useNavigate();
-  const { login, authError, setAuthError, allAdmins, allTeachers, allStudents } = useEduAuth();
+  const { login, authError, setAuthError } = useEduAuth();
 
   const [selectedRole, setSelectedRole] = useState("admin");
-  const [selectedUserId, setSelectedUserId] = useState(201);
+  const [email, setEmail] = useState("admin@educontrol.uz");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRoleChange = (role) => {
+  const handleRoleTabChange = (role) => {
     setSelectedRole(role);
+    setEmail(ROLE_PRESET_EMAILS[role] || "");
     setAuthError("");
-    if (role === "admin") setSelectedUserId(201);
-    else if (role === "teacher") setSelectedUserId(allTeachers[0]?.id || 101);
-    else setSelectedUserId(allStudents[0]?.id || 1);
-  };
-
-  const getUserList = () => {
-    if (selectedRole === "admin") return allAdmins || [];
-    if (selectedRole === "teacher") return allTeachers || [];
-    return allStudents || [];
   };
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
     setTimeout(() => {
-      const success = login(selectedRole, password, selectedUserId);
+      const success = login(email, password, selectedRole);
       setIsLoading(false);
       if (success) {
         navigate("/");
       }
-    }, 400);
+    }, 350);
   };
 
-  const fillDemoPassword = () => {
+  const fillDemoCredentials = () => {
+    setEmail(ROLE_PRESET_EMAILS[selectedRole] || "admin@educontrol.uz");
     setPassword("10102013");
   };
 
@@ -65,7 +63,7 @@ const Login = () => {
           </div>
           <h1 className="login-system-title">EduControl CRM</h1>
           <p className="login-system-subtitle">
-            O'quv Markazini Avtomatlashtirish va Boshqarish Tizimi
+            Tizimga kirish uchun Email va parolingizni kiriting
           </p>
         </div>
 
@@ -80,7 +78,7 @@ const Login = () => {
           <button
             type="button"
             className={`role-tab-btn ${selectedRole === "admin" ? "active" : ""}`}
-            onClick={() => handleRoleChange("admin")}
+            onClick={() => handleRoleTabChange("admin")}
           >
             <FaCrown />
             <span>Admin</span>
@@ -88,7 +86,7 @@ const Login = () => {
           <button
             type="button"
             className={`role-tab-btn ${selectedRole === "teacher" ? "active" : ""}`}
-            onClick={() => handleRoleChange("teacher")}
+            onClick={() => handleRoleTabChange("teacher")}
           >
             <FaChalkboardUser />
             <span>O'qituvchi</span>
@@ -96,7 +94,7 @@ const Login = () => {
           <button
             type="button"
             className={`role-tab-btn ${selectedRole === "student" ? "active" : ""}`}
-            onClick={() => handleRoleChange("student")}
+            onClick={() => handleRoleTabChange("student")}
           >
             <FaGraduationCap />
             <span>O'quvchi</span>
@@ -106,20 +104,20 @@ const Login = () => {
         <form onSubmit={handleLoginSubmit} className="login-form">
           <div className="login-form-group">
             <label className="login-form-label">
-              <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 4 }} />
-              Foydalanuvchini tanlang:
+              <HiOutlineEnvelope style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              Elektron pochta (Email):
             </label>
-            <select
-              className="login-form-select"
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(parseInt(e.target.value))}
-            >
-              {getUserList().map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name || u.fullName} ({u.roleTitle || u.subject || u.groupName || "Foydalanuvchi"})
-                </option>
-              ))}
-            </select>
+            <div className="login-input-wrap">
+              <input
+                type="email"
+                className="login-form-input"
+                placeholder="masalan: admin@educontrol.uz"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
           </div>
 
           <div className="login-form-group">
@@ -131,21 +129,20 @@ const Login = () => {
               <button
                 type="button"
                 className="login-quick-fill-btn"
-                onClick={fillDemoPassword}
+                onClick={fillDemoCredentials}
               >
                 <HiSparkles style={{ verticalAlign: 'middle', marginRight: 2 }} />
-                Parolni to'ldirish
+                Avto-to'ldirish
               </button>
             </div>
             <div className="login-password-input-wrap">
               <input
                 type={showPassword ? "text" : "password"}
                 className="login-form-input"
-                placeholder="Parolni kiriting (masalan: 10102013)"
+                placeholder="Parolingizni kiriting"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoFocus
               />
               <button
                 type="button"
@@ -160,7 +157,7 @@ const Login = () => {
 
           <div className="login-credentials-hint">
             <HiShieldCheck className="hint-icon" />
-            <span>Universal kirish paroli: <strong>10102013</strong> yoki <strong>1010201300</strong></span>
+            <span>Universal parol: <strong>10102013</strong> yoki <strong>1010201300</strong></span>
           </div>
 
           <button
@@ -169,7 +166,7 @@ const Login = () => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <span>Kirilmoqda...</span>
+              <span>Tekshirilmoqda...</span>
             ) : (
               <>
                 <HiArrowRightOnRectangle />
@@ -180,7 +177,7 @@ const Login = () => {
         </form>
 
         <div className="login-footer-info">
-          <span>EduControl CRM • PostgreSQL & Express API bilan to'liq integratsiya qilingan</span>
+          <span>EduControl CRM • PostgreSQL & Express REST API</span>
         </div>
       </div>
     </div>
