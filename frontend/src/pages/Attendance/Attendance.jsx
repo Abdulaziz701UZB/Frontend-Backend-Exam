@@ -14,12 +14,17 @@ import {
 } from "react-icons/hi2";
 import "./Attendance.css";
 
-const ABSENCE_REASONS = [
-  { id: "medical", label: "Salomatlik / Kasallik", tag: "Kasal" },
-  { id: "family", label: "Oilaviy Sabab", tag: "Oilaviy" },
+const EXCUSED_REASONS = [
+  { id: "medical", label: "Salomatlik / Kasallik (Uzrli)", tag: "Kasal" },
+  { id: "family", label: "Oilaviy Sabab (Ruxsat olingan)", tag: "Oilaviy" },
   { id: "competition", label: "Musobaqa / Olimpiada", tag: "Musobaqa" },
-  { id: "technical", label: "Texnik / Yo'l / Internet", tag: "Texnik" },
-  { id: "unexcused", label: "Sababsiz", tag: "Sababsiz" },
+  { id: "technical", label: "Texnik / Transport sababi", tag: "Texnik" },
+  { id: "other_excused", label: "Boshqa Uzrli Sabab", tag: "Uzrli" },
+];
+
+const ABSENCE_REASONS = [
+  ...EXCUSED_REASONS,
+  { id: "unexcused", label: "Sababsiz Dars Qoldirdi", tag: "Sababsiz" },
 ];
 
 const Attendance = () => {
@@ -82,10 +87,10 @@ const Attendance = () => {
         note: rec ? rec.note : "",
         reasonCategory:
           rec?.reasonCategory ||
-          (rec?.note?.includes("Kasal")
+          (rec?.status === "Excused"
             ? "medical"
-            : rec?.note?.includes("Musobaqa")
-              ? "competition"
+            : rec?.status === "Absent"
+              ? "unexcused"
               : ""),
       };
     });
@@ -98,11 +103,18 @@ const Attendance = () => {
       [studentId]: {
         ...prev[studentId],
         status,
-        note: status === "Present" ? "" : prev[studentId]?.note || "Sababsiz",
+        note:
+          status === "Present"
+            ? ""
+            : status === "Excused"
+              ? "Salomatlik / Kasallik (Uzrli)"
+              : "Sababsiz Dars Qoldirdi",
         reasonCategory:
           status === "Present"
             ? ""
-            : prev[studentId]?.reasonCategory || "unexcused",
+            : status === "Excused"
+              ? "medical"
+              : "unexcused",
       },
     }));
   };
@@ -180,12 +192,12 @@ const Attendance = () => {
   );
 
   const getReasonStats = () => {
-    const total = groupAbsences.length || 1;
     const stats = {
       medical: 0,
       family: 0,
       competition: 0,
       technical: 0,
+      other_excused: 0,
       unexcused: 0,
     };
 
@@ -319,9 +331,8 @@ const Attendance = () => {
                     note: "",
                     reasonCategory: "",
                   };
-                  const isMissing =
-                    currentRec.status === "Absent" ||
-                    currentRec.status === "Excused";
+                  const isExcused = currentRec.status === "Excused";
+                  const isAbsent = currentRec.status === "Absent";
 
                   return (
                     <tr key={student.id}>
@@ -370,21 +381,21 @@ const Attendance = () => {
                         </div>
                       </td>
                       <td>
-                        {isMissing ? (
+                        {isExcused ? (
                           <div className="reason-categorizer-box">
                             <select
                               className="form-select form-select-sm reason-select"
-                              value={currentRec.reasonCategory || "unexcused"}
+                              value={currentRec.reasonCategory || "medical"}
                               disabled={!canMarkAttendance}
                               onChange={(e) => {
-                                const selectedObj = ABSENCE_REASONS.find(
+                                const selectedObj = EXCUSED_REASONS.find(
                                   (r) => r.id === e.target.value,
                                 );
                                 if (selectedObj)
                                   handleReasonSelect(student.id, selectedObj);
                               }}
                             >
-                              {ABSENCE_REASONS.map((r) => (
+                              {EXCUSED_REASONS.map((r) => (
                                 <option key={r.id} value={r.id}>
                                   {r.label}
                                 </option>
@@ -393,7 +404,23 @@ const Attendance = () => {
                             <input
                               type="text"
                               className="form-input form-input-sm reason-custom-note"
-                              placeholder="Qo'shimcha izoh..."
+                              placeholder="Sabab tafsilotlari..."
+                              value={currentRec.note}
+                              disabled={!canMarkAttendance}
+                              onChange={(e) =>
+                                handleNoteChange(student.id, e.target.value)
+                              }
+                            />
+                          </div>
+                        ) : isAbsent ? (
+                          <div className="reason-categorizer-box">
+                            <span className="status-pill pill-overdue flex items-center gap-1">
+                              <HiOutlineXMark /> Sababsiz qoldirdi
+                            </span>
+                            <input
+                              type="text"
+                              className="form-input form-input-sm reason-custom-note"
+                              placeholder="Sababsiz qoldirish izohi..."
                               value={currentRec.note}
                               disabled={!canMarkAttendance}
                               onChange={(e) =>
