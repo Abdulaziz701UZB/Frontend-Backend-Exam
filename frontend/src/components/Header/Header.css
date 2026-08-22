@@ -120,6 +120,53 @@
   font-family: inherit;
 }
 
+.role-switcher-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+}
+
+.switcher-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.role-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.role-btn {
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.role-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.role-btn.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
 .crm-user-profile {
   display: flex;
   align-items: center;
