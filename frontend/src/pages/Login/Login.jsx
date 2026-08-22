@@ -12,36 +12,22 @@ import {
   HiExclamationCircle,
   HiShieldCheck
 } from "react-icons/hi2";
-import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
 import "./Login.css";
-
-const ROLE_PRESET_EMAILS = {
-  admin: "admin@educontrol.uz",
-  teacher: "teacher@educontrol.uz",
-  student: "student@educontrol.uz",
-};
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, authError, setAuthError } = useEduAuth();
 
-  const [selectedRole, setSelectedRole] = useState("admin");
-  const [email, setEmail] = useState("admin@educontrol.uz");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleRoleTabChange = (role) => {
-    setSelectedRole(role);
-    setEmail(ROLE_PRESET_EMAILS[role] || "");
-    setAuthError("");
-  };
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
     setTimeout(() => {
-      const success = login(email, password, selectedRole);
+      const success = login(email, password);
       setIsLoading(false);
       if (success) {
         navigate("/");
@@ -50,8 +36,9 @@ const Login = () => {
   };
 
   const fillDemoCredentials = () => {
-    setEmail(ROLE_PRESET_EMAILS[selectedRole] || "admin@educontrol.uz");
+    setEmail("admin@educontrol.uz");
     setPassword("10102013");
+    setAuthError("");
   };
 
   return (
@@ -73,33 +60,6 @@ const Login = () => {
             <span>{authError}</span>
           </div>
         )}
-
-        <div className="login-role-tabs">
-          <button
-            type="button"
-            className={`role-tab-btn ${selectedRole === "admin" ? "active" : ""}`}
-            onClick={() => handleRoleTabChange("admin")}
-          >
-            <FaCrown />
-            <span>Admin</span>
-          </button>
-          <button
-            type="button"
-            className={`role-tab-btn ${selectedRole === "teacher" ? "active" : ""}`}
-            onClick={() => handleRoleTabChange("teacher")}
-          >
-            <FaChalkboardUser />
-            <span>O'qituvchi</span>
-          </button>
-          <button
-            type="button"
-            className={`role-tab-btn ${selectedRole === "student" ? "active" : ""}`}
-            onClick={() => handleRoleTabChange("student")}
-          >
-            <FaGraduationCap />
-            <span>O'quvchi</span>
-          </button>
-        </div>
 
         <form onSubmit={handleLoginSubmit} className="login-form">
           <div className="login-form-group">
