@@ -267,10 +267,9 @@
 }
 
 .dashboard-content-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
   gap: 28px;
-  width: 100%;
 }
 
 .card-header-flex {
@@ -335,9 +334,9 @@
 }
 
 .debtors-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .debtor-item {
