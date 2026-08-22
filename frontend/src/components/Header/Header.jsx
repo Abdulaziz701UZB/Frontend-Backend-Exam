@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { 
   HiBars3, 
@@ -6,17 +7,19 @@ import {
   HiCalendarDays, 
   HiLockClosed, 
   HiXMark, 
-  HiKey 
+  HiKey,
+  HiOutlineArrowRightOnRectangle
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
-import { FaHandSparkles } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
 import "./Header.css";
 
 const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
+  const navigate = useNavigate();
   const {
     currentRole,
     switchRoleWithPassword,
+    logout,
     user,
     authError,
     setAuthError,
@@ -43,8 +46,8 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
     setPasswordInput("");
 
     if (role === "admin") setTargetUserId(201);
-    else if (role === "teacher") setTargetUserId(101);
-    else setTargetUserId(1);
+    else if (role === "teacher") setTargetUserId(allTeachers[0]?.id || 101);
+    else setTargetUserId(allStudents[0]?.id || 1);
 
     setAuthModalOpen(true);
   };
@@ -61,13 +64,18 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const getTargetUserList = () => {
     if (targetRole === "admin") return allAdmins || [];
     if (targetRole === "teacher") return allTeachers || [];
     return allStudents || [];
   };
 
-  const displayName = user?.name || "Abdulaziz Abdulhayev";
+  const displayName = user?.name || user?.fullName || "Abdulaziz Abdulhayev";
   const firstName = displayName.split(" ")[0] || "Abdulaziz";
 
   return (
@@ -144,10 +152,19 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             <div className="user-info-text">
               <p className="user-display-name">{displayName}</p>
               <p className="user-display-role">
-                {user?.roleTitle || "Tizim foydalanuvchisi"}
+                {user?.roleTitle || (currentRole === "teacher" ? "O'qituvchi" : currentRole === "student" ? "O'quvchi" : "Administrator")}
               </p>
             </div>
           </div>
+
+          <button
+            className="crm-logout-btn"
+            onClick={handleLogout}
+            title="Tizimdan chiqish (Log Out)"
+          >
+            <HiOutlineArrowRightOnRectangle className="logout-icon" />
+            <span>Chiqish</span>
+          </button>
         </div>
       </div>
 
@@ -186,7 +203,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                 >
                   {getTargetUserList().map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.name} (
+                      {u.name || u.fullName} (
                       {u.roleTitle ||
                         u.subject ||
                         u.groupName ||

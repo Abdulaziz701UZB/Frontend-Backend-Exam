@@ -86,7 +86,7 @@
 .header-right-actions {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 .cmd-trigger-btn {
@@ -205,6 +205,32 @@
   color: #64748b;
   margin: 0;
   font-weight: 500;
+}
+
+.crm-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #ef4444;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crm-logout-btn:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.crm-logout-btn .logout-icon {
+  font-size: 17px;
 }
 
 @media (max-width: 992px) {

@@ -14,6 +14,10 @@ const DEFAULT_USER = {
 };
 
 export const EduAuthProvider = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem("educontrol_is_authenticated") === "true";
+  });
+
   const [currentRole, setCurrentRole] = useState(() => {
     return localStorage.getItem("educontrol_role") || "admin";
   });
@@ -56,6 +60,33 @@ export const EduAuthProvider = ({ children }) => {
 
   const user = getUserObject(currentRole, selectedUserId);
 
+  const login = (role, password, targetUserId) => {
+    setAuthError("");
+
+    if (VALID_PASSWORDS.includes(password.trim())) {
+      const newUserId =
+        targetUserId ||
+        (role === "admin" ? 201 : role === "teacher" ? (liveTeachers[0]?.id || 101) : (liveStudents[0]?.id || 1));
+      setIsAuthenticated(true);
+      setCurrentRole(role);
+      setSelectedUserId(newUserId);
+      localStorage.setItem("educontrol_is_authenticated", "true");
+      localStorage.setItem("educontrol_role", role);
+      localStorage.setItem("educontrol_user_id", newUserId.toString());
+      return true;
+    } else {
+      setAuthError("Noto'g'ri parol kiritildi! Iltimos qaytadan urinib ko'ring.");
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("educontrol_is_authenticated");
+    localStorage.removeItem("educontrol_role");
+    localStorage.removeItem("educontrol_user_id");
+  };
+
   const switchRoleWithPassword = (newRole, password, targetUserId) => {
     setAuthError("");
 
@@ -88,6 +119,9 @@ export const EduAuthProvider = ({ children }) => {
   return (
     <EduAuthContext.Provider
       value={{
+        isAuthenticated,
+        login,
+        logout,
         currentRole,
         switchRoleWithPassword,
         user: user || DEFAULT_USER,

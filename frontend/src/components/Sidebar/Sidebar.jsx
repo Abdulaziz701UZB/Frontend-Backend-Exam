@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { 
   HiOutlineSquares2X2, 
@@ -13,13 +13,21 @@ import {
   HiOutlineBuildingOffice2, 
   HiOutlinePhoneArrowUpRight,
   HiBolt,
-  HiXMark
+  HiXMark,
+  HiOutlineArrowRightOnRectangle
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
 import "./Sidebar.css";
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { currentRole, isAdmin, isTeacher, isStudent } = useEduAuth();
+  const navigate = useNavigate();
+  const { currentRole, isAdmin, isTeacher, isStudent, logout } = useEduAuth();
+
+  const handleLogout = () => {
+    logout();
+    onClose();
+    navigate("/login");
+  };
 
   return (
     <>
@@ -60,7 +68,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineSquares2X2 /></span>
-            <span className="link-text">Dashboard</span>
+            <span className="link-text">Dashboard (Boshqaruv)</span>
           </NavLink>
 
           <NavLink
@@ -71,7 +79,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineAcademicCap /></span>
-            <span className="link-text">1. Guruhlar va Kurslar</span>
+            <span className="link-text">1. Kurslar va Guruhlar</span>
           </NavLink>
 
           <NavLink
@@ -175,6 +183,15 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         <div className="sidebar-footer">
+          <button
+            type="button"
+            className="sidebar-logout-btn"
+            onClick={handleLogout}
+            title="Tizimdan chiqish"
+          >
+            <span className="link-icon"><HiOutlineArrowRightOnRectangle /></span>
+            <span className="link-text">Tizimdan Chiqish</span>
+          </button>
           <div className="system-status">
             <span className="status-ping"></span>
             <span>Tizim Holati: Faol</span>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Header from "./components/Header/Header";
 import CommandPalette from "./components/CommandPalette/CommandPalette";
@@ -15,11 +15,13 @@ import Homework from "./pages/Homework/Homework";
 import Certificates from "./pages/Certificates/Certificates";
 import Rooms from "./pages/Rooms/Rooms";
 import Leads from "./pages/Leads/Leads";
+import Login from "./pages/Login/Login";
 
-import { EduAuthProvider } from "./context/EduAuthContext";
+import { EduAuthProvider, useEduAuth } from "./context/EduAuthContext";
 import "./App.css";
 
-function AppContent() {
+function ProtectedApp() {
+  const { isAuthenticated } = useEduAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
 
@@ -34,6 +36,10 @@ function AppContent() {
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="crm-app-layout">
@@ -68,7 +74,8 @@ function AppContent() {
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/leads" element={<Leads />} />
-            <Route path="*" element={<Dashboard />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>
@@ -76,11 +83,25 @@ function AppContent() {
   );
 }
 
+function MainRoutes() {
+  const { isAuthenticated } = useEduAuth();
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+      />
+      <Route path="*" element={<ProtectedApp />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <EduAuthProvider>
       <Router>
-        <AppContent />
+        <MainRoutes />
       </Router>
     </EduAuthProvider>
   );

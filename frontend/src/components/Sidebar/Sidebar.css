@@ -1,113 +1,132 @@
 .crm-sidebar {
-  width: 270px;
-  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
-  color: #f8fafc;
-  padding: 24px 18px;
+  width: 280px;
+  height: 100vh;
+  background: #0f172a;
+  border-right: 1px solid #1e293b;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  min-height: 100vh;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  padding: 24px 16px;
+  position: sticky;
+  top: 0;
   z-index: 90;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.crm-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.crm-sidebar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
 }
 
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 4px 8px 20px;
+  gap: 12px;
+  padding-bottom: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   position: relative;
 }
 
 .brand-logo-wrap {
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
-}
-
-.brand-logo-icon {
-  font-size: 24px;
+  font-size: 22px;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }
 
 .brand-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
-  color: #ffffff;
+  color: #f8fafc;
   margin: 0;
   letter-spacing: -0.5px;
 }
 
 .brand-subtitle {
   font-size: 11px;
-  color: #38bdf8;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: #6366f1;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .mobile-sidebar-close {
   display: none;
-  background: rgba(255, 255, 255, 0.1);
+  position: absolute;
+  right: 0;
+  top: 6px;
+  background: transparent;
   border: none;
-  color: #ffffff;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  font-size: 16px;
+  color: #94a3b8;
+  font-size: 20px;
   cursor: pointer;
-  margin-left: auto;
 }
 
 .role-badge {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 10px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   font-size: 12.5px;
   font-weight: 700;
-  border: 1px solid transparent;
-}
-
-.role-badge.role-admin {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
-  border-color: rgba(99, 102, 241, 0.3);
-}
-
-.role-badge.role-teacher {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.role-badge.role-student {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .role-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: currentColor;
+}
+
+.role-admin {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.role-admin .role-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.role-teacher {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.role-teacher .role-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6;
+}
+
+.role-student {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.role-student .role-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
 }
 
@@ -151,6 +170,32 @@
 .sidebar-footer {
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateX(2px);
 }
 
 .system-status {
@@ -160,6 +205,7 @@
   font-size: 12px;
   color: #64748b;
   font-weight: 500;
+  padding-left: 4px;
 }
 
 .status-ping {
