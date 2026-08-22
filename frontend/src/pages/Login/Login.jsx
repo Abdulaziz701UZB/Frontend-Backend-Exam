@@ -71,7 +71,7 @@ const Login = () => {
               <input
                 type="email"
                 className="login-form-input"
-                placeholder="Elektron pochtangizni kiriting (admin@educontrol.uz)"
+                placeholder="Elektron pochtangizni kiriting..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
