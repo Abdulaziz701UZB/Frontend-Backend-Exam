@@ -1,6 +1,7 @@
 import models from "../models/index.js";
 
 const {
+  sequelize,
   Course,
   Teacher,
   Group,
@@ -13,6 +14,19 @@ const {
   Room,
   Lead,
 } = models;
+
+export const syncSequences = async () => {
+  try {
+    const tables = ["students", "teachers", "courses", "attendance"];
+    for (const t of tables) {
+      await sequelize.query(
+        `SELECT setval(pg_get_serial_sequence('${t}', 'id'), COALESCE((SELECT MAX(id) FROM ${t}), 1));`
+      );
+    }
+  } catch (err) {
+    console.error("Sequence sync error:", err.message);
+  }
+};
 
 export const seedDatabase = async () => {
   try {
@@ -226,6 +240,8 @@ export const seedDatabase = async () => {
         },
       ]);
     }
+
+    await syncSequences();
   } catch (err) {
     console.error("Seed error:", err.message);
   }

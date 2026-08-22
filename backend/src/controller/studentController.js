@@ -1,4 +1,4 @@
-import { Student, Group } from "../models/index.js";
+import { Student, Group, sequelize } from "../models/index.js";
 import { validateStudent } from "../validation/studentValidation.js";
 import { Op } from "sequelize";
 
@@ -18,7 +18,21 @@ export const createStudent = async (req, res) => {
       balance: req.body.balance !== undefined ? req.body.balance : 0,
       status: req.body.status || "Active",
     };
-    const student = await Student.create(newStudentData);
+
+    let student;
+    try {
+      student = await Student.create(newStudentData);
+    } catch (createErr) {
+      if (createErr.name === "SequelizeUniqueConstraintError") {
+        await sequelize.query(
+          "SELECT setval(pg_get_serial_sequence('students', 'id'), COALESCE((SELECT MAX(id) FROM students), 1));"
+        );
+        student = await Student.create(newStudentData);
+      } else {
+        throw createErr;
+      }
+    }
+
     const result = await Student.findByPk(student.id, {
       include: [{ model: Group, as: "group" }],
     });

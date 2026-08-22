@@ -1,13 +1,24 @@
-import { Course } from "../models/index.js";
+import { Course, sequelize } from "../models/index.js";
 import { validateCourse } from "../validation/courseValidation.js";
-import { Op } from "sequelize";
 
 export const createCourse = async (req, res) => {
   const { error } = validateCourse(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   try {
-    const course = await Course.create(req.body);
+    let course;
+    try {
+      course = await Course.create(req.body);
+    } catch (createErr) {
+      if (createErr.name === "SequelizeUniqueConstraintError") {
+        await sequelize.query(
+          "SELECT setval(pg_get_serial_sequence('courses', 'id'), COALESCE((SELECT MAX(id) FROM courses), 1));"
+        );
+        course = await Course.create(req.body);
+      } else {
+        throw createErr;
+      }
+    }
     res.status(201).json(course);
   } catch (err) {
     res.status(500).json({ error: err.message });

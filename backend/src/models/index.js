@@ -24,6 +24,7 @@ export const Homework = homeworkModel(sequelize, DataTypes);
 export const Certificate = certificateModel(sequelize, DataTypes);
 export const Room = roomModel(sequelize, DataTypes);
 export const Lead = leadModel(sequelize, DataTypes);
+export { sequelize };
 
 Group.belongsTo(Course, { foreignKey: "course_id", as: "course" });
 Group.belongsTo(Teacher, { foreignKey: "teacher_id", as: "teacher" });
