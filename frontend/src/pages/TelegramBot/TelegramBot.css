@@ -4,59 +4,171 @@
   gap: 24px;
 }
 
-.telegram-hero-card {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  border-radius: 20px;
-  padding: 28px;
-  color: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.4);
-}
-
-.telegram-hero-info {
-  display: flex;
-  align-items: center;
+.four-bots-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-.telegram-hero-icon-wrap {
-  width: 64px;
-  height: 64px;
+.bot-card-box {
+  background: #ffffff;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid #e2e8f0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.bot-card-box:hover {
+  border-color: #0284c7;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
+}
+
+.bot-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.bot-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bot-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
-  color: #ffffff;
-  backdrop-filter: blur(8px);
+  font-size: 20px;
 }
 
-.telegram-hero-text h2 {
-  font-size: 22px;
+.icon-parent {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.icon-student {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.icon-teacher {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.icon-admin {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.bot-title-area h3 {
+  font-size: 16px;
   font-weight: 800;
-  margin: 0 0 6px 0;
-}
-
-.telegram-hero-text p {
+  color: #0f172a;
   margin: 0;
-  font-size: 13.5px;
-  opacity: 0.9;
 }
 
-.bot-tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
+.bot-title-area p {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.token-status-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
   border-radius: 9999px;
-  font-size: 12.5px;
-  font-weight: 700;
-  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.status-active-bot {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.status-waiting-bot {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.bot-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bot-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.bot-guide-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 18px;
+  padding: 24px;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.guide-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.guide-step-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #0284c7;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.guide-step-item strong {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.guide-step-item p {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .telegram-grid-2 {
@@ -122,34 +234,6 @@
   transform: translateX(22px);
 }
 
-.test-buttons-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.test-btn {
-  padding: 12px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #0f172a;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.test-btn:hover {
-  border-color: #0284c7;
-  background: #f0f9ff;
-  transform: translateY(-2px);
-}
-
 .telegram-log-item {
   display: flex;
   justify-content: space-between;
@@ -189,10 +273,13 @@
   color: #475569;
 }
 
-@media (max-width: 992px) {
-  .telegram-hero-card {
-    flex-direction: column;
-    align-items: flex-start;
+@media (max-width: 1024px) {
+  .four-bots-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-steps-grid {
+    grid-template-columns: 1fr;
   }
 
   .telegram-grid-2 {

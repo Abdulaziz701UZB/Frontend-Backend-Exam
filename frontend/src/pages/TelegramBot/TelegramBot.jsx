@@ -4,31 +4,58 @@ import {
   HiOutlinePaperAirplane,
   HiOutlineBellAlert,
   HiOutlineDevicePhoneMobile,
-  HiOutlineCheckBadge,
-  HiOutlineUserGroup,
-  HiOutlineSparkles,
-  HiOutlineDocumentCheck,
   HiOutlineClock,
-  HiOutlineBolt,
   HiOutlineCheckCircle,
   HiOutlineKey,
   HiOutlineGlobeAlt,
-  HiOutlineArrowTopRightOnSquare
+  HiOutlineArrowTopRightOnSquare,
+  HiOutlineInformationCircle,
+  HiOutlineBolt,
+  HiOutlineSparkles
 } from "react-icons/hi2";
-import { FaTelegram, FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
+import { FaTelegram, FaCrown, FaChalkboardUser, FaGraduationCap, FaPeopleRoof } from "react-icons/fa6";
 import "./TelegramBot.css";
 
 const TelegramBot = () => {
-  const [botConfig, setBotConfig] = useState({
-    token: "7891234567:AAFakeDemoTokenEduControlBotUzbekistan",
-    adminChatId: "123456789",
-    botUsername: "@EduControlDemoBot",
-    isEnabled: true,
-    webAppUrl: "http://localhost:5173",
+  const [botsConfig, setBotsConfig] = useState({
+    parentBot: {
+      id: "parent",
+      name: "Ota-onalar Boti",
+      token: "",
+      username: "@EduControlParentBot",
+      description: "Farzand davomati, to'lov cheklari va baholarni ota-onaga yetkazish",
+      isEnabled: true,
+    },
+    studentBot: {
+      id: "student",
+      name: "O'quvchilar Boti & WebApp",
+      token: "",
+      username: "@EduControlStudentBot",
+      description: "Dars jadvali, uyga vazifalar va WebApp shaxsiy kabinet",
+      isEnabled: true,
+    },
+    teacherBot: {
+      id: "teacher",
+      name: "O'qituvchilar Boti",
+      token: "",
+      username: "@EduControlTeacherBot",
+      description: "Tezkor davomat olish, guruhlar ro'yxati va oylik maosh",
+      isEnabled: true,
+    },
+    adminBot: {
+      id: "admin",
+      name: "Bosh Admin & Rahbar Boti",
+      token: "",
+      adminChatId: "",
+      username: "@EduControlAdminBot",
+      description: "Yangi arizalar (Lidlar) signali, kechki kunlik hisobot va ommaviy e'lonlar",
+      isEnabled: true,
+    },
     autoNotifyAttendance: true,
     autoNotifyPayment: true,
     autoNotifyLead: true,
     autoNotifyDailyReport: true,
+    webAppUrl: "http://localhost:5173",
   });
 
   const [logs, setLogs] = useState([]);
@@ -36,7 +63,7 @@ const TelegramBot = () => {
   const [loading, setLoading] = useState(true);
 
   const [broadcastText, setBroadcastText] = useState("");
-  const [targetRole, setTargetRole] = useState("all");
+  const [targetBotKey, setTargetBotKey] = useState("all");
   const [isSending, setIsSending] = useState(false);
   const [alertSuccess, setAlertSuccess] = useState("");
 
@@ -44,7 +71,7 @@ const TelegramBot = () => {
     try {
       setLoading(true);
       const data = await telegramApi.getStatus();
-      if (data.config) setBotConfig(data.config);
+      if (data.config) setBotsConfig(data.config);
       if (data.logs) setLogs(data.logs);
       if (data.users) setUsers(data.users);
     } catch (err) {
@@ -58,9 +85,31 @@ const TelegramBot = () => {
     loadStatus();
   }, []);
 
+  const handleBotFieldChange = (botKey, field, value) => {
+    setBotsConfig((prev) => ({
+      ...prev,
+      [botKey]: {
+        ...prev[botKey],
+        [field]: value,
+      },
+    }));
+  };
+
+  const saveIndividualBot = async (botKey) => {
+    try {
+      await telegramApi.updateConfig(botsConfig);
+      const botName = botsConfig[botKey]?.name || "Bot";
+      setAlertSuccess(`"${botName}" sozlamalari muvaffaqiyatli saqlandi!`);
+      setTimeout(() => setAlertSuccess(""), 3500);
+      loadStatus();
+    } catch (err) {
+      alert("Xatolik: " + err.message);
+    }
+  };
+
   const handleToggle = async (key) => {
-    const updated = { ...botConfig, [key]: !botConfig[key] };
-    setBotConfig(updated);
+    const updated = { ...botsConfig, [key]: !botsConfig[key] };
+    setBotsConfig(updated);
     try {
       await telegramApi.updateConfig(updated);
     } catch (err) {
@@ -73,8 +122,8 @@ const TelegramBot = () => {
     if (!broadcastText.trim()) return;
     try {
       setIsSending(true);
-      const res = await telegramApi.sendBroadcast(broadcastText, targetRole);
-      setAlertSuccess(`Xabarnoma ${res.sentCount || users.length} ta foydalanuvchiga muvaffaqiyatli yuborildi!`);
+      const res = await telegramApi.sendBroadcast(broadcastText, targetBotKey);
+      setAlertSuccess(`Xabarnoma ${res.sentCount || users.length} ta foydalanuvchiga yuborildi!`);
       setBroadcastText("");
       setTimeout(() => setAlertSuccess(""), 3500);
       loadStatus();
@@ -85,10 +134,10 @@ const TelegramBot = () => {
     }
   };
 
-  const triggerTestNotification = async (type) => {
+  const triggerTestNotification = async (botKey, type) => {
     try {
-      await telegramApi.sendTestNotification(type);
-      setAlertSuccess(`"${type}" bo'yicha test bildirishnomasi Telegram orqali yuborildi!`);
+      await telegramApi.sendTestNotification(type, { botKey });
+      setAlertSuccess(`"${type}" bo'yicha test xabari muvaffaqiyatli jo'natildi!`);
       setTimeout(() => setAlertSuccess(""), 3000);
       loadStatus();
     } catch (err) {
@@ -96,69 +145,202 @@ const TelegramBot = () => {
     }
   };
 
+  const renderBotCard = (botKey, icon, iconClass, specificInputs = null) => {
+    const bot = botsConfig[botKey] || {};
+    const hasToken = Boolean(bot.token && bot.token.trim() !== "");
+
+    return (
+      <div className="bot-card-box">
+        <div className="bot-card-header">
+          <div className="bot-header-left">
+            <div className={`bot-icon-circle ${iconClass}`}>{icon}</div>
+            <div className="bot-title-area">
+              <h3>{bot.name}</h3>
+              <p>{bot.description}</p>
+            </div>
+          </div>
+          <span
+            className={`token-status-pill ${
+              hasToken ? "status-active-bot" : "status-waiting-bot"
+            }`}
+          >
+            {hasToken ? "Token Ulangan" : "Token Kutilmoqda"}
+          </span>
+        </div>
+
+        <div className="bot-card-form">
+          <div className="form-group mb-0">
+            <label className="form-label text-xs">
+              <HiOutlineKey style={{ verticalAlign: "middle", marginRight: 4 }} />
+              BotFather Token (Bo'sh qoldirilgan - tokeningizni kiriting):
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="masalan: 7891234567:AAF..."
+              value={bot.token || ""}
+              onChange={(e) =>
+                handleBotFieldChange(botKey, "token", e.target.value)
+              }
+            />
+          </div>
+
+          <div className="form-group mb-0">
+            <label className="form-label text-xs">
+              <HiOutlineGlobeAlt style={{ verticalAlign: "middle", marginRight: 4 }} />
+              Bot Username:
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="@EduControl...Bot"
+              value={bot.username || ""}
+              onChange={(e) =>
+                handleBotFieldChange(botKey, "username", e.target.value)
+              }
+            />
+          </div>
+
+          {specificInputs}
+        </div>
+
+        <div className="bot-card-actions">
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => triggerTestNotification(botKey, "GENERAL")}
+          >
+            <HiOutlineSparkles /> Test Xabar
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => saveIndividualBot(botKey)}
+          >
+            <HiOutlineCheckCircle /> Sozlamani Saqlash
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="telegram-page">
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <FaTelegram style={{ verticalAlign: 'middle', marginRight: 8, color: '#0284c7' }} />
-            Telegram Bot va WebApp Boshqaruvi
+            <FaTelegram
+              style={{
+                verticalAlign: "middle",
+                marginRight: 8,
+                color: "#0284c7",
+              }}
+            />
+            4 ta Alohida Telegram Botlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            Ota-onalar, o'quvchilar va o'qituvchilarga avtomatik davomat, to'lov kvitansiyalari va kunlik hisobotlarni Telegram orqali yuborish
+            Ota-onalar, O'quvchilar, O'qituvchilar va Bosh Admin uchun 4 ta mustaqil bot tokenlarini sozlash
           </p>
         </div>
       </div>
 
       {alertSuccess && (
         <div className="alert alert-success">
-          <HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          <HiOutlineCheckCircle
+            style={{ verticalAlign: "middle", marginRight: 6 }}
+          />
           {alertSuccess}
         </div>
       )}
 
-      <div className="telegram-hero-card">
-        <div className="telegram-hero-info">
-          <div className="telegram-hero-icon-wrap">
-            <FaTelegram />
+      <div className="bot-guide-card">
+        <div className="flex items-center gap-2">
+          <HiOutlineInformationCircle style={{ fontSize: 22, color: "#38bdf8" }} />
+          <strong style={{ fontSize: 16 }}>BotFather dan 4 ta Bot ochish bo'yicha qisqa yo'riqnoma:</strong>
+        </div>
+        <div className="guide-steps-grid">
+          <div className="guide-step-item">
+            <div className="step-num">1</div>
+            <strong>Telegramda @BotFather ga kiring</strong>
+            <p>Qidiruvdan rasmiy ko'k belgili <code>@BotFather</code> botini topib <code>/start</code> bosing.</p>
           </div>
-          <div className="telegram-hero-text">
-            <h2>EduControl Rasmiy Telegram Boti</h2>
-            <p>Bot holati: <strong>Faol va ulangan</strong> • WebApp integratsiyasi yoqilgan</p>
-            <div className="bot-tag-pill">
-              <HiOutlineGlobeAlt /> {botConfig.botUsername} • {users.length} ta faol a'zo
-            </div>
+          <div className="guide-step-item">
+            <div className="step-num">2</div>
+            <strong>/newbot buyrug'ini yuboring</strong>
+            <p>Bot nomini va unikal username (masalan: <i>EduControlParent_bot</i>) deb kiriting.</p>
+          </div>
+          <div className="guide-step-item">
+            <div className="step-num">3</div>
+            <strong>Tokenni nusxalab bu yerga qo'ying</strong>
+            <p>Berilgan HTTP API tokenni (<i>78912...:AAF...</i>) pastdagi tegishli bot qatoriga qo'yib saqlang.</p>
           </div>
         </div>
+      </div>
 
-        <a
-          href={`https://t.me/${botConfig.botUsername.replace('@', '')}`}
-          target="_blank"
-          rel="noreferrer"
-          className="btn btn-secondary btn-lg"
-        >
-          <HiOutlineArrowTopRightOnSquare /> Botni Ochish (t.me)
-        </a>
+      <div className="four-bots-grid">
+        {renderBotCard(
+          "parentBot",
+          <FaPeopleRoof />,
+          "icon-parent"
+        )}
+
+        {renderBotCard(
+          "studentBot",
+          <FaGraduationCap />,
+          "icon-student"
+        )}
+
+        {renderBotCard(
+          "teacherBot",
+          <FaChalkboardUser />,
+          "icon-teacher"
+        )}
+
+        {renderBotCard(
+          "adminBot",
+          <FaCrown />,
+          "icon-admin",
+          <div className="form-group mb-0">
+            <label className="form-label text-xs">
+              <FaCrown style={{ verticalAlign: "middle", marginRight: 4 }} />
+              Admin Telegram Chat ID:
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="masalan: 123456789"
+              value={botsConfig.adminBot?.adminChatId || ""}
+              onChange={(e) =>
+                handleBotFieldChange("adminBot", "adminChatId", e.target.value)
+              }
+            />
+          </div>
+        )}
       </div>
 
       <div className="telegram-grid-2">
         <div className="card">
           <h3 className="section-title">
-            <HiOutlineBellAlert style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineBellAlert
+              style={{ verticalAlign: "middle", marginRight: 6 }}
+            />
             Avtomatik Xabarnoma Triggerlari
           </h3>
           <p className="text-muted text-sm mb-4">
-            Tizimda hodisa ro'y berganda Telegram orqali avtomatik bildirishnoma yuborish:
+            Tegishli botlarga qaysi xabarlar avtomat borishini yoqing/o'chiring:
           </p>
 
           <div className="auto-toggle-row">
             <div className="auto-toggle-text">
-              <strong>Davomatda Ota-onaga Xabar</strong>
-              <span>O'quvchi keldi/kelmadi belgilanganda 1 soniyada xabar boradi</span>
+              <strong>Davomatda Ota-ona Botiga Xabar</strong>
+              <span>Farzand keldi/kelmadi belgilanganda Ota-onalar botiga 1 soniyada xabar boradi</span>
             </div>
             <button
               type="button"
-              className={`switch-toggle ${botConfig.autoNotifyAttendance ? "active" : ""}`}
+              className={`switch-toggle ${
+                botsConfig.autoNotifyAttendance ? "active" : ""
+              }`}
               onClick={() => handleToggle("autoNotifyAttendance")}
             >
               <span className="switch-circle"></span>
@@ -168,11 +350,13 @@ const TelegramBot = () => {
           <div className="auto-toggle-row">
             <div className="auto-toggle-text">
               <strong>To'lov Kvitansiyasi (Chek)</strong>
-              <span>To'lov qabul qilinganda ota-ona va o'quvchiga chek yuboriladi</span>
+              <span>To'lov qilinganda Ota-onalar va O'quvchilar botiga chek boradi</span>
             </div>
             <button
               type="button"
-              className={`switch-toggle ${botConfig.autoNotifyPayment ? "active" : ""}`}
+              className={`switch-toggle ${
+                botsConfig.autoNotifyPayment ? "active" : ""
+              }`}
               onClick={() => handleToggle("autoNotifyPayment")}
             >
               <span className="switch-circle"></span>
@@ -182,11 +366,13 @@ const TelegramBot = () => {
           <div className="auto-toggle-row">
             <div className="auto-toggle-text">
               <strong>Yangi Lid (Ariza) Signali</strong>
-              <span>Sayt yoki botdan yangi mijoz murojaat qilganda adminga xabar</span>
+              <span>Sayt yoki botdan yangi mijoz ariza berganda Admin Botiga xabar boradi</span>
             </div>
             <button
               type="button"
-              className={`switch-toggle ${botConfig.autoNotifyLead ? "active" : ""}`}
+              className={`switch-toggle ${
+                botsConfig.autoNotifyLead ? "active" : ""
+              }`}
               onClick={() => handleToggle("autoNotifyLead")}
             >
               <span className="switch-circle"></span>
@@ -196,11 +382,13 @@ const TelegramBot = () => {
           <div className="auto-toggle-row">
             <div className="auto-toggle-text">
               <strong>Kechki Kunlik Moliyaviy Hisobot</strong>
-              <span>Har kuni soat 21:00 da rahbarga kunlik tushum va qatnashuv xulosasi</span>
+              <span>Har oqshom soat 21:00 da Admin Botiga kunlik tushum xulosasi yuboriladi</span>
             </div>
             <button
               type="button"
-              className={`switch-toggle ${botConfig.autoNotifyDailyReport ? "active" : ""}`}
+              className={`switch-toggle ${
+                botsConfig.autoNotifyDailyReport ? "active" : ""
+              }`}
               onClick={() => handleToggle("autoNotifyDailyReport")}
             >
               <span className="switch-circle"></span>
@@ -210,86 +398,28 @@ const TelegramBot = () => {
 
         <div className="card">
           <h3 className="section-title">
-            <HiOutlineSparkles style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            Jonli Test Simulyatori
-          </h3>
-          <p className="text-muted text-sm mb-4">
-            Bot qanday xabarlar yuborishini tekshirish uchun test signalini bosing:
-          </p>
-
-          <div className="test-buttons-grid">
-            <button
-              type="button"
-              className="test-btn"
-              onClick={() => triggerTestNotification("ATTENDANCE")}
-            >
-              <HiOutlineDocumentCheck style={{ color: '#16a34a', fontSize: 18 }} />
-              <span>Davomat Xabari Test</span>
-            </button>
-
-            <button
-              type="button"
-              className="test-btn"
-              onClick={() => triggerTestNotification("PAYMENT")}
-            >
-              <HiOutlineCheckBadge style={{ color: '#0284c7', fontSize: 18 }} />
-              <span>To'lov Kvitansiyasi Test</span>
-            </button>
-
-            <button
-              type="button"
-              className="test-btn"
-              onClick={() => triggerTestNotification("LEAD")}
-            >
-              <HiOutlineBolt style={{ color: '#d97706', fontSize: 18 }} />
-              <span>Yangi Lid Signali Test</span>
-            </button>
-
-            <button
-              type="button"
-              className="test-btn"
-              onClick={() => triggerTestNotification("GENERAL")}
-            >
-              <HiOutlinePaperAirplane style={{ color: '#8b5cf6', fontSize: 18 }} />
-              <span>Umumiy Eslatma Test</span>
-            </button>
-          </div>
-
-          <div className="mt-6 pt-4 border-t">
-            <h4 className="text-sm font-bold text-main mb-2">
-              <HiOutlineDevicePhoneMobile style={{ verticalAlign: 'middle', marginRight: 4 }} />
-              Telegram WebApp Integratsiyasi
-            </h4>
-            <p className="text-xs text-muted">
-              Ushbu CRM Telegram WebApp sifatida to'liq moslashtirilgan. O'quvchi bot ichida <strong>"📱 WebApp-ni Ochish"</strong> tugmasini bosganda butun kabinetini Telegramdan chiqmasdan boshqarishi mumkin.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="telegram-grid-2">
-        <div className="card">
-          <h3 className="section-title">
-            <HiOutlinePaperAirplane style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlinePaperAirplane
+              style={{ verticalAlign: "middle", marginRight: 6 }}
+            />
             Ommaviy Xabarnoma Yuborish (Broadcast)
           </h3>
           <p className="text-muted text-sm mb-4">
-            Barcha yoki alohida guruh foydalanuvchilariga bir zumda e'lon yuboring:
+            Qaysi bot auditoriyasiga e'lon yuborishni tanlang:
           </p>
 
           <form onSubmit={handleSendBroadcast}>
             <div className="form-group">
-              <label className="form-label">Kimlarga yuborilsin:</label>
+              <label className="form-label">Qaysi Bot Auditoriyasiga:</label>
               <select
                 className="form-select"
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
+                value={targetBotKey}
+                onChange={(e) => setTargetBotKey(e.target.value)}
               >
-                <option value="all">Barcha Ulangan Foydalanuvchilarga</option>
-                <option value="parent">Faqat Ota-onalarga</option>
-                <option value="student">Faqat O'quvchilarga</option>
-                <option value="teacher">Faqat O'qituvchilarga</option>
-                <option value="admin">Faqat Administratorlarga</option>
+                <option value="all">Barcha 4 ta Bot Foydalanuvchilariga</option>
+                <option value="parentBot">Faqat Ota-onalar Botiga</option>
+                <option value="studentBot">Faqat O'quvchilar Botiga</option>
+                <option value="teacherBot">Faqat O'qituvchilar Botiga</option>
+                <option value="adminBot">Faqat Admin Botiga</option>
               </select>
             </div>
 
@@ -297,8 +427,8 @@ const TelegramBot = () => {
               <label className="form-label">Xabarnoma Matni (HTML qo'llab-quvvatlanadi):</label>
               <textarea
                 className="form-textarea"
-                rows="4"
-                placeholder="E'lon matnini kiriting... masalan: Hurmatli o'quvchilar, ertaga bayram munosabati bilan barcha darslar qoldiriladi!"
+                rows="3"
+                placeholder="E'lon matnini kiriting... masalan: Hurmatli ota-onalar va o'quvchilar, ertaga markazimizda ochiq darslar kuni bo'lib o'tadi!"
                 value={broadcastText}
                 onChange={(e) => setBroadcastText(e.target.value)}
                 required
@@ -315,40 +445,44 @@ const TelegramBot = () => {
             </button>
           </form>
         </div>
+      </div>
 
-        <div className="card">
-          <h3 className="section-title">
-            <HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            So'nggi Telegram Xabarlari Logi
-          </h3>
-          <p className="text-muted text-sm mb-4">
-            Bot orqali yuborilgan oxirgi bildirishnomalar ro'yxati:
-          </p>
+      <div className="card">
+        <h3 className="section-title">
+          <HiOutlineClock
+            style={{ verticalAlign: "middle", marginRight: 6 }}
+          />
+          So'nggi Telegram Xabarlari Logi
+        </h3>
+        <div
+          className="telegram-logs-wrap"
+          style={{ maxHeight: 240, overflowY: "auto" }}
+        >
+          {logs.map((log) => {
+            const tagClass =
+              log.type === "PAYMENT"
+                ? "log-payment"
+                : log.type === "ATTENDANCE"
+                ? "log-attendance"
+                : log.type === "LEAD"
+                ? "log-lead"
+                : "log-message";
 
-          <div className="telegram-logs-wrap" style={{ maxHeight: 290, overflowY: 'auto' }}>
-            {logs.map((log) => {
-              const tagClass =
-                log.type === "PAYMENT"
-                  ? "log-payment"
-                  : log.type === "ATTENDANCE"
-                  ? "log-attendance"
-                  : log.type === "LEAD"
-                  ? "log-lead"
-                  : "log-message";
-
-              return (
-                <div key={log.id} className="telegram-log-item">
-                  <div>
-                    <span className={`log-type-tag ${tagClass}`} style={{ marginRight: 8 }}>
-                      {log.type}
-                    </span>
-                    <strong>{log.text}</strong>
-                  </div>
-                  <span className="text-xs text-muted">{log.date}</span>
+            return (
+              <div key={log.id} className="telegram-log-item">
+                <div>
+                  <span
+                    className={`log-type-tag ${tagClass}`}
+                    style={{ marginRight: 8 }}
+                  >
+                    {log.bot || "Bot"}: {log.type}
+                  </span>
+                  <strong>{log.text}</strong>
                 </div>
-              );
-            })}
-          </div>
+                <span className="text-xs text-muted">{log.date}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
