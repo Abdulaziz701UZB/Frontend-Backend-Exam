@@ -12,6 +12,7 @@ import roomRoute from './roomRoute.js';
 import leadRoute from './leadRoute.js';
 import reviewRoutes from './reviewRoutes.js';
 import trialLessonRoutes from './trialLessonRoutes.js';
+import telegramRoutes from './telegramRoutes.js';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use(roomRoute);
 router.use(leadRoute);
 router.use('/reviews', reviewRoutes);
 router.use('/trial-lessons', trialLessonRoutes);
+router.use('/telegram', telegramRoutes);
 
 export default router;

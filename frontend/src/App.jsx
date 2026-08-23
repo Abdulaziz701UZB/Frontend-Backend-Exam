@@ -17,6 +17,7 @@ import Rooms from "./pages/Rooms/Rooms";
 import Leads from "./pages/Leads/Leads";
 import Reviews from "./pages/Reviews/Reviews";
 import TrialLessons from "./pages/TrialLessons/TrialLessons";
+import TelegramBot from "./pages/TelegramBot/TelegramBot";
 import Login from "./pages/Login/Login";
 
 import { EduAuthProvider, useEduAuth } from "./context/EduAuthContext";
@@ -78,6 +79,7 @@ function ProtectedApp() {
             <Route path="/leads" element={<Leads />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/trial-lessons" element={<TrialLessons />} />
+            <Route path="/telegram-bot" element={<TelegramBot />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

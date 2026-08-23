@@ -457,4 +457,23 @@ export const trialLessonsApi = {
   },
 };
 
+export const telegramApi = {
+  getStatus: async () => {
+    const res = await api.get("/telegram/status");
+    return res.data;
+  },
+  updateConfig: async (config) => {
+    const res = await api.put("/telegram/config", config);
+    return res.data;
+  },
+  sendBroadcast: async (message, targetRole) => {
+    const res = await api.post("/telegram/broadcast", { message, targetRole });
+    return res.data;
+  },
+  sendTestNotification: async (type, payload = {}) => {
+    const res = await api.post("/telegram/test-notification", { type, ...payload });
+    return res.data;
+  },
+};
+
 export default api;

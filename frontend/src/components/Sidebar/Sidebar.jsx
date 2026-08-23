@@ -203,6 +203,17 @@ const Sidebar = ({ isOpen, onClose }) => {
             <span className="link-icon"><HiOutlineSparkles /></span>
             <span className="link-text">12. Sinov Darslari</span>
           </NavLink>
+
+          <NavLink
+            to="/telegram-bot"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
+            onClick={onClose}
+          >
+            <span className="link-icon" style={{ color: '#38bdf8' }}><FaTelegram /></span>
+            <span className="link-text">13. Telegram Bot & WebApp</span>
+          </NavLink>
         </nav>
 
         <div className="sidebar-footer">
