@@ -11,6 +11,7 @@ import certificateRoute from './certificateRoute.js';
 import roomRoute from './roomRoute.js';
 import leadRoute from './leadRoute.js';
 import reviewRoutes from './reviewRoutes.js';
+import trialLessonRoutes from './trialLessonRoutes.js';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use(certificateRoute);
 router.use(roomRoute);
 router.use(leadRoute);
 router.use('/reviews', reviewRoutes);
+router.use('/trial-lessons', trialLessonRoutes);
 
 export default router;

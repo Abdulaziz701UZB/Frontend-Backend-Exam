@@ -13,6 +13,7 @@ import certificateModel from "./certificateModel.js";
 import roomModel from "./roomModel.js";
 import leadModel from "./leadModel.js";
 import reviewModel from "./reviewModel.js";
+import trialLessonModel from "./trialLessonModel.js";
 
 export const Course = courseModel(sequelize, DataTypes);
 export const Teacher = teacherModel(sequelize, DataTypes);
@@ -26,6 +27,7 @@ export const Certificate = certificateModel(sequelize, DataTypes);
 export const Room = roomModel(sequelize, DataTypes);
 export const Lead = leadModel(sequelize, DataTypes);
 export const Review = reviewModel(sequelize, DataTypes);
+export const TrialLesson = trialLessonModel(sequelize, DataTypes);
 export { sequelize };
 
 Group.belongsTo(Course, { foreignKey: "course_id", as: "course" });
@@ -49,4 +51,5 @@ export default {
   Room,
   Lead,
   Review,
+  TrialLesson,
 };

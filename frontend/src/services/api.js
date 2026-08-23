@@ -418,4 +418,43 @@ export const reviewsApi = {
   },
 };
 
+export const normalizeTrialLesson = (t) => {
+  if (!t) return null;
+  return {
+    id: t.id,
+    studentName: t.student_name || t.studentName,
+    phone: t.phone,
+    teacherName: t.teacher_name || t.teacherName,
+    courseName: t.course_name || t.courseName,
+    date: t.date,
+    time: t.time,
+    room: t.room,
+    status: t.status,
+    notes: t.notes,
+  };
+};
+
+export const trialLessonsApi = {
+  getAll: async () => {
+    const res = await api.get("/trial-lessons");
+    return (res.data || []).map(normalizeTrialLesson);
+  },
+  getById: async (id) => {
+    const res = await api.get(`/trial-lessons/${id}`);
+    return normalizeTrialLesson(res.data);
+  },
+  create: async (data) => {
+    const res = await api.post("/trial-lessons", data);
+    return normalizeTrialLesson(res.data);
+  },
+  update: async (id, data) => {
+    const res = await api.put(`/trial-lessons/${id}`, data);
+    return normalizeTrialLesson(res.data);
+  },
+  delete: async (id) => {
+    const res = await api.delete(`/trial-lessons/${id}`);
+    return res.data;
+  },
+};
+
 export default api;

@@ -14,11 +14,12 @@ const {
   Room,
   Lead,
   Review,
+  TrialLesson,
 } = models;
 
 export const syncSequences = async () => {
   try {
-    const tables = ["students", "teachers", "courses", "attendance", "reviews"];
+    const tables = ["students", "teachers", "courses", "attendance", "reviews", "trial_lessons"];
     for (const t of tables) {
       await sequelize.query(
         `SELECT setval(pg_get_serial_sequence('${t}', 'id'), COALESCE((SELECT MAX(id) FROM ${t}), 1));`
@@ -274,6 +275,45 @@ export const seedDatabase = async () => {
           comment: "Kompyuterlar tez va zamonaviy, konditsioner va internet doimiy ishlaydi.",
           status: "Yangi",
           date: "2026-08-22",
+        },
+      ]);
+    }
+
+    const trialCount = await TrialLesson.count();
+    if (trialCount === 0) {
+      await TrialLesson.bulkCreate([
+        {
+          student_name: "Otabek Mahmudov",
+          phone: "+998 90 599 06 00",
+          teacher_name: "Abdulaziz Abdulhayev",
+          course_name: "Frontend ReactJS",
+          date: "2026-08-25",
+          time: "14:00 - 15:30",
+          room: "201-xona (Kompyuter zali)",
+          status: "Guruhga yozildi",
+          notes: "Darsdan juda mamnun bo'ldi, to'lovni 100% qildi.",
+        },
+        {
+          student_name: "Shaxzod Aliyev",
+          phone: "+998 90 599 06 00",
+          teacher_name: "Azizbek Murodov",
+          course_name: "Python Backend (Django)",
+          date: "2026-08-26",
+          time: "16:30 - 18:00",
+          room: "203-xona (Backend Lab)",
+          status: "Kutilyapti",
+          notes: "Noldan boshlamoqchi, darsga noutbuki bilan keladi.",
+        },
+        {
+          student_name: "Zilola Karimova",
+          phone: "+998 90 599 06 00",
+          teacher_name: "Abdulaziz Abdulhayev",
+          course_name: "Frontend ReactJS",
+          date: "2026-08-24",
+          time: "14:00 - 15:30",
+          room: "201-xona (Kompyuter zali)",
+          status: "O'ylanyapti",
+          notes: "Jadvalni ko'rib chiqib, 2 kunda javob beradi.",
         },
       ]);
     }

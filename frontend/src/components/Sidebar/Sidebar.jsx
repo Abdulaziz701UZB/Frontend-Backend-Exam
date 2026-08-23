@@ -192,6 +192,17 @@ const Sidebar = ({ isOpen, onClose }) => {
             <span className="link-icon"><HiOutlineStar /></span>
             <span className="link-text">11. Fikrlar & 1-10 Baholash</span>
           </NavLink>
+
+          <NavLink
+            to="/trial-lessons"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
+            onClick={onClose}
+          >
+            <span className="link-icon"><HiOutlineSparkles /></span>
+            <span className="link-text">12. Sinov Darslari</span>
+          </NavLink>
         </nav>
 
         <div className="sidebar-footer">
