@@ -379,4 +379,43 @@ export const leadsApi = {
   },
 };
 
+export const normalizeReview = (r) => {
+  if (!r) return null;
+  return {
+    id: r.id,
+    studentId: r.student_id || r.studentId,
+    studentName: r.student_name || r.studentName,
+    teacherName: r.teacher_name || r.teacherName,
+    groupName: r.group_name || r.groupName,
+    rating: parseInt(r.rating) || 10,
+    category: r.category,
+    comment: r.comment,
+    status: r.status,
+    date: r.date,
+  };
+};
+
+export const reviewsApi = {
+  getAll: async () => {
+    const res = await api.get("/reviews");
+    return (res.data || []).map(normalizeReview);
+  },
+  getById: async (id) => {
+    const res = await api.get(`/reviews/${id}`);
+    return normalizeReview(res.data);
+  },
+  create: async (data) => {
+    const res = await api.post("/reviews", data);
+    return normalizeReview(res.data);
+  },
+  update: async (id, data) => {
+    const res = await api.put(`/reviews/${id}`, data);
+    return normalizeReview(res.data);
+  },
+  delete: async (id) => {
+    const res = await api.delete(`/reviews/${id}`);
+    return res.data;
+  },
+};
+
 export default api;

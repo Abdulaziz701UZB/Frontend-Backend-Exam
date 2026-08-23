@@ -15,6 +15,7 @@ import Homework from "./pages/Homework/Homework";
 import Certificates from "./pages/Certificates/Certificates";
 import Rooms from "./pages/Rooms/Rooms";
 import Leads from "./pages/Leads/Leads";
+import Reviews from "./pages/Reviews/Reviews";
 import Login from "./pages/Login/Login";
 
 import { EduAuthProvider, useEduAuth } from "./context/EduAuthContext";
@@ -74,6 +75,7 @@ function ProtectedApp() {
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/leads" element={<Leads />} />
+            <Route path="/reviews" element={<Reviews />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

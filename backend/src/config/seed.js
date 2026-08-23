@@ -1,23 +1,24 @@
+import sequelize from "./database.js";
 import models from "../models/index.js";
 
 const {
-  sequelize,
   Course,
   Teacher,
   Group,
   Student,
-  Payment,
   Attendance,
+  Payment,
   Exam,
   Homework,
   Certificate,
   Room,
   Lead,
+  Review,
 } = models;
 
 export const syncSequences = async () => {
   try {
-    const tables = ["students", "teachers", "courses", "attendance"];
+    const tables = ["students", "teachers", "courses", "attendance", "reviews"];
     for (const t of tables) {
       await sequelize.query(
         `SELECT setval(pg_get_serial_sequence('${t}', 'id'), COALESCE((SELECT MAX(id) FROM ${t}), 1));`
@@ -237,6 +238,42 @@ export const seedDatabase = async () => {
           interested_course: "Frontend ReactJS",
           source: "Instagram Ads",
           status: "Yangi",
+        },
+      ]);
+    }
+
+    const reviewCount = await Review.count();
+    if (reviewCount === 0) {
+      await Review.bulkCreate([
+        {
+          student_name: "Abdulaziz Abdulhayev",
+          teacher_name: "Abdulaziz Abdulhayev",
+          group_name: "F-12 Guruh (ReactJS)",
+          rating: 10,
+          category: "O'qitish sifati",
+          comment: "Darslar a'lo darajada o'tmoqda! Har bir mavzu amaliy loyihalar bilan tushuntiriladi.",
+          status: "Ko'rib chiqildi",
+          date: "2026-08-20",
+        },
+        {
+          student_name: "Diyorbek Toshmatov",
+          teacher_name: "Azizbek Murodov",
+          group_name: "P-04 Guruh (Python)",
+          rating: 9,
+          category: "Dars qiziqarliligi",
+          comment: "Django backend darslari juda foydali, uyga vazifalar o'z vaqtida tekshiriladi.",
+          status: "Ko'rib chiqildi",
+          date: "2026-08-21",
+        },
+        {
+          student_name: "Abdulbosit",
+          teacher_name: "Sardor Rahimov",
+          group_name: "F-12 Guruh (ReactJS)",
+          rating: 10,
+          category: "Xona sharoiti & Jihozlar",
+          comment: "Kompyuterlar tez va zamonaviy, konditsioner va internet doimiy ishlaydi.",
+          status: "Yangi",
+          date: "2026-08-22",
         },
       ]);
     }

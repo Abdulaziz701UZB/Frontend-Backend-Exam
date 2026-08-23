@@ -12,6 +12,7 @@ import {
   HiOutlineDocumentText, 
   HiOutlineBuildingOffice2, 
   HiOutlinePhoneArrowUpRight,
+  HiOutlineStar,
   HiBolt,
   HiXMark,
   HiOutlineArrowRightOnRectangle
@@ -179,6 +180,17 @@ const Sidebar = ({ isOpen, onClose }) => {
           >
             <span className="link-icon"><HiOutlinePhoneArrowUpRight /></span>
             <span className="link-text">10. Lidlar & Sales CRM</span>
+          </NavLink>
+
+          <NavLink
+            to="/reviews"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
+            onClick={onClose}
+          >
+            <span className="link-icon"><HiOutlineStar /></span>
+            <span className="link-text">11. Fikrlar & 1-10 Baholash</span>
           </NavLink>
         </nav>
 
