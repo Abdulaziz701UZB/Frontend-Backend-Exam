@@ -267,7 +267,7 @@ const Groups = () => {
     );
     const teacherGroupsCount = Math.max(1, teacherActiveGroups.length);
 
-    const rawSalary = (teacherObj?.salary || "").replace(/\D/g, "");
+    const rawSalary = String(teacherObj?.salary || "").replace(/\D/g, "");
     const baseSalary = parseFloat(rawSalary) || 6000000;
     const allocatedTeacherSalary = Math.round(baseSalary / teacherGroupsCount);
 

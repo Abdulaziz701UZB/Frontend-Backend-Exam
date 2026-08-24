@@ -810,7 +810,7 @@ const Students = () => {
                       </a>
                       <div className="mt-2">
                         <a
-                          href={`https://t.me/${(selectedDossierStudent.parentPhone || "").replace(/\D/g, "")}`}
+                          href={`https://t.me/${String(selectedDossierStudent.parentPhone || selectedDossierStudent.phone || "").replace(/\D/g, "")}`}
                           target="_blank"
                           rel="noreferrer"
                           className="btn btn-secondary btn-sm"
