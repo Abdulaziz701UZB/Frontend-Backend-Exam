@@ -396,12 +396,7 @@ const Attendance = () => {
                   className="group-select-card"
                   onClick={() => setSelectedGroup(g.id)}
                 >
-                  <div className="flex justify-between items-center">
-                    <h4 className="group-card-name">{g.name}</h4>
-                    <span className="group-open-indicator">
-                      Ochish <HiOutlineChevronRight className="inline-icon-xs" />
-                    </span>
-                  </div>
+                  <h4 className="group-card-name">{g.name}</h4>
                   <span className="group-card-course">{g.courseName}</span>
 
                   <div className="group-card-meta-list">
