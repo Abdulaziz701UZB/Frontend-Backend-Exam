@@ -74,7 +74,7 @@ const Login = () => {
           <div className="login-logo-badge">
             <HiBolt className="login-logo-icon" />
           </div>
-          <h1 className="login-system-title">VELNEX CRM</h1>
+          <h1 className="login-system-title">VELNEX</h1>
           <p className="login-system-subtitle">
             Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting
           </p>
@@ -158,7 +158,7 @@ const Login = () => {
         </form>
 
         <div className="login-footer-info">
-          <span>VELNEX CRM • PostgreSQL & Express REST API</span>
+          <span>VELNEX • PostgreSQL & Express REST API</span>
         </div>
       </div>
     </div>

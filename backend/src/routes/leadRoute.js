@@ -7,7 +7,7 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Leads
- *   description: Lidlar, yangi arizalar va Sales CRM voronkasi
+ *   description: Lidlar va yangi arizalar voronkasi
  */
 
 /**

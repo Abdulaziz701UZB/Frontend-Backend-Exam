@@ -108,7 +108,7 @@ const Leads = () => {
         <div>
           <h1 className="page-title">
             <HiOutlinePhoneArrowUpRight className="title-icon-indigo" />
-            10. Lidlar va Arizalar - Sales CRM
+            Lidlar va Yangi Arizalar Voronkasi
           </h1>
           <p className="page-subtitle">
             Ijtimoiy tarmoqlar va Telegram-botdan tushgan yangi ariza/lidlar

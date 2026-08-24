@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "VELNEX CRM - O'quv Markazini Boshqarish API",
+      title: "VELNEX - O'quv Markazini Boshqarish API",
       version: "1.0.0",
-      description: "VELNEX platformasining barcha 10 ta CRM modullari uchun to'liq interaktiv REST API hujjatlari va PostgreSQL ulanishi.",
+      description: "VELNEX platformasining barcha 10 ta modullari uchun to'liq interaktiv REST API hujjatlari va PostgreSQL ulanishi.",
     },
     servers: [
       {

@@ -20,7 +20,7 @@ app.use("/api", apiRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "VELNEX CRM API Server faol ishlamoqda",
+    message: "VELNEX API Server faol ishlamoqda",
     database: "PostgreSQL (Sequelize ORM) ulangan",
     swaggerDocs: "http://localhost:5000/api-docs",
     modulesCount: 11,

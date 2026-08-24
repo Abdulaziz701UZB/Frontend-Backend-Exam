@@ -1,6 +1,6 @@
-# VELNEX - O'quv Markazini Boshqarish Tizimi (CRM)
+# VELNEX - O'quv Markazini Boshqarish Tizimi
 
-VELNEX — zamonaviy o'quv markazlari faoliyatini to'liq avtomatlashtirish uchun mo'ljallangan kompleks SaaS CRM platformasi.
+VELNEX — zamonaviy o'quv markazlari faoliyatini to'liq avtomatlashtirish uchun mo'ljallangan kompleks SaaS platformasi.
 
 ## Loyiha Texnologiyalari
 
@@ -20,7 +20,7 @@ VELNEX — zamonaviy o'quv markazlari faoliyatini to'liq avtomatlashtirish uchun
 8. **Uyga Vazifalar** — Vazifalar monitoringi
 9. **Sertifikatlar** — QR-kodli bitiruv sertifikatlari
 10. **Xonalar & Inventar** — O'quv xonalari sig'imi va jihozlari
-11. **Lidlar** — Yangi arizalar va mijozlar voronkasi (Sales CRM)
+11. **Lidlar** — Yangi arizalar va mijozlar voronkasi
 
 ## Ishga Tushirish
 
