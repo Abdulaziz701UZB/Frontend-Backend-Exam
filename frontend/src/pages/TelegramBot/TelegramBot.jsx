@@ -260,7 +260,7 @@ const TelegramBot = () => {
           <div className="guide-step-item">
             <div className="step-num">2</div>
             <strong>/newbot buyrug'ini yuboring</strong>
-            <p>Bot nomini va unikal username (masalan: <i>EduControlParent_bot</i>) deb kiriting.</p>
+            <p>Bot nomini va unikal username deb kiriting.</p>
           </div>
           <div className="guide-step-item">
             <div className="step-num">3</div>

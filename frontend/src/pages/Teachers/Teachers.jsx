@@ -318,7 +318,7 @@ const Teachers = () => {
           <input
             type="text"
             className="form-input search-field"
-            placeholder="O'qituvchi ismi, 9 xonali IDsi yoki fani bo'yicha qidiruv..."
+            placeholder=""
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

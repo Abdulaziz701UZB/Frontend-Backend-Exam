@@ -105,7 +105,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
             ref={inputRef}
             type="text"
             className="cmd-input"
-            placeholder="Tezkor qidiruv yoki buyruq..."
+            placeholder=""
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus

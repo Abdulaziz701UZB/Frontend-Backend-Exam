@@ -244,7 +244,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   type="password"
                   className="form-input"
                   required
-                  placeholder="Parolni kiriting"
+                  placeholder=""
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   autoFocus

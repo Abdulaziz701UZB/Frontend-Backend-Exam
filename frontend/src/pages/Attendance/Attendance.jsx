@@ -655,7 +655,7 @@ const Attendance = () => {
                                     <input
                                       type="text"
                                       className="form-input form-input-sm reason-custom-note"
-                                      placeholder="Sabab tafsilotlari..."
+                                      placeholder=""
                                       value={currentRec.note}
                                       disabled={!canMarkAttendance}
                                       onChange={(e) =>
@@ -671,7 +671,7 @@ const Attendance = () => {
                                     <input
                                       type="text"
                                       className="form-input form-input-sm reason-custom-note"
-                                      placeholder="Izoh yozing..."
+                                      placeholder=""
                                       value={currentRec.note}
                                       disabled={!canMarkAttendance}
                                       onChange={(e) =>

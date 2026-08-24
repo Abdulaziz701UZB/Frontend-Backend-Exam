@@ -50,7 +50,7 @@ const Login = () => {
 
     const cleanDigits = phoneDigits.replace(/\D/g, "");
     if (cleanDigits.length < 9) {
-      setLocalError("Iltimos, 9 xonali telefon raqamingizni to'liq kiriting! (masalan: 90 123 45 67)");
+      setLocalError("Iltimos, 9 xonali telefon raqamingizni to'liq kiriting!");
       return;
     }
 
@@ -98,7 +98,7 @@ const Login = () => {
               <input
                 type="tel"
                 className="login-phone-input-field"
-                placeholder="90 123 45 67"
+                placeholder=""
                 value={phoneDigits}
                 onChange={handlePhoneChange}
                 maxLength={12}
@@ -117,7 +117,7 @@ const Login = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 className="login-form-input"
-                placeholder="Parolingizni kiriting"
+                placeholder=""
                 value={password}
                 onChange={(e) => {
                   setLocalError("");

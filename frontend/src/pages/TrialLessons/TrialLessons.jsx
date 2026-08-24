@@ -255,7 +255,7 @@ const TrialLessons = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="Qiziquvchi ismi yoki telefon raqami..."
+                placeholder=""
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />

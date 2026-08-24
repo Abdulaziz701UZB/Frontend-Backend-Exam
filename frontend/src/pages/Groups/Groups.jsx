@@ -367,7 +367,7 @@ const Groups = () => {
           <HiMagnifyingGlass className="search-icon" />
           <input
             type="text"
-            placeholder="Guruh, kurs yoki o'qituvchi bo'yicha qidirish..."
+            placeholder=""
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

@@ -254,7 +254,7 @@ const Reviews = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="O'quvchi, ustoz yoki izoh matni..."
+                placeholder=""
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -517,7 +517,7 @@ const Reviews = () => {
                 <textarea
                   className="form-textarea"
                   rows="3"
-                  placeholder="Dars sifati, ustozning tushuntirishi yoki markaz haqidagi xolis fikringizni yozing..."
+                  placeholder=""
                   value={formData.comment}
                   onChange={(e) =>
                     setFormData({ ...formData, comment: e.target.value })
