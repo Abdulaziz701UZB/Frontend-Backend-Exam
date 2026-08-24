@@ -333,10 +333,72 @@
   color: #64748b;
 }
 
+.dash-groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dash-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  gap: 12px;
+}
+
+.group-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.group-name-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  display: block;
+}
+
+.group-meta-text {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.group-extra-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.group-teacher-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.group-students-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
 .debtors-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .debtor-item {
@@ -347,39 +409,35 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
+  gap: 12px;
 }
 
 .debtor-info {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.debtor-avatar {
-  font-size: 28px;
-}
-
-.debtor-name {
+.debtor-name-title {
   font-size: 14.5px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
-  margin: 0 0 2px;
 }
 
-.debtor-group {
+.debtor-group-text {
   font-size: 12px;
   color: #4f46e5;
   font-weight: 600;
-  margin: 0;
 }
 
-.debtor-phone {
+.debtor-phone-link {
   font-size: 11.5px;
   color: #64748b;
-  margin: 0;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.debt-badge {
+.amount-badge {
   background: #fee2e2;
   color: #b91c1c;
   padding: 6px 12px;
@@ -387,6 +445,7 @@
   font-weight: 800;
   font-size: 13.5px;
   border: 1px solid #fecaca;
+  white-space: nowrap;
 }
 
 .student-personal-grid {

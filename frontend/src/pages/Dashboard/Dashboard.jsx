@@ -271,15 +271,15 @@ const Dashboard = () => {
             {groups.slice(0, 4).map((g) => (
               <div key={g.id} className="dash-group-item">
                 <div className="group-info-col">
-                  <span className="group-name">{g.name}</span>
-                  <span className="group-meta">
+                  <span className="group-name-title">{g.name}</span>
+                  <span className="group-meta-text">
                     {g.courseName} • {g.scheduleDays}
                   </span>
                 </div>
                 <div className="group-extra-col">
-                  <span className="group-teacher">{g.teacherName}</span>
+                  <span className="group-teacher-name">{g.teacherName}</span>
                   <span className="group-students-badge">
-                    <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 2 }} /> {g.currentStudents}/{g.maxStudents}
+                    <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 3 }} /> {g.currentStudents || g.current_students || 12}/{g.maxStudents || g.max_students || 15}
                   </span>
                 </div>
               </div>
@@ -303,13 +303,13 @@ const Dashboard = () => {
               overdueDebtors.slice(0, 4).map((d) => (
                 <div key={d.id} className="debtor-item">
                   <div className="debtor-info">
-                    <span className="debtor-name">{d.fullName}</span>
-                    <span className="debtor-group">
-                      {d.groupName} •{" "}
-                      <a href={`tel:${d.phone}`} className="phone-link">
-                        <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {d.phone}
-                      </a>
+                    <span className="debtor-name-title">{d.fullName}</span>
+                    <span className="debtor-group-text">
+                      {d.groupName}
                     </span>
+                    <a href={`tel:${d.phone}`} className="debtor-phone-link">
+                      <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 3 }} /> {d.phone}
+                    </a>
                   </div>
                   <div className="debtor-amount">
                     <span className="amount-badge">

@@ -403,9 +403,6 @@ const TelegramBot = () => {
             />
             Ommaviy Xabarnoma Yuborish (Broadcast)
           </h3>
-          <p className="text-muted text-sm mb-4">
-            Qaysi bot auditoriyasiga e'lon yuborishni tanlang:
-          </p>
 
           <form onSubmit={handleSendBroadcast}>
             <div className="form-group">
@@ -437,7 +434,7 @@ const TelegramBot = () => {
 
             <button
               type="submit"
-              className="btn btn-primary btn-lg"
+              className="btn btn-primary btn-lg btn-block-mobile"
               disabled={isSending}
             >
               <HiOutlinePaperAirplane />
@@ -456,7 +453,7 @@ const TelegramBot = () => {
         </h3>
         <div
           className="telegram-logs-wrap"
-          style={{ maxHeight: 240, overflowY: "auto" }}
+          style={{ maxHeight: 280, overflowY: "auto" }}
         >
           {logs.map((log) => {
             const tagClass =
@@ -470,16 +467,15 @@ const TelegramBot = () => {
 
             return (
               <div key={log.id} className="telegram-log-item">
-                <div>
-                  <span
-                    className={`log-type-tag ${tagClass}`}
-                    style={{ marginRight: 8 }}
-                  >
+                <div className="log-top-row">
+                  <span className={`log-type-tag ${tagClass}`}>
                     {log.bot || "Bot"}: {log.type}
                   </span>
+                  <span className="log-date-text">{log.date}</span>
+                </div>
+                <div className="log-message-body">
                   <strong>{log.text}</strong>
                 </div>
-                <span className="text-xs text-muted">{log.date}</span>
               </div>
             );
           })}
