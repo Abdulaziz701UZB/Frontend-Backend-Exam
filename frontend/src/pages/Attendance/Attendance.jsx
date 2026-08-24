@@ -400,7 +400,7 @@ const Attendance = () => {
               Davomat yoki Baholarni kiritish uchun guruhni tanlang:
             </span>
             <span className="text-xs text-muted">
-              Jami: <strong>{accessibleGroups.length} ta guruh</strong> {currentRole === "teacher" ? `(Ustoz: ${user?.name || "Siz"})` : "(Barcha guruhlar)"}
+              Jami: <strong>{accessibleGroups.length} ta faol guruh</strong>
             </span>
           </div>
 
