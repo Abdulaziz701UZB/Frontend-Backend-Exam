@@ -45,7 +45,7 @@ const Teachers = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    phone: "+998 90 599 06 00",
+    phone: "",
     subject: "Frontend ReactJS",
     salary: 10000000,
     experience: "3 yil",
@@ -130,7 +130,7 @@ const Teachers = () => {
     setEditingTeacher(null);
     setFormData({
       name: "",
-      phone: "+998 90 599 06 00",
+      phone: "",
       subject: "Frontend ReactJS",
       salary: 10000000,
       experience: "3 yil",
@@ -613,7 +613,7 @@ const Teachers = () => {
                   type="text"
                   required
                   className="form-input"
-                  placeholder="masalan: Azizbek Murodov"
+                  placeholder=""
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
@@ -627,7 +627,7 @@ const Teachers = () => {
                   type="text"
                   required
                   className="form-input"
-                  placeholder="+998 90 123 45 67"
+                  placeholder=""
                   value={formData.phone}
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })

@@ -517,7 +517,7 @@ const Rooms = () => {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="masalan: 301-xona (Frontend Lab)"
+                  placeholder=""
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })

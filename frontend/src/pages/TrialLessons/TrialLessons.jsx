@@ -44,7 +44,7 @@ const TrialLessons = () => {
 
   const [formData, setFormData] = useState({
     studentName: "",
-    phone: "+998 90 ",
+    phone: "",
     teacherName: "",
     courseName: "",
     date: new Date().toISOString().split("T")[0],
@@ -413,7 +413,7 @@ const TrialLessons = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="masalan: Otabek Mahmudov"
+                    placeholder=""
                     value={formData.studentName}
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
@@ -427,6 +427,7 @@ const TrialLessons = () => {
                   <input
                     type="text"
                     className="form-input"
+                    placeholder=""
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
@@ -491,7 +492,7 @@ const TrialLessons = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="14:00 - 15:30"
+                    placeholder=""
                     value={formData.time}
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
@@ -542,7 +543,7 @@ const TrialLessons = () => {
                 <textarea
                   className="form-textarea"
                   rows="2"
-                  placeholder="Qiziquvchining bilim darajasi, talablari yoki darsdan keyingi xulosalari..."
+                  placeholder=""
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData({ ...formData, notes: e.target.value })

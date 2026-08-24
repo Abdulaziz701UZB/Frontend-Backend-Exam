@@ -671,7 +671,7 @@ const Attendance = () => {
                                     <input
                                       type="text"
                                       className="form-input form-input-sm reason-custom-note"
-                                      placeholder="Izoh (masalan: Telefoni o'chiq)..."
+                                      placeholder="Izoh yozing..."
                                       value={currentRec.note}
                                       disabled={!canMarkAttendance}
                                       onChange={(e) =>

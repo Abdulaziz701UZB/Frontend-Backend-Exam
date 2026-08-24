@@ -128,10 +128,10 @@ const Students = () => {
       setEditingStudent(null);
       setFormData({
         fullName: "",
-        phone: "+998 90 599 06 00",
-        parentPhone: "+998 90 599 06 00",
+        phone: "",
+        parentPhone: "",
         groupId: groups[0]?.id || "G-101",
-        birthDate: "2006-10-12",
+        birthDate: "",
         paymentStatus: "Paid",
         balance: 0,
         status: "Active",
@@ -155,7 +155,7 @@ const Students = () => {
           phone: s.phone,
           parentPhone: s.parentPhone,
           groupId: s.groupId,
-          birthDate: s.birthDate || "2006-10-12",
+          birthDate: s.birthDate || "",
           paymentStatus: s.paymentStatus,
           balance: s.balance,
           status: s.status,
@@ -169,10 +169,10 @@ const Students = () => {
     setEditingStudent(null);
     setFormData({
       fullName: "",
-      phone: "+998 90 599 06 00",
-      parentPhone: "+998 90 599 06 00",
+      phone: "",
+      parentPhone: "",
       groupId: groups[0]?.id || "G-101",
-      birthDate: "2006-10-12",
+      birthDate: "",
       paymentStatus: "Paid",
       balance: 0,
       status: "Active",
@@ -417,7 +417,7 @@ const Students = () => {
             <input
               type="text"
               className="filter-input-field"
-              placeholder="1. Ism bo'yicha qidirish..."
+              placeholder=""
               value={searchInputs.name}
               onChange={(e) =>
                 setSearchInputs({ ...searchInputs, name: e.target.value })
@@ -434,10 +434,10 @@ const Students = () => {
                 setSearchInputs({ ...searchInputs, group: e.target.value })
               }
             >
-              <option value="All">2. Barcha Guruhlar</option>
+              <option value="All">Barcha Guruhlar</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name} ({g.courseName})
+                  {g.name}
                 </option>
               ))}
             </select>
@@ -448,7 +448,7 @@ const Students = () => {
             <input
               type="text"
               className="filter-input-field"
-              placeholder="3. Oxirgi 4 ta raqam / Tel..."
+              placeholder=""
               value={searchInputs.phone}
               onChange={(e) =>
                 setSearchInputs({ ...searchInputs, phone: e.target.value })
@@ -982,7 +982,7 @@ const Students = () => {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="masalan: Dars vaqti to'g'ri kelmaganligi sababli kechki guruhga o'tkazildi"
+                  placeholder=""
                   value={transferReason}
                   onChange={(e) => setTransferReason(e.target.value)}
                   required
@@ -1033,7 +1033,7 @@ const Students = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="masalan: Abdulaziz Abdulhayev"
+                    placeholder=""
                     value={formData.fullName}
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
@@ -1047,7 +1047,7 @@ const Students = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="+998 90 123 45 67"
+                    placeholder=""
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
@@ -1063,7 +1063,7 @@ const Students = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="+998 90 987 65 43"
+                    placeholder=""
                     value={formData.parentPhone}
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
@@ -1072,7 +1072,7 @@ const Students = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Tug'ilgan Sanasi (9):</label>
+                  <label className="form-label">Tug'ilgan Sanasi:</label>
                   <input
                     type="date"
                     className="form-input"

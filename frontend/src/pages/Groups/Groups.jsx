@@ -824,7 +824,7 @@ const Groups = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="masalan: F-14 Guruhi (Frontend)"
+                    placeholder=""
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })

@@ -102,9 +102,10 @@ const CommandPalette = ({ isOpen, onClose }) => {
         <div className="cmd-input-wrap">
           <span className="cmd-search-icon"><HiMagnifyingGlass /></span>
           <input
+            ref={inputRef}
             type="text"
             className="cmd-input"
-            placeholder="Tezkor qidiruv yoki buyruq (Masalan: Abdulaziz, F-12, To'lov)..."
+            placeholder="Tezkor qidiruv yoki buyruq..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus

@@ -177,7 +177,7 @@ const TelegramBot = () => {
             <input
               type="text"
               className="form-input"
-              placeholder="masalan: 7891234567:AAF..."
+              placeholder=""
               value={bot.token || ""}
               onChange={(e) =>
                 handleBotFieldChange(botKey, "token", e.target.value)
@@ -193,7 +193,7 @@ const TelegramBot = () => {
             <input
               type="text"
               className="form-input"
-              placeholder="@EduControl...Bot"
+              placeholder=""
               value={bot.username || ""}
               onChange={(e) =>
                 handleBotFieldChange(botKey, "username", e.target.value)
@@ -301,7 +301,7 @@ const TelegramBot = () => {
             <input
               type="text"
               className="form-input"
-              placeholder="masalan: 123456789"
+              placeholder=""
               value={botsConfig.adminBot?.adminChatId || ""}
               onChange={(e) =>
                 handleBotFieldChange("adminBot", "adminChatId", e.target.value)
@@ -416,7 +416,7 @@ const TelegramBot = () => {
               <textarea
                 className="form-textarea"
                 rows="3"
-                placeholder="E'lon matnini kiriting... masalan: Hurmatli ota-onalar va o'quvchilar, ertaga markazimizda ochiq darslar kuni bo'lib o'tadi!"
+                placeholder=""
                 value={broadcastText}
                 onChange={(e) => setBroadcastText(e.target.value)}
                 required
