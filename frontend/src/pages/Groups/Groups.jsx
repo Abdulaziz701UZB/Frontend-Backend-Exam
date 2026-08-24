@@ -36,6 +36,7 @@ const Groups = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
   const [allowConflictSave, setAllowConflictSave] = useState(false);
+  const [highlightConflictShake, setHighlightConflictShake] = useState(false);
 
   const [formData, setFormData] = useState({
     courseId: 1,
@@ -155,8 +156,10 @@ const Groups = () => {
     e.preventDefault();
 
     if (activeConflicts && !allowConflictSave) {
-      toast.warning(
-        "Diqqat! Xona yoki o'qituvchi dars jadvalida to'qnashuv aniqlandi. Iltimos, xona yoki vaqtni o'zgartiring!",
+      setHighlightConflictShake(true);
+      setTimeout(() => setHighlightConflictShake(false), 900);
+      toast.error(
+        "Diqqat! Dars jadvali to'qnashuvi aniqlandi. Saqlash uchun 'Admin Override' tasdiqlash katakchasini belgilang!",
       );
       return;
     }
@@ -533,7 +536,7 @@ const Groups = () => {
               </div>
 
               {activeConflicts && (
-                <div className="conflict-alert-box">
+                <div className={`conflict-alert-box ${highlightConflictShake ? "conflict-alert-highlight" : ""}`}>
                   <div className="conflict-alert-header">
                     <HiOutlineExclamationTriangle className="conflict-alert-icon" />
                     <span>Dars Jadvali To'qnashuvi Aniqlandi!</span>
@@ -547,7 +550,10 @@ const Groups = () => {
                     <input
                       type="checkbox"
                       checked={allowConflictSave}
-                      onChange={(e) => setAllowConflictSave(e.target.checked)}
+                      onChange={(e) => {
+                        setAllowConflictSave(e.target.checked);
+                        if (e.target.checked) setHighlightConflictShake(false);
+                      }}
                     />
                     <span>Ogohlantirishga qaramay saqlashga ruxsat berish (Admin Override)</span>
                   </label>
@@ -562,7 +568,10 @@ const Groups = () => {
                 >
                   Bekor qilish
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button
+                  type="submit"
+                  className={`btn ${activeConflicts ? "btn-danger-action" : "btn-primary"}`}
+                >
                   {editingGroup ? "Guruhni Yangilash" : "Guruhni Yaratish"}
                 </button>
               </div>

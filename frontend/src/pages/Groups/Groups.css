@@ -193,53 +193,89 @@
 }
 
 .conflict-alert-box {
-  background: #fef2f2;
-  border: 1.5px solid #f87171;
-  border-radius: 14px;
-  padding: 16px;
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+  border: 1.5px solid #f43f5e;
+  border-radius: 16px;
+  padding: 16px 20px;
   margin-bottom: 20px;
+  transition: all 0.3s ease;
   animation: fadeIn 0.2s ease;
+}
+
+.conflict-alert-highlight {
+  border-color: #e11d48 !important;
+  box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.35), 0 8px 24px rgba(225, 29, 72, 0.25) !important;
+  animation: alertShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes alertShake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(3px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
 }
 
 .conflict-alert-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #b91c1c;
+  color: #9f1239;
   font-size: 14.5px;
   font-weight: 800;
   margin-bottom: 8px;
 }
 
 .conflict-alert-icon {
-  font-size: 18px;
+  font-size: 20px;
+  color: #e11d48;
 }
 
 .conflict-list {
   margin: 0 0 12px;
   padding-left: 20px;
-  color: #991b1b;
-  font-size: 13px;
+  color: #881337;
+  font-size: 13.5px;
   line-height: 1.5;
+  font-weight: 500;
 }
 
 .conflict-override-checkbox {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
-  color: #7f1d1d;
+  color: #881337;
   cursor: pointer;
-  background: #fee2e2;
-  padding: 8px 12px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #fca5a5;
+  padding: 10px 14px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.conflict-override-checkbox:hover {
+  background: #ffffff;
 }
 
 .conflict-override-checkbox input {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
+  accent-color: #e11d48;
   cursor: pointer;
+}
+
+.btn-danger-action {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+  border-color: #e11d48 !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35) !important;
+}
+
+.btn-danger-action:hover {
+  background: #be123c !important;
+  border-color: #be123c !important;
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45) !important;
 }
 
 @media (max-width: 768px) {
