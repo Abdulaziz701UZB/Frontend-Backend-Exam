@@ -19,9 +19,11 @@ import {
   HiOutlineArrowTrendingUp,
   HiOutlineChartBar,
   HiOutlineMapPin,
-  HiOutlineUserGroup
+  HiOutlineUserGroup,
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineShare
 } from "react-icons/hi2";
-import { FaChalkboardUser } from "react-icons/fa6";
+import { FaChalkboardUser, FaUserGraduate } from "react-icons/fa6";
 import "./Teachers.css";
 
 const Teachers = () => {
@@ -159,74 +161,133 @@ const Teachers = () => {
 
   const closeDetailModal = () => {
     setSelectedTeacherDetail(null);
-    if (urlParamId) {
-      navigate("/teachers");
-    }
+    navigate("/teachers");
   };
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    const payload = {
-      name: formData.name,
-      phone: formData.phone,
-      subject: formData.subject,
-      salary: parseFloat(formData.salary || 0),
-      experience: formData.experience,
-      avatar: formData.avatar,
-    };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingTeacher(null);
+  };
 
+  const handleCopyTeacherLink = (teacherId) => {
+    const formattedId = format9DigitId(teacherId, "teacher");
+    const fullUrl = `${window.location.origin}/teachers/${formattedId}`;
+    navigator.clipboard?.writeText(fullUrl);
+    toast.success(`Ustoz profili havolasi nusxalandi: #${formattedId}`);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
       if (editingTeacher) {
-        await teachersApi.update(editingTeacher.id, payload);
-        toast.success(`"${formData.name}" ma'lumotlari yangilandi!`);
+        await teachersApi.update(editingTeacher.id, formData);
+        toast.success("O'qituvchi ma'lumotlari muvaffaqiyatli yangilandi!");
       } else {
-        await teachersApi.create(payload);
-        toast.success(`Yangi o'qituvchi "${formData.name}" qo'shildi!`);
+        await teachersApi.create(formData);
+        toast.success("Yangi o'qituvchi muvaffaqiyatli qo'shildi!");
       }
-      await loadData();
-      setIsModalOpen(false);
+      closeModal();
+      loadData();
     } catch (err) {
-      toast.error("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
+      console.error("Save teacher error:", err.message);
+      toast.error(
+        "Saqlashda xatolik: " + (err.response?.data?.error || err.message),
+      );
     }
   };
 
   const handleDelete = async (id, name, e) => {
     if (e) e.stopPropagation();
-    if (window.confirm(`Haqiqatan ham "${name}" o'qituvchisini o'chirmoqchisiz?`)) {
+    if (
+      window.confirm(
+        `Haqiqatan ham "${name}" o'qituvchisini tizimdan o'chirmoqchimisiz?`,
+      )
+    ) {
       try {
         await teachersApi.delete(id);
-        toast.success(`"${name}" muvaffaqiyatli o'chirildi!`);
-        await loadData();
+        toast.success(`"${name}" o'qituvchisi tizimdan o'chirildi!`);
+        if (selectedTeacherDetail?.id === id) {
+          closeDetailModal();
+        }
+        loadData();
       } catch (err) {
-        toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+        console.error("Delete teacher error:", err.message);
+        toast.error("O'chirishda xatolik yuz berdi");
       }
     }
   };
 
-  const filtered = teachers.filter(
-    (t) =>
-      (t.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.subject || "").toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const formatMoney = (val) => {
+    return new Intl.NumberFormat("uz-UZ").format(val) + " so'm";
+  };
 
-  const formatMoney = (val) =>
-    new Intl.NumberFormat("uz-UZ").format(val || 0) + " so'm";
+  const filtered = teachers.filter((t) => {
+    const term = searchTerm.toLowerCase().trim();
+    const formattedId = format9DigitId(t.id, "teacher");
+    return (
+      (t.name || "").toLowerCase().includes(term) ||
+      (t.subject || "").toLowerCase().includes(term) ||
+      (t.phone || "").includes(term) ||
+      formattedId.includes(term)
+    );
+  });
 
   const getTeacherAnalytics = (teacher) => {
-    if (!teacher) return null;
-    const teacherGroups = groups.filter((g) => parseInt(g.teacherId) === teacher.id && g.status === "Active");
-    const totalStudentsTaught = teacherGroups.reduce((acc, g) => acc + students.filter((s) => s.groupId === g.id).length, 0);
-    const totalRevenueGenerated = teacherGroups.reduce((acc, g) => {
-      const gStudents = students.filter((s) => s.groupId === g.id).length;
-      return acc + (gStudents * (g.monthlyFee || 0));
-    }, 0);
-    const netCenterProfit = totalRevenueGenerated - (teacher.salary || 0);
+    const teacherGroups = groups.filter(
+      (g) =>
+        (g.teacherName || "").toLowerCase().includes((teacher.name || "").toLowerCase()) ||
+        (teacher.name || "").toLowerCase().includes((g.teacherName || "").toLowerCase())
+    );
+
+    let totalStudentsTaught = 0;
+    let totalRevenueGenerated = 0;
+
+    teacherGroups.forEach((g) => {
+      const gStudents = students.filter((s) => s.groupId === g.id);
+      totalStudentsTaught += gStudents.length;
+      totalRevenueGenerated += gStudents.length * (g.price || 850000);
+    });
+
+    const netCenterProfit = totalRevenueGenerated - (teacher.salary || 10000000);
+
+    const timeSlots = [
+      "06:00 - 08:00",
+      "08:00 - 10:00",
+      "10:00 - 12:00",
+      "14:00 - 16:00",
+      "16:00 - 18:00",
+      "18:00 - 20:00",
+      "20:00 - 22:00",
+    ];
+
+    const scheduleMatrix = timeSlots.map((slot) => {
+      const oddDayGroup = teacherGroups.find(
+        (g) =>
+          g.scheduleTime === slot &&
+          (g.scheduleDays || "").includes("Dush"),
+      );
+      const evenDayGroup = teacherGroups.find(
+        (g) =>
+          g.scheduleTime === slot &&
+          (g.scheduleDays || "").includes("Sesh"),
+      );
+      return {
+        timeSlot: slot,
+        oddDayGroup: oddDayGroup
+          ? `${oddDayGroup.name} (${oddDayGroup.room})`
+          : "Bo'sh",
+        evenDayGroup: evenDayGroup
+          ? `${evenDayGroup.name} (${evenDayGroup.room})`
+          : "Bo'sh",
+      };
+    });
 
     return {
       teacherGroups,
       totalStudentsTaught,
       totalRevenueGenerated,
       netCenterProfit,
+      scheduleMatrix,
     };
   };
 
@@ -238,10 +299,10 @@ const Teachers = () => {
         <div>
           <h1 className="page-title">
             <FaChalkboardUser className="title-icon-indigo" />
-            5. O'qituvchilar va Xodimlar Boshqaruvi
+            O'qituvchilar va Xodimlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            O'quv markazining barcha o'qituvchilari, 9 xonali identifikatorlar, maosh kalkulyatori va shaxsiy dars jadvallari
+            O'quv markazining barcha o'qituvchilari, 9 xonali identifikatorlar (#300000101), maosh kalkulyatori va shaxsiy dars jadvallari
           </p>
         </div>
         {canManageGroups && (
@@ -257,7 +318,7 @@ const Teachers = () => {
           <input
             type="text"
             className="form-input search-field"
-            placeholder="O'qituvchi ismi yoki fani bo'yicha qidiruv..."
+            placeholder="O'qituvchi ismi, 9 xonali IDsi yoki fani bo'yicha qidiruv..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -270,11 +331,12 @@ const Teachers = () => {
             <thead>
               <tr>
                 <th>9 Xonali ID</th>
-                <th>O'qituvchi F.I.SH (Tahlil uchun bosing)</th>
+                <th>O'qituvchi F.I.SH</th>
                 <th>Mutaxassisligi / Fani</th>
                 <th>Telefon</th>
                 <th>Tajribasi</th>
                 <th>Oylik Maosh Stavkasi</th>
+                <th className="text-center">Profil Ko'rish</th>
                 {canManageGroups && <th className="text-center">Harakatlar</th>}
               </tr>
             </thead>
@@ -309,6 +371,15 @@ const Teachers = () => {
                     <strong className="text-emerald">
                       {formatMoney(t.salary)}
                     </strong>
+                  </td>
+                  <td className="text-center">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={(e) => openDetailModal(t, e)}
+                    >
+                      <FaChalkboardUser /> Profil Ko'rish
+                    </button>
                   </td>
                   {canManageGroups && (
                     <td className="text-center" onClick={(e) => e.stopPropagation()}>
@@ -345,7 +416,7 @@ const Teachers = () => {
               <div>
                 <h2>
                   <FaChalkboardUser className="title-icon-indigo" />
-                  {selectedTeacherDetail.name} — O'qituvchi KPI & Jadvallari
+                  {selectedTeacherDetail.name} — O'qituvchi Profili & KPI
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
                   O'qituvchi 9 Xonali ID: <strong>#{format9DigitId(selectedTeacherDetail.id, "teacher")}</strong> | Fani: <strong>{selectedTeacherDetail.subject}</strong>
@@ -360,15 +431,43 @@ const Teachers = () => {
               </button>
             </div>
 
+            <div className="teacher-dossier-hero">
+              <div className="teacher-hero-left">
+                <div className="teacher-hero-avatar">
+                  <FaChalkboardUser />
+                </div>
+                <div>
+                  <h3 className="teacher-hero-title">{selectedTeacherDetail.name}</h3>
+                  <div className="teacher-hero-meta">
+                    <span className="id-pill">#{format9DigitId(selectedTeacherDetail.id, "teacher")}</span>
+                    <span><HiOutlinePhone className="inline-icon-xs" /> {selectedTeacherDetail.phone}</span>
+                    <span><HiOutlineAcademicCap className="inline-icon-xs" /> {selectedTeacherDetail.subject}</span>
+                    <span>Tajriba: <strong>{selectedTeacherDetail.experience}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="share-link-box">
+                <span>Havola: /teachers/{format9DigitId(selectedTeacherDetail.id, "teacher")}</span>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-xs"
+                  onClick={() => handleCopyTeacherLink(selectedTeacherDetail.id)}
+                >
+                  <HiOutlineShare /> Nusxalash
+                </button>
+              </div>
+            </div>
+
             <div className="teacher-kpi-grid-4">
               <div className="teacher-kpi-card">
                 <div className="kpi-icon-wrap kpi-purple">
                   <HiOutlineBanknotes />
                 </div>
                 <div className="kpi-content">
-                  <span className="kpi-label">13. Oylik Maoshi</span>
+                  <span className="kpi-label">Oylik Maoshi</span>
                   <strong className="kpi-value">{formatMoney(selectedTeacherDetail.salary)}</strong>
-                  <span className="kpi-subtext">Belgilangan oylik stavka</span>
+                  <span className="kpi-subtext">Belgilangan stavka</span>
                 </div>
               </div>
 
@@ -377,7 +476,7 @@ const Teachers = () => {
                   <HiOutlineAcademicCap />
                 </div>
                 <div className="kpi-content">
-                  <span className="kpi-label">14. Faol Guruhlari</span>
+                  <span className="kpi-label">Faol Guruhlari</span>
                   <strong className="kpi-value">{teacherStats.teacherGroups.length} ta guruh</strong>
                   <span className="kpi-subtext">Jami {teacherStats.totalStudentsTaught} nafar o'quvchi</span>
                 </div>
@@ -408,7 +507,7 @@ const Teachers = () => {
 
             <h4 className="section-title text-sm mb-3">
               <HiOutlineAcademicCap className="inline-icon-xs text-indigo" />
-              14. O'qituvchi Boshqarayotgan Faol Guruhlar
+              O'qituvchi Boshqarayotgan Faol Guruhlar
             </h4>
 
             <div className="teacher-groups-list">
@@ -440,7 +539,7 @@ const Teachers = () => {
 
             <h4 className="section-title text-sm mb-3">
               <HiOutlineCalendarDays className="inline-icon-xs text-indigo" />
-              17. O'qituvchining Haftalik Dars Jadvali Matritsasi
+              Haftalik Dars Jadvali Matritsasi (06:00 - 22:00)
             </h4>
 
             <div className="teacher-schedule-matrix-wrap">
@@ -448,180 +547,155 @@ const Teachers = () => {
                 <table className="dash-table">
                   <thead>
                     <tr>
-                      <th>Dars Vaqti</th>
+                      <th>Vaqt Oralig'i</th>
                       <th>Dushanba - Chorshanba - Juma</th>
                       <th>Seshanba - Payshanba - Shanba</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      "06:00 - 08:00",
-                      "08:00 - 10:00",
-                      "10:00 - 12:00",
-                      "14:00 - 16:00",
-                      "16:00 - 18:00",
-                      "18:00 - 20:00",
-                      "20:00 - 22:00"
-                    ].map((timeSlot) => {
-                      const toqGroup = teacherStats.teacherGroups.find(
-                        (g) => (g.scheduleDays || "").includes("Dushanba") && g.scheduleTime === timeSlot
-                      );
-                      const juftGroup = teacherStats.teacherGroups.find(
-                        (g) => (g.scheduleDays || "").includes("Seshanba") && g.scheduleTime === timeSlot
-                      );
-
-                      return (
-                        <tr key={timeSlot}>
-                          <td><strong>{timeSlot}</strong></td>
-                          <td>
-                            {toqGroup ? (
-                              <span className="status-pill pill-paid">
-                                {toqGroup.name} ({toqGroup.room})
-                              </span>
-                            ) : (
-                              <span className="text-muted text-xs">Bo'sh</span>
-                            )}
-                          </td>
-                          <td>
-                            {juftGroup ? (
-                              <span className="status-pill pill-paid">
-                                {juftGroup.name} ({juftGroup.room})
-                              </span>
-                            ) : (
-                              <span className="text-muted text-xs">Bo'sh</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {teacherStats.scheduleMatrix.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <strong>{item.timeSlot}</strong>
+                        </td>
+                        <td>
+                          <span
+                            className={`schedule-slot-pill ${
+                              item.oddDayGroup !== "Bo'sh" ? "occupied" : "empty"
+                            }`}
+                          >
+                            {item.oddDayGroup}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`schedule-slot-pill ${
+                              item.evenDayGroup !== "Bo'sh" ? "occupied" : "empty"
+                            }`}
+                          >
+                            {item.evenDayGroup}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            <div className="modal-actions-flex">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={closeDetailModal}
-              >
-                Yopish
-              </button>
             </div>
           </div>
         </div>
       )}
 
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={closeModal}>
+          <div
+            className="modal-content card admin-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>
-                {editingTeacher
-                  ? "O'qituvchi Ma'lumotlarini Tahrirlash"
-                  : "Yangi O'qituvchi Qo'shish"}
+                <FaChalkboardUser className="title-icon-indigo" />
+                {editingTeacher ? "O'qituvchi Ma'lumotlarini Tahrirlash" : "Yangi O'qituvchi Qo'shish"}
               </h2>
               <button
-                type="button"
-                className="modal-close-btn"
-                onClick={() => setIsModalOpen(false)}
+                className="close-modal-btn"
+                onClick={closeModal}
                 aria-label="Yopish"
               >
                 <HiXMark />
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="admin-modal-form">
+            <form onSubmit={handleSubmit} className="admin-form">
               <div className="form-group">
                 <label className="form-label">O'qituvchi F.I.SH:</label>
                 <input
                   type="text"
+                  required
                   className="form-input"
-                  placeholder="masalan: Abdulbosit Abdumannonov"
+                  placeholder="masalan: Azizbek Murodov"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  required
                 />
               </div>
 
-              <div className="admin-form-grid">
-                <div className="form-group">
-                  <label className="form-label">Telefon Raqami:</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="+998 90 123 45 67"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Mutaxassisligi / Fani:</label>
-                  <select
-                    className="form-select"
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                  >
-                    {subjectOptions.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Telefon Raqami:</label>
+                <input
+                  type="text"
+                  required
+                  className="form-input"
+                  placeholder="+998 90 123 45 67"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                />
               </div>
 
-              <div className="admin-form-grid">
-                <div className="form-group">
-                  <label className="form-label">O'qituvchilik Tajribasi:</label>
-                  <select
-                    className="form-select"
-                    value={formData.experience}
-                    onChange={(e) =>
-                      setFormData({ ...formData, experience: e.target.value })
-                    }
-                  >
-                    {experienceOptions.map((exp) => (
-                      <option key={exp} value={exp}>
-                        {exp}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Mutaxassisligi / Asosiy Fani:</label>
+                <select
+                  className="form-select"
+                  value={formData.subject}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subject: e.target.value })
+                  }
+                >
+                  {subjectOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                <div className="form-group">
-                  <label className="form-label">Oylik Maosh Stavkasi:</label>
-                  <select
-                    className="form-select"
-                    value={formData.salary}
-                    onChange={(e) =>
-                      setFormData({ ...formData, salary: e.target.value })
-                    }
-                  >
-                    {salaryOptions.map((sal) => (
-                      <option key={sal.value} value={sal.value}>
-                        {sal.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Tajribasi:</label>
+                <select
+                  className="form-select"
+                  value={formData.experience}
+                  onChange={(e) =>
+                    setFormData({ ...formData, experience: e.target.value })
+                  }
+                >
+                  {experienceOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Oylik Maosh Stavkasi:</label>
+                <select
+                  className="form-select"
+                  value={formData.salary}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      salary: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                >
+                  {salaryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="admin-modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeModal}
                 >
-                  Bekor qilish
+                  Bekor Qilish
                 </button>
                 <button type="submit" className="btn btn-primary">
                   {editingTeacher ? "Saqlash" : "Qo'shish"}
