@@ -13,11 +13,12 @@ import {
   HiOutlineBuildingOffice2, 
   HiOutlinePhoneArrowUpRight,
   HiOutlineStar,
+  HiOutlineSparkles,
   HiBolt,
   HiXMark,
   HiOutlineArrowRightOnRectangle
 } from "react-icons/hi2";
-import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
+import { FaCrown, FaChalkboardUser, FaGraduationCap, FaTelegram } from "react-icons/fa6";
 import "./Sidebar.css";
 
 const Sidebar = ({ isOpen, onClose }) => {
