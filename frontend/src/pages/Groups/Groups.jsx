@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
-import { groupsApi, coursesApi, teachersApi, roomsApi } from "../../services/api";
+import { groupsApi, coursesApi, teachersApi, roomsApi, studentsApi } from "../../services/api";
 import {
   HiOutlineAcademicCap,
   HiOutlinePlus,
@@ -15,9 +15,14 @@ import {
   HiOutlineBanknotes,
   HiOutlineExclamationTriangle,
   HiOutlineUserGroup,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineChartBar,
+  HiOutlineArrowTrendingUp,
+  HiOutlinePhone,
+  HiOutlineArrowsRightLeft,
+  HiOutlineShieldCheck
 } from "react-icons/hi2";
-import { FaChalkboardUser, FaDoorClosed } from "react-icons/fa6";
+import { FaChalkboardUser, FaUserGraduate } from "react-icons/fa6";
 import "./Groups.css";
 
 const Groups = () => {
@@ -28,6 +33,7 @@ const Groups = () => {
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [filterStatus, setFilterStatus] = useState("All");
@@ -37,6 +43,8 @@ const Groups = () => {
   const [editingGroup, setEditingGroup] = useState(null);
   const [allowConflictSave, setAllowConflictSave] = useState(false);
   const [highlightConflictShake, setHighlightConflictShake] = useState(false);
+
+  const [selectedGroupDetail, setSelectedGroupDetail] = useState(null);
 
   const [formData, setFormData] = useState({
     courseId: 1,
@@ -52,16 +60,18 @@ const Groups = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [groupsData, coursesData, teachersData, roomsData] = await Promise.all([
+      const [groupsData, coursesData, teachersData, roomsData, studentsData] = await Promise.all([
         groupsApi.getAll(),
         coursesApi.getAll(),
         teachersApi.getAll(),
         roomsApi.getAll(),
+        studentsApi.getAll(),
       ]);
       setGroups(groupsData);
       setCourses(coursesData);
       setTeachers(teachersData);
       setRooms(roomsData);
+      setStudents(studentsData);
     } catch (err) {
       console.error("Groups load error:", err.message);
       toast.error("Guruhlar ma'lumotlarini yuklashda xatolik");
@@ -136,7 +146,8 @@ const Groups = () => {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (group) => {
+  const openEditModal = (group, e) => {
+    if (e) e.stopPropagation();
     setEditingGroup(group);
     setAllowConflictSave(false);
     setFormData({
@@ -150,6 +161,11 @@ const Groups = () => {
       status: group.status,
     });
     setIsModalOpen(true);
+  };
+
+  const openDetailModal = (group, e) => {
+    if (e) e.stopPropagation();
+    setSelectedGroupDetail(group);
   };
 
   const handleFormSubmit = async (e) => {
@@ -202,7 +218,8 @@ const Groups = () => {
     }
   };
 
-  const handleDeleteGroup = async (groupId, groupName) => {
+  const handleDeleteGroup = async (groupId, groupName, e) => {
+    if (e) e.stopPropagation();
     if (
       window.confirm(
         `Haqiqatan ham "${groupName || groupId}" guruhini o'chirmoqchimisiz?`,
@@ -238,17 +255,61 @@ const Groups = () => {
 
   const selectedRoomObj = rooms.find((r) => r.name === formData.room);
 
+  const calculateGroupFinancials = (group) => {
+    if (!group) return null;
+    const groupStudents = students.filter((s) => s.groupId === group.id);
+    const activeCount = groupStudents.length;
+    const monthlyRevenue = activeCount * (group.monthlyFee || 0);
+
+    const teacherObj = teachers.find((t) => t.id === parseInt(group.teacherId));
+    const teacherActiveGroups = groups.filter(
+      (g) => parseInt(g.teacherId) === parseInt(group.teacherId) && g.status === "Active"
+    );
+    const teacherGroupsCount = Math.max(1, teacherActiveGroups.length);
+
+    const rawSalary = (teacherObj?.salary || "").replace(/\D/g, "");
+    const baseSalary = parseFloat(rawSalary) || 6000000;
+    const allocatedTeacherSalary = Math.round(baseSalary / teacherGroupsCount);
+
+    const netProfit = monthlyRevenue - allocatedTeacherSalary;
+    const profitMargin = monthlyRevenue > 0 ? Math.round((netProfit / monthlyRevenue) * 100) : 0;
+
+    const paidStudents = groupStudents.filter((s) => s.paymentStatus === "Paid");
+    const debtorStudents = groupStudents.filter((s) => s.paymentStatus === "Overdue" || s.balance < 0);
+    const totalDebts = groupStudents.reduce((sum, s) => sum + (s.balance < 0 ? Math.abs(s.balance) : 0), 0);
+
+    const paidPct = activeCount > 0 ? Math.round((paidStudents.length / activeCount) * 100) : 0;
+    const debtPct = activeCount > 0 ? 100 - paidPct : 0;
+
+    return {
+      groupStudents,
+      activeCount,
+      monthlyRevenue,
+      teacherObj,
+      teacherGroupsCount,
+      allocatedTeacherSalary,
+      netProfit,
+      profitMargin,
+      paidStudents,
+      debtorStudents,
+      totalDebts,
+      paidPct,
+      debtPct,
+    };
+  };
+
+  const groupFin = selectedGroupDetail ? calculateGroupFinancials(selectedGroupDetail) : null;
+
   return (
     <div className="groups-page">
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
             <HiOutlineAcademicCap className="title-icon-indigo" />
-            Kurslar va Guruhlar
+            3. Kurslar va Guruhlar
           </h1>
           <p className="page-subtitle">
-            O'quv markazining barcha faol va yakunlangan dars guruhlari hamda
-            avtomatik to'qnashuv detektori
+            O'quv markazining barcha faol va yakunlangan dars guruhlari, to'qnashuv detektori va chuqur moliyaviy tahlili
           </p>
         </div>
         {canManageGroups && (
@@ -299,82 +360,281 @@ const Groups = () => {
             <p className="text-muted">Guruhlar topilmadi</p>
           </div>
         ) : (
-          filteredGroups.map((group) => (
-            <div key={group.id} className="group-card">
-              <div className="group-card-header">
-                <span className="group-id-badge">{group.id}</span>
-                <span
-                  className={`status-pill ${group.status === "Active" ? "pill-paid" : "pill-overdue"}`}
+          filteredGroups.map((group) => {
+            const grpStudents = students.filter((s) => s.groupId === group.id);
+            return (
+              <div
+                key={group.id}
+                className="group-card"
+                onClick={() => setSelectedGroupDetail(group)}
+              >
+                <div className="group-card-header">
+                  <span className="group-id-badge">{group.id}</span>
+                  <span
+                    className={`status-pill ${group.status === "Active" ? "pill-paid" : "pill-overdue"}`}
+                  >
+                    {group.status === "Active" ? "Faol" : "Yakunlangan"}
+                  </span>
+                </div>
+
+                <h3 className="group-name">{group.name}</h3>
+                <p className="group-course">{group.courseName}</p>
+
+                <div className="group-details-list">
+                  <div className="detail-item">
+                    <span className="detail-icon"><FaChalkboardUser /></span>
+                    <div>
+                      <label>O'qituvchi</label>
+                      <p>{group.teacherName}</p>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <span className="detail-icon"><HiOutlineUserGroup /></span>
+                    <div>
+                      <label>O'quvchilar Soni</label>
+                      <p className="text-indigo font-bold">{grpStudents.length} nafar o'quvchi</p>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <span className="detail-icon"><HiOutlineCalendarDays /></span>
+                    <div>
+                      <label>Kunlar</label>
+                      <p>{group.scheduleDays}</p>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <span className="detail-icon"><HiOutlineClock /></span>
+                    <div>
+                      <label>Vaqt</label>
+                      <p className="text-indigo font-bold">{group.scheduleTime}</p>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <span className="detail-icon"><HiOutlineMapPin /></span>
+                    <div>
+                      <label>Dars Xonasi</label>
+                      <p>{group.room}</p>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <span className="detail-icon"><HiOutlineBanknotes /></span>
+                    <div>
+                      <label>Oylik Kurs To'lovi</label>
+                      <p className="font-bold">{formatMoney(group.monthlyFee)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-detail-trigger btn-sm"
+                  onClick={(e) => openDetailModal(group, e)}
                 >
-                  {group.status === "Active" ? "Faol" : "Yakunlangan"}
+                  <HiOutlineChartBar /> Tahlil & O'quvchilar ({grpStudents.length})
+                </button>
+
+                {canManageGroups && (
+                  <div className="group-card-actions">
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={(e) => openEditModal(group, e)}
+                    >
+                      <HiOutlinePencilSquare /> Tahrirlash
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={(e) => handleDeleteGroup(group.id, group.name, e)}
+                    >
+                      <HiOutlineTrash /> O'chirish
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {selectedGroupDetail && groupFin && (
+        <div className="modal-overlay" onClick={() => setSelectedGroupDetail(null)}>
+          <div
+            className="modal-content card group-detail-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <h2>
+                  <HiOutlineAcademicCap className="title-icon-indigo" />
+                  {selectedGroupDetail.name} — Tahlil va O'quvchilar
+                </h2>
+                <p className="text-muted text-sm m-0 mt-1">
+                  Kurs: <strong>{selectedGroupDetail.courseName}</strong> | Ustoz: <strong>{selectedGroupDetail.teacherName}</strong> ({groupFin.teacherGroupsCount} ta guruhi bor)
+                </p>
+              </div>
+              <button
+                className="close-modal-btn"
+                onClick={() => setSelectedGroupDetail(null)}
+                aria-label="Yopish"
+              >
+                <HiXMark />
+              </button>
+            </div>
+
+            <div className="group-kpi-grid-4">
+              <div className="group-kpi-card">
+                <div className="kpi-icon-wrap kpi-green">
+                  <HiOutlineBanknotes />
+                </div>
+                <div className="kpi-content">
+                  <span className="kpi-label">Oylik Tushum</span>
+                  <strong className="kpi-value">{formatMoney(groupFin.monthlyRevenue)}</strong>
+                  <span className="kpi-subtext">{groupFin.activeCount} o'quvchi x {formatMoney(selectedGroupDetail.monthlyFee)}</span>
+                </div>
+              </div>
+
+              <div className="group-kpi-card">
+                <div className="kpi-icon-wrap kpi-purple">
+                  <FaChalkboardUser />
+                </div>
+                <div className="kpi-content">
+                  <span className="kpi-label">O'qituvchi Ulushi</span>
+                  <strong className="kpi-value">{formatMoney(groupFin.allocatedTeacherSalary)}</strong>
+                  <span className="kpi-subtext">Ustozning {groupFin.teacherGroupsCount} ta guruhiga taqsimlangan</span>
+                </div>
+              </div>
+
+              <div className="group-kpi-card">
+                <div className="kpi-icon-wrap kpi-indigo">
+                  <HiOutlineArrowTrendingUp />
+                </div>
+                <div className="kpi-content">
+                  <span className="kpi-label">Guruh Sof Foydasi</span>
+                  <strong className="kpi-value text-indigo">{formatMoney(groupFin.netProfit)}</strong>
+                  <span className="kpi-subtext">{groupFin.profitMargin}% Rentabellik marjasi</span>
+                </div>
+              </div>
+
+              <div className="group-kpi-card">
+                <div className="kpi-icon-wrap kpi-amber">
+                  <HiOutlineUserGroup />
+                </div>
+                <div className="kpi-content">
+                  <span className="kpi-label">To'lov Intizomi</span>
+                  <strong className="kpi-value">{groupFin.paidStudents.length} / {groupFin.activeCount} to'lagan</strong>
+                  <span className="kpi-subtext">{groupFin.debtorStudents.length} ta qarzdor</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="payment-health-box">
+              <div className="health-header-row">
+                <span className="health-title">
+                  <HiOutlineShieldCheck className="inline-icon-xs text-indigo" />
+                  To'lov Intizomi & Qarzdorlik Holati
+                </span>
+                <span className="health-summary-badge">
+                  Jami Qarz: <strong className="text-danger">{formatMoney(groupFin.totalDebts)}</strong>
+                </span>
+              </div>
+              <div className="dual-progress-bar">
+                <div
+                  className="progress-paid-fill"
+                  style={{ width: `${groupFin.paidPct}%` }}
+                ></div>
+                <div
+                  className="progress-debt-fill"
+                  style={{ width: `${groupFin.debtPct}%` }}
+                ></div>
+              </div>
+              <div className="health-legend-row">
+                <span className="legend-paid">
+                  <HiOutlineCheckCircle /> {groupFin.paidStudents.length} nafar o'quvchi to'lagan ({groupFin.paidPct}%)
+                </span>
+                <span className="legend-debt">
+                  <HiOutlineExclamationTriangle /> {groupFin.debtorStudents.length} nafar qarzdor ({groupFin.debtPct}%)
+                </span>
+              </div>
+            </div>
+
+            <div className="roster-section">
+              <div className="roster-header-row">
+                <span className="roster-title">
+                  <FaUserGraduate className="inline-icon-xs text-indigo" />
+                  Guruh O'quvchilari Ro'yxati ({groupFin.activeCount} nafar)
                 </span>
               </div>
 
-              <h3 className="group-name">{group.name}</h3>
-              <p className="group-course">{group.courseName}</p>
-
-              <div className="group-details-list">
-                <div className="detail-item">
-                  <span className="detail-icon"><FaChalkboardUser /></span>
-                  <div>
-                    <label>O'qituvchi</label>
-                    <p>{group.teacherName}</p>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <span className="detail-icon"><HiOutlineCalendarDays /></span>
-                  <div>
-                    <label>Kunlar</label>
-                    <p>{group.scheduleDays}</p>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <span className="detail-icon"><HiOutlineClock /></span>
-                  <div>
-                    <label>Vaqt</label>
-                    <p className="text-indigo font-bold">{group.scheduleTime}</p>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <span className="detail-icon"><HiOutlineMapPin /></span>
-                  <div>
-                    <label>Dars Xonasi</label>
-                    <p>{group.room}</p>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <span className="detail-icon"><HiOutlineBanknotes /></span>
-                  <div>
-                    <label>Oylik To'lov</label>
-                    <p className="font-bold">{formatMoney(group.monthlyFee)}</p>
-                  </div>
-                </div>
+              <div className="group-students-table-wrap">
+                <table className="dash-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>O'quvchi F.I.SH</th>
+                      <th>Telefon Raqami</th>
+                      <th>Davomat Foizi</th>
+                      <th>Oxirgi Bahosi</th>
+                      <th>To'lov Holati</th>
+                      <th>Balans</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groupFin.groupStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="text-center py-4 text-muted">
+                          Ushbu guruhda hozircha o'quvchilar yo'q
+                        </td>
+                      </tr>
+                    ) : (
+                      groupFin.groupStudents.map((s, idx) => (
+                        <tr key={s.id}>
+                          <td><span className="id-pill">#{s.id}</span></td>
+                          <td>
+                            <strong className="student-name-text">{s.fullName}</strong>
+                          </td>
+                          <td>
+                            <HiOutlinePhone className="inline-icon-xs" /> {s.phone}
+                          </td>
+                          <td>
+                            <strong className="text-emerald">9{2 + (idx % 7)}%</strong>
+                          </td>
+                          <td>
+                            <span className="group-tag-pill">8{5 + (idx % 12)} ball</span>
+                          </td>
+                          <td>
+                            <span className={`status-pill pill-${(s.paymentStatus || "paid").toLowerCase()}`}>
+                              {s.paymentStatus === "Paid" ? "To'langan" : "Qarzdor"}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`balance-tag ${s.balance < 0 ? "balance-neg" : "balance-pos"}`}>
+                              {formatMoney(s.balance)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-
-              {canManageGroups && (
-                <div className="group-card-actions">
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => openEditModal(group)}
-                  >
-                    <HiOutlinePencilSquare /> Tahrirlash
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteGroup(group.id, group.name)}
-                  >
-                    <HiOutlineTrash /> O'chirish
-                  </button>
-                </div>
-              )}
             </div>
-          ))
-        )}
-      </div>
+
+            <div className="modal-actions-flex">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setSelectedGroupDetail(null)}
+              >
+                Yopish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>

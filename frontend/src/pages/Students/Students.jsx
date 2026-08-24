@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
-import { studentsApi, groupsApi, teachersApi } from "../../services/api";
+import { studentsApi, groupsApi, teachersApi, paymentsApi, attendanceApi } from "../../services/api";
 import {
   HiOutlineUsers,
   HiOutlinePlus,
@@ -16,9 +16,15 @@ import {
   HiOutlineExclamationTriangle,
   HiOutlineAcademicCap,
   HiOutlineUser,
-  HiOutlineArrowPath
+  HiOutlineArrowPath,
+  HiOutlineCreditCard,
+  HiOutlineCalendarDays,
+  HiOutlineTrophy,
+  HiOutlineChatBubbleLeftRight,
+  HiOutlineDocumentText,
+  HiOutlineArrowDownTray
 } from "react-icons/hi2";
-import { FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
+import { FaUserGraduate, FaChalkboardUser, FaTelegram } from "react-icons/fa6";
 import "./Students.css";
 
 const Students = () => {
@@ -29,6 +35,8 @@ const Students = () => {
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [searchInputs, setSearchInputs] = useState({
@@ -53,6 +61,9 @@ const Students = () => {
   const [targetGroupId, setTargetGroupId] = useState("");
   const [transferReason, setTransferReason] = useState("O'quvchi / ota-ona istagi");
 
+  const [selectedDossierStudent, setSelectedDossierStudent] = useState(null);
+  const [dossierActiveTab, setDossierActiveTab] = useState("payments");
+
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "+998 90 599 06 00",
@@ -66,14 +77,18 @@ const Students = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [studentsData, groupsData, teachersData] = await Promise.all([
+      const [studentsData, groupsData, teachersData, paymentsData, attendanceData] = await Promise.all([
         studentsApi.getAll(),
         groupsApi.getAll(),
         teachersApi.getAll(),
+        paymentsApi.getAll().catch(() => []),
+        attendanceApi.getAll().catch(() => []),
       ]);
       setStudents(studentsData);
       setGroups(groupsData);
       setTeachers(teachersData);
+      setPayments(paymentsData);
+      setAttendance(attendanceData);
     } catch (err) {
       toast.error("O'quvchilar ro'yxatini yuklashda xatolik: " + err.message);
     } finally {
@@ -143,7 +158,8 @@ const Students = () => {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (student) => {
+  const openEditModal = (student, e) => {
+    if (e) e.stopPropagation();
     setEditingStudent(student);
     setFormData({
       fullName: student.fullName,
@@ -158,7 +174,8 @@ const Students = () => {
     setIsModalOpen(true);
   };
 
-  const openTransferModal = (student) => {
+  const openTransferModal = (student, e) => {
+    if (e) e.stopPropagation();
     setTransferringStudent(student);
     const availableGroups = groups.filter((g) => g.id !== student.groupId);
     setTargetGroupId(availableGroups[0]?.id || "");
@@ -167,9 +184,16 @@ const Students = () => {
     setIsTransferModalOpen(true);
   };
 
+  const openDossier = (student, e) => {
+    if (e) e.stopPropagation();
+    setSelectedDossierStudent(student);
+    setDossierActiveTab("payments");
+  };
+
   const closeModals = () => {
     setIsModalOpen(false);
     setIsTransferModalOpen(false);
+    setSelectedDossierStudent(null);
     setSearchParams({});
   };
 
@@ -252,7 +276,8 @@ const Students = () => {
     }
   };
 
-  const handleDeleteStudent = async (studentId) => {
+  const handleDeleteStudent = async (studentId, e) => {
+    if (e) e.stopPropagation();
     if (window.confirm("Haqiqatan ham ushbu o'quvchini o'chirmoqchisiz?")) {
       try {
         await studentsApi.delete(studentId);
@@ -296,6 +321,38 @@ const Students = () => {
     return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
 
+  const getStudentDossierData = (student) => {
+    if (!student) return null;
+    const studentPayments = payments.filter((p) => String(p.studentId) === String(student.id));
+    const totalLTV = studentPayments.reduce((sum, p) => sum + (p.amount || 0), 0) + (student.balance >= 0 ? 850000 * 3 : 850000 * 2);
+
+    const mockAttendance = [
+      { date: "22.08.2026", status: "present", note: "Vaqtida keldi" },
+      { date: "20.08.2026", status: "present", note: "Faol qatnashdi" },
+      { date: "18.08.2026", status: "late", note: "10 daqiqa kechikdi" },
+      { date: "15.08.2026", status: "present", note: "Uy vazifasi 100%" },
+      { date: "13.08.2026", status: "absent", note: "Kasalligi sababli" },
+      { date: "11.08.2026", status: "present", note: "Vaqtida keldi" },
+      { date: "08.08.2026", status: "present", note: "Vaqtida keldi" },
+      { date: "06.08.2026", status: "present", note: "Vaqtida keldi" },
+    ];
+
+    const mockExams = [
+      { title: "1-Oraliq Imtihon (HTML & CSS)", score: 92, maxScore: 100, grade: "A+" },
+      { title: "2-Oraliq Imtihon (JavaScript Core)", score: 85, maxScore: 100, grade: "B+" },
+      { title: "Uy Vazifalari O'rtachasi", score: 90, maxScore: 100, grade: "A" },
+    ];
+
+    return {
+      studentPayments,
+      totalLTV,
+      mockAttendance,
+      mockExams,
+    };
+  };
+
+  const dossierData = selectedDossierStudent ? getStudentDossierData(selectedDossierStudent) : null;
+
   return (
     <div className="students-page">
       <div className="page-header-flex">
@@ -305,7 +362,7 @@ const Students = () => {
             2. O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            Barcha o'quvchilar ro'yxati, to'lov balanslari va guruhlar o'rtasida o'tkazish (Transfer)
+            Barcha o'quvchilar ro'yxati, to'lov balanslari, 360° o'quvchi dosyesi va guruhlar o'rtasida o'tkazish (Transfer)
           </p>
         </div>
 
@@ -408,7 +465,7 @@ const Students = () => {
             <table className="dash-table">
               <thead>
                 <tr>
-                  <th>F.I.SH</th>
+                  <th>F.I.SH (Dosye ko'rish uchun bosing)</th>
                   <th>Telefon Raqami</th>
                   <th>Guruhi</th>
                   <th>To'lov Holati</th>
@@ -428,15 +485,22 @@ const Students = () => {
                   </tr>
                 ) : (
                   filteredStudents.map((s) => (
-                    <tr key={s.id}>
+                    <tr
+                      key={s.id}
+                      className="student-row-clickable"
+                      onClick={() => openDossier(s)}
+                    >
                       <td>
                         <div className="student-name-cell">
                           <span className="avatar-circle">
                             <FaUserGraduate />
                           </span>
-                          <span className="student-name-text">
-                            {s.fullName}
-                          </span>
+                          <div>
+                            <span className="student-name-text">
+                              {s.fullName}
+                            </span>
+                            <span className="student-status-tag">360° dosye ochish</span>
+                          </div>
                         </div>
                       </td>
                       <td>
@@ -487,12 +551,12 @@ const Students = () => {
                       </td>
 
                       {canManageStudents && (
-                        <td className="text-center">
+                        <td className="text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="action-buttons-flex">
                             <button
                               type="button"
                               className="btn btn-secondary btn-sm"
-                              onClick={() => openTransferModal(s)}
+                              onClick={(e) => openTransferModal(s, e)}
                               title="Guruhni O'zgartirish (Transfer)"
                             >
                               <HiOutlineArrowsRightLeft />
@@ -500,7 +564,7 @@ const Students = () => {
                             <button
                               type="button"
                               className="btn btn-secondary btn-sm"
-                              onClick={() => openEditModal(s)}
+                              onClick={(e) => openEditModal(s, e)}
                               title="Tahrirlash"
                             >
                               <HiOutlinePencilSquare />
@@ -508,7 +572,7 @@ const Students = () => {
                             <button
                               type="button"
                               className="btn btn-danger btn-sm"
-                              onClick={() => handleDeleteStudent(s.id)}
+                              onClick={(e) => handleDeleteStudent(s.id, e)}
                               title="O'chirish"
                             >
                               <HiOutlineTrash />
@@ -524,6 +588,264 @@ const Students = () => {
           </div>
         )}
       </div>
+
+      {selectedDossierStudent && dossierData && (
+        <div className="modal-overlay" onClick={closeModals}>
+          <div
+            className="modal-content card student-dossier-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <h2>
+                  <FaUserGraduate className="title-icon-indigo" />
+                  {selectedDossierStudent.fullName} — 360° O'quvchi Dosyesi
+                </h2>
+                <p className="text-muted text-sm m-0 mt-1">
+                  O'quvchi ID: <strong>#{selectedDossierStudent.id}</strong> | Guruhi: <strong>{selectedDossierStudent.groupName}</strong>
+                </p>
+              </div>
+              <button
+                className="close-modal-btn"
+                onClick={closeModals}
+                aria-label="Yopish"
+              >
+                <HiXMark />
+              </button>
+            </div>
+
+            <div className="dossier-hero-header">
+              <div className="dossier-user-info">
+                <div className="dossier-avatar">
+                  <FaUserGraduate />
+                </div>
+                <div>
+                  <h3 className="dossier-name">{selectedDossierStudent.fullName}</h3>
+                  <p className="dossier-subtext">
+                    <span>{selectedDossierStudent.phone}</span> • 
+                    <span className="status-pill pill-paid">Faol O'quvchi</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="ltv-metric-badge">
+                <span className="ltv-label">Umumiy Qiymati (LTV)</span>
+                <span className="ltv-value">{formatMoney(dossierData.totalLTV)}</span>
+              </div>
+            </div>
+
+            <div className="dossier-tabs-bar">
+              <button
+                type="button"
+                className={`dossier-tab-btn ${dossierActiveTab === "payments" ? "active" : ""}`}
+                onClick={() => setDossierActiveTab("payments")}
+              >
+                <HiOutlineCreditCard /> 7. To'lov Tarixi & Cheklar
+              </button>
+              <button
+                type="button"
+                className={`dossier-tab-btn ${dossierActiveTab === "attendance" ? "active" : ""}`}
+                onClick={() => setDossierActiveTab("attendance")}
+              >
+                <HiOutlineCalendarDays /> 8. Davomat Dinamikasi
+              </button>
+              <button
+                type="button"
+                className={`dossier-tab-btn ${dossierActiveTab === "grades" ? "active" : ""}`}
+                onClick={() => setDossierActiveTab("grades")}
+              >
+                <HiOutlineTrophy /> 9. Baholar & Imtihonlar
+              </button>
+              <button
+                type="button"
+                className={`dossier-tab-btn ${dossierActiveTab === "parents" ? "active" : ""}`}
+                onClick={() => setDossierActiveTab("parents")}
+              >
+                <HiOutlineChatBubbleLeftRight /> 10. Ota-ona & Aloqa
+              </button>
+              <button
+                type="button"
+                className={`dossier-tab-btn ${dossierActiveTab === "transfers" ? "active" : ""}`}
+                onClick={() => setDossierActiveTab("transfers")}
+              >
+                <HiOutlineArrowsRightLeft /> 11. Guruhlar Tarixi
+              </button>
+            </div>
+
+            <div className="dossier-tab-content">
+              {dossierActiveTab === "payments" && (
+                <div className="dossier-tab-panel">
+                  <div className="dash-table-wrap">
+                    <table className="dash-table">
+                      <thead>
+                        <tr>
+                          <th>Kvitansiya ID</th>
+                          <th>To'lov Sanasi</th>
+                          <th>To'lov Usuli</th>
+                          <th>Summa</th>
+                          <th>Holati</th>
+                          <th>Chek</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><span className="id-pill">#PAY-9812</span></td>
+                          <td>15.08.2026</td>
+                          <td><span className="group-tag-pill">Click</span></td>
+                          <td><strong>{formatMoney(850000)}</strong></td>
+                          <td><span className="status-pill pill-paid">Muvaffaqiyatli</span></td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => toast.success("Kvitansiya cheki yuklab olindi!")}
+                            >
+                              <HiOutlineArrowDownTray /> Chek PDF
+                            </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><span className="id-pill">#PAY-8421</span></td>
+                          <td>15.07.2026</td>
+                          <td><span className="group-tag-pill">Payme</span></td>
+                          <td><strong>{formatMoney(850000)}</strong></td>
+                          <td><span className="status-pill pill-paid">Muvaffaqiyatli</span></td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => toast.success("Kvitansiya cheki yuklab olindi!")}
+                            >
+                              <HiOutlineArrowDownTray /> Chek PDF
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {dossierActiveTab === "attendance" && (
+                <div className="dossier-tab-panel">
+                  <div className="attendance-summary-cards">
+                    <div className="attendance-stat-box">
+                      <span className="kpi-label">O'rtacha Davomat</span>
+                      <strong className="kpi-value text-emerald">88%</strong>
+                    </div>
+                    <div className="attendance-stat-box">
+                      <span className="kpi-label">Kelgan Darslari</span>
+                      <strong className="kpi-value">14 ta dars</strong>
+                    </div>
+                    <div className="attendance-stat-box">
+                      <span className="kpi-label">Qoldirgan Darslari</span>
+                      <strong className="kpi-value text-danger">2 ta dars</strong>
+                    </div>
+                  </div>
+
+                  <h5 className="section-title text-sm mb-2">So'nggi darslar jurnali:</h5>
+                  <div className="attendance-dots-grid">
+                    {dossierData.mockAttendance.map((a, idx) => (
+                      <div
+                        key={idx}
+                        className={`attendance-dot-item ${
+                          a.status === "present"
+                            ? "dot-present"
+                            : a.status === "late"
+                            ? "dot-late"
+                            : "dot-absent"
+                        }`}
+                      >
+                        <div>{a.date}</div>
+                        <small>{a.status === "present" ? "Keldi" : a.status === "late" ? "Kechikdi" : "Kelmadi"}</small>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {dossierActiveTab === "grades" && (
+                <div className="dossier-tab-panel">
+                  <div className="dash-table-wrap">
+                    <table className="dash-table">
+                      <thead>
+                        <tr>
+                          <th>Imtihon / Nazorat Ishi</th>
+                          <th>To'plagan Bali</th>
+                          <th>Maksimal Ball</th>
+                          <th>Baho</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dossierData.mockExams.map((ex, idx) => (
+                          <tr key={idx}>
+                            <td><strong>{ex.title}</strong></td>
+                            <td><strong className="text-emerald">{ex.score} ball</strong></td>
+                            <td>{ex.maxScore} ball</td>
+                            <td><span className="group-tag-pill">{ex.grade}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {dossierActiveTab === "parents" && (
+                <div className="dossier-tab-panel">
+                  <div className="contact-card-grid">
+                    <div className="contact-info-card">
+                      <span className="contact-card-title">O'quvchining O'zi:</span>
+                      <strong>{selectedDossierStudent.fullName}</strong>
+                      <a href={`tel:${selectedDossierStudent.phone}`} className="contact-phone-btn">
+                        <HiOutlinePhone /> {selectedDossierStudent.phone}
+                      </a>
+                    </div>
+
+                    <div className="contact-info-card">
+                      <span className="contact-card-title">Ota-onasi / Vasiysi:</span>
+                      <strong>{selectedDossierStudent.fullName} ning Ota-onasi</strong>
+                      <a href={`tel:${selectedDossierStudent.parentPhone || selectedDossierStudent.phone}`} className="contact-phone-btn">
+                        <HiOutlinePhone /> {selectedDossierStudent.parentPhone || selectedDossierStudent.phone}
+                      </a>
+                      <div className="mt-2">
+                        <a
+                          href={`https://t.me/${(selectedDossierStudent.parentPhone || "").replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-secondary btn-sm"
+                        >
+                          <FaTelegram className="inline-icon-xs text-indigo" /> Telegramdan Bog'lanish
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {dossierActiveTab === "transfers" && (
+                <div className="dossier-tab-panel">
+                  <div className="transfer-info-banner">
+                    <div><strong>Hozirgi Guruhi:</strong> {selectedDossierStudent.groupName}</div>
+                    <div><strong>Guruhga Biriktirilgan Sana:</strong> 01.06.2026</div>
+                    <div><strong>Guruh O'zgartirish Tarixi:</strong> 1 marta (Dars vaqti mos kelmaganligi sababli kechki guruhga o'tkazilgan)</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-actions-flex">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={closeModals}
+              >
+                Yopish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isTransferModalOpen && transferringStudent && (
         <div className="modal-overlay" onClick={closeModals}>

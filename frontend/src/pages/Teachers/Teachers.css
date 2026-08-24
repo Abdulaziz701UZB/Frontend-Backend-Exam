@@ -1,0 +1,80 @@
+.teachers-page {
+  padding-bottom: 40px;
+}
+
+.teacher-row-clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.teacher-row-clickable:hover {
+  background: #f1f5f9 !important;
+}
+
+.teacher-detail-modal-card {
+  max-width: 960px !important;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px !important;
+}
+
+.teacher-kpi-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.teacher-kpi-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.teacher-groups-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.teacher-group-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.teacher-group-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.teacher-schedule-matrix-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  background: #f8fafc;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 992px) {
+  .teacher-kpi-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .teacher-kpi-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
