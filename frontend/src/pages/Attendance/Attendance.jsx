@@ -123,7 +123,7 @@ const Attendance = () => {
       };
 
       gMap[s.id] = {
-        score: 85 + (idx % 14),
+        score: 10,
         homeworkDone: true,
         comment: "Faol qatnashdi",
       };
@@ -189,7 +189,7 @@ const Attendance = () => {
   };
 
   const handleGradeChange = (studentId, score) => {
-    const numScore = Math.min(100, Math.max(0, parseInt(score) || 0));
+    const numScore = Math.min(10, Math.max(1, parseInt(score) || 1));
     setGradesMap((prev) => ({
       ...prev,
       [studentId]: {
@@ -220,11 +220,12 @@ const Attendance = () => {
   };
 
   const getLetterGrade = (score) => {
-    if (score >= 90) return { label: "A+ A'lo", class: "grade-a-plus" };
-    if (score >= 80) return { label: "A Yaxshi", class: "grade-a" };
-    if (score >= 70) return { label: "B Qoniqarli", class: "grade-b" };
-    if (score >= 60) return { label: "C O'rtacha", class: "grade-c" };
-    return { label: "D Qoniqarsiz", class: "grade-d" };
+    if (score >= 10) return { label: "🌟 10 (A'lo)", class: "grade-a-plus" };
+    if (score >= 9) return { label: "🟢 9 (Juda yaxshi)", class: "grade-a" };
+    if (score >= 8) return { label: "🔵 8 (Yaxshi)", class: "grade-b" };
+    if (score >= 7) return { label: "🟡 7 (Qoniqarli)", class: "grade-c" };
+    if (score >= 5) return { label: "🟠 5-6 (O'rtacha)", class: "grade-d" };
+    return { label: "🔴 1-4 (Qoniqarsiz)", class: "grade-d" };
   };
 
   const sendTelegramAbsenceAlert = (student) => {
@@ -479,7 +480,7 @@ const Attendance = () => {
                 className={`mode-tab-btn-sm ${activeTabMode === "grades" ? "active" : ""}`}
                 onClick={() => setActiveTabMode("grades")}
               >
-                <HiOutlineTrophy /> Baholar & Imtihonlar
+                <HiOutlineStar /> Baholar
               </button>
             </div>
           </div>
@@ -832,8 +833,8 @@ const Attendance = () => {
                       <tr>
                         <th>9 Xonali ID</th>
                         <th>O'quvchi F.I.SH</th>
-                        <th>Baho (0-100 Ball)</th>
-                        <th>Daraja</th>
+                        <th>Baho (1-10 Ball)</th>
+                        <th>Baholash Darajasi</th>
                         <th>Uy Vazifasi</th>
                         <th>Ustoz Izohi</th>
                         <th className="text-center">360° Dosye</th>
@@ -849,7 +850,7 @@ const Attendance = () => {
                       ) : (
                         activeGroupStudents.map((student) => {
                           const grRec = gradesMap[student.id] || {
-                            score: 85,
+                            score: 10,
                             homeworkDone: true,
                             comment: "Faol",
                           };
@@ -872,8 +873,8 @@ const Attendance = () => {
                                 <input
                                   type="number"
                                   className="grade-score-input"
-                                  min="0"
-                                  max="100"
+                                  min="1"
+                                  max="10"
                                   value={grRec.score}
                                   onChange={(e) => handleGradeChange(student.id, e.target.value)}
                                 />
