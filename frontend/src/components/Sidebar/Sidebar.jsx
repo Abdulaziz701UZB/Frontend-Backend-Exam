@@ -100,7 +100,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineClipboardDocumentCheck /></span>
-            <span className="link-text">4. Davomat (Journal)</span>
+            <span className="link-text">4. Davomat</span>
           </NavLink>
 
           <NavLink
@@ -133,7 +133,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineUserPlus /></span>
-            <span className="link-text">7. Lidlar (Lid Management)</span>
+            <span className="link-text">7. Lidlar Boshqaruvi</span>
           </NavLink>
 
           <NavLink
@@ -144,7 +144,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineBookOpen /></span>
-            <span className="link-text">8. Vazifalar (Homework)</span>
+            <span className="link-text">8. Uy Vazifalari</span>
           </NavLink>
 
           <NavLink
