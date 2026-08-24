@@ -616,3 +616,89 @@ a:hover {
     font-size: 13px;
   }
 }
+
+/* ===== GLOBAL DARK THEME STYLES ===== */
+body.dark-theme {
+  background-color: #0b0f19;
+  color: #f8fafc;
+}
+
+body.dark-theme .page-header-flex {
+  background: linear-gradient(135deg, #131c2e 0%, #0d1525 100%) !important;
+  border: 1.5px solid #1f2d42 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-theme .page-header-flex::before {
+  background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%) !important;
+}
+
+body.dark-theme .page-title {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .page-subtitle {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .card,
+body.dark-theme .stat-card,
+body.dark-theme .dash-table,
+body.dark-theme .table-card,
+body.dark-theme .modal-content,
+body.dark-theme .admin-card {
+  background: #131c2e !important;
+  border-color: #1f2d42 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select,
+body.dark-theme input:not([type="checkbox"]):not([type="radio"]),
+body.dark-theme select,
+body.dark-theme textarea {
+  background-color: #0a0f1d !important;
+  border-color: #1f2d42 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus,
+body.dark-theme input:focus,
+body.dark-theme select:focus,
+body.dark-theme textarea:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+body.dark-theme .btn-secondary,
+body.dark-theme .btn-light {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme .btn-secondary:hover,
+body.dark-theme .btn-light:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .table {
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme .table th {
+  background-color: #0f172a !important;
+  border-bottom-color: #1f2d42 !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .table td {
+  border-bottom-color: #1f2d42 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme .table tbody tr:hover {
+  background-color: #1a2538 !important;
+}

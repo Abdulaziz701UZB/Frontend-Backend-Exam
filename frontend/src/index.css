@@ -67,22 +67,18 @@ body {
 }
 
 body.dark-theme .crm-header {
-  background: rgba(17, 24, 39, 0.95);
-  border-bottom-color: #1f2937;
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-bottom-color: #1f2d42 !important;
 }
 
-body.dark-theme .card,
-body.dark-theme .stat-card,
-body.dark-theme .dash-table,
-body.dark-theme .group-card,
-body.dark-theme .student-group-box,
-body.dark-theme .student-payment-box,
-body.dark-theme .debtor-item,
-body.dark-theme .student-stat-item,
-body.dark-theme .modal-content {
-  background: #111827 !important;
-  border-color: #1f2937 !important;
-  color: #f9fafb !important;
+body.dark-theme .page-header-flex {
+  background: linear-gradient(135deg, #131c2e 0%, #0d1525 100%) !important;
+  border-color: #1f2d42 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-theme .page-header-flex::before {
+  background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%) !important;
 }
 
 body.dark-theme .page-title,
@@ -90,8 +86,176 @@ body.dark-theme .section-title,
 body.dark-theme .group-name,
 body.dark-theme .student-name-text,
 body.dark-theme .stat-value,
-body.dark-theme .header-greeting {
-  color: #f9fafb !important;
+body.dark-theme .header-greeting,
+body.dark-theme .card-title,
+body.dark-theme .dash-section-title {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .page-subtitle,
+body.dark-theme .stat-label,
+body.dark-theme .header-date-text {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .card,
+body.dark-theme .stat-card,
+body.dark-theme .metric-box,
+body.dark-theme .table-card,
+body.dark-theme .dash-table,
+body.dark-theme .group-card,
+body.dark-theme .teacher-card,
+body.dark-theme .room-card,
+body.dark-theme .exam-card,
+body.dark-theme .review-card,
+body.dark-theme .homework-card,
+body.dark-theme .lead-card,
+body.dark-theme .trial-card,
+body.dark-theme .student-group-box,
+body.dark-theme .student-payment-box,
+body.dark-theme .debtor-item,
+body.dark-theme .student-stat-item,
+body.dark-theme .modal-content,
+body.dark-theme .modal-card,
+body.dark-theme .detail-modal-card {
+  background: #131c2e !important;
+  border-color: #1f2d42 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.dark-theme .group-card:hover,
+body.dark-theme .teacher-card:hover,
+body.dark-theme .room-card:hover {
+  border-color: #6366f1 !important;
+}
+
+body.dark-theme .table-filters-container,
+body.dark-theme .filter-bar,
+body.dark-theme .search-box-wrap,
+body.dark-theme .groups-filter-wrap,
+body.dark-theme .students-filters-card,
+body.dark-theme .filters-wrapper {
+  background: #131c2e !important;
+  border-color: #1f2d42 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-theme input:not([type="checkbox"]):not([type="radio"]),
+body.dark-theme select,
+body.dark-theme textarea {
+  background: #0a0f1d !important;
+  border-color: #1f2d42 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme input:focus,
+body.dark-theme select:focus,
+body.dark-theme textarea:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+body.dark-theme .table th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom-color: #1f2d42 !important;
+}
+
+body.dark-theme .table td {
+  border-bottom-color: #1f2d42 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme .table tbody tr:hover {
+  background: #1a2538 !important;
+}
+
+body.dark-theme .payment-channel-card,
+body.dark-theme .dash-group-item {
+  background: #131c2e !important;
+  border-color: #1f2d42 !important;
+}
+
+body.dark-theme .payment-channel-card strong,
+body.dark-theme .group-item-name,
+body.dark-theme .debtor-info h4,
+body.dark-theme .dash-group-item strong {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .payment-channel-card span,
+body.dark-theme .payment-channel-card small,
+body.dark-theme .group-item-course,
+body.dark-theme .group-item-teacher,
+body.dark-theme .debtor-info p,
+body.dark-theme .debtor-info span,
+body.dark-theme .group-info-item span,
+body.dark-theme .teacher-info-label,
+body.dark-theme .room-item-label {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .group-info-item strong,
+body.dark-theme .teacher-info-val,
+body.dark-theme .room-item-val {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .channel-progress-wrap {
+  background: #1f2d42 !important;
+}
+
+body.dark-theme .group-info-row,
+body.dark-theme .group-footer,
+body.dark-theme .teacher-stat-row,
+body.dark-theme .room-info-grid,
+body.dark-theme .modal-header,
+body.dark-theme .modal-footer {
+  border-color: #1f2d42 !important;
+  background: transparent !important;
+}
+
+body.dark-theme .modal-close-btn {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .modal-close-btn:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .cmd-trigger-btn {
+  background: #1a2538 !important;
+  border-color: #1f2d42 !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-theme .cmd-kbd {
+  background: #0b0f19 !important;
+  border-color: #1f2d42 !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .role-switcher-container {
+  background: #1a2538 !important;
+  border-color: #1f2d42 !important;
+}
+
+body.dark-theme .role-btn {
+  color: #94a3b8 !important;
+}
+
+body.dark-theme .role-btn.active {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+body.dark-theme .crm-logout-btn {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
 }
 
 /* ===== SKELETON LOADERS ===== */
