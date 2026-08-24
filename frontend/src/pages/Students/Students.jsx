@@ -265,10 +265,7 @@ const Students = () => {
         await studentsApi.update(editingStudent.id, payload);
         toast.success("O'quvchi ma'lumotlari yangilandi!");
       } else {
-        await studentsApi.create({
-          id: `S-${Math.floor(100000000 + Math.random() * 900000000)}`,
-          ...payload,
-        });
+        await studentsApi.create(payload);
         toast.success("Yangi o'quvchi ro'yxatdan o'tkazildi!");
       }
       await loadData();

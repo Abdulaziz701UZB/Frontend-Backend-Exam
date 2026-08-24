@@ -2,7 +2,7 @@ import Joi from "joi";
 
 export const validateStudent = (student) => {
   const schema = Joi.object({
-    id: Joi.number().integer().optional().allow(null),
+    id: Joi.any().optional().allow(null, ""),
     full_name: Joi.string().optional(),
     fullName: Joi.string().optional(),
     phone: Joi.string().required(),

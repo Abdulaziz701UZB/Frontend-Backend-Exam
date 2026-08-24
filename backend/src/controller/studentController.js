@@ -13,6 +13,7 @@ export const createStudent = async (req, res) => {
       parent_phone: req.body.parent_phone || req.body.parentPhone || "",
       group_id: req.body.group_id || req.body.groupId || null,
       group_name: req.body.group_name || req.body.groupName || "",
+      birth_date: req.body.birth_date || req.body.birthDate || "2006-10-12",
       join_date: req.body.join_date || req.body.joinDate || new Date().toISOString().split("T")[0],
       payment_status: req.body.payment_status || req.body.paymentStatus || "Paid",
       balance: req.body.balance !== undefined ? req.body.balance : 0,
