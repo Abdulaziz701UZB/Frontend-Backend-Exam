@@ -72,7 +72,7 @@ const Login = () => {
       <div className="login-card-container">
         <div className="login-brand-header">
           <div className="login-logo-badge">
-            <HiBolt className="login-logo-icon" />
+            <img src="/velnex-logo.png" alt="VELNEX" className="login-logo-img" />
           </div>
           <h1 className="login-system-title">VELNEX</h1>
           <p className="login-system-subtitle">

@@ -35,7 +35,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside className={`crm-sidebar ${isOpen ? "mobile-open" : ""}`}>
         <div className="sidebar-brand">
           <div className="brand-logo-wrap">
-            <span className="logo-spark">✨</span>
+            <img src="/velnex-logo.png" alt="VELNEX" className="brand-logo-img" />
           </div>
           <div className="brand-text">
             <span className="brand-title">VELNEX</span>
