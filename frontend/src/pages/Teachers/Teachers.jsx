@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
+import { useToast } from "../../context/ToastContext";
 import { teachersApi } from "../../services/api";
 import {
   HiOutlineUsers,
@@ -8,12 +9,17 @@ import {
   HiOutlinePencilSquare,
   HiOutlineTrash,
   HiXMark,
-  HiOutlinePhone
+  HiOutlinePhone,
+  HiOutlineBriefcase,
+  HiOutlineAcademicCap,
+  HiOutlineBanknotes
 } from "react-icons/hi2";
 import { FaChalkboardUser } from "react-icons/fa6";
 
 const Teachers = () => {
   const { canManageGroups } = useEduAuth();
+  const toast = useToast();
+
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +35,44 @@ const Teachers = () => {
     avatar: "teacher",
   });
 
+  const subjectOptions = [
+    "Frontend ReactJS",
+    "Backend NodeJS / Express",
+    "Python Backend (Django)",
+    "Grafik Dizayn & UI/UX",
+    "Ingliz tili (IELTS / CEFR)",
+    "Matematika va SAT",
+    "Mobil Dasturlash (Flutter)",
+    "Cyber Security (Kiberxavfsizlik)",
+    "Buxgalteriya va 1C",
+    "Robototexnika va IT Kids",
+    "Rus tili (So'zlashuv)",
+    "Arab tili va Tajvid",
+  ];
+
+  const experienceOptions = [
+    "1 yilgacha (Boshlang'ich)",
+    "1 - 2 yil",
+    "2 - 3 yil",
+    "3 yil",
+    "4 - 5 yil (Tajribali)",
+    "5 - 7 yil",
+    "7+ yil (Katta o'qituvchi / Lead)",
+  ];
+
+  const salaryOptions = [
+    { value: 4000000, label: "4,000,000 so'm (Boshlang'ich)" },
+    { value: 5000000, label: "5,000,000 so'm" },
+    { value: 6000000, label: "6,000,000 so'm" },
+    { value: 8000000, label: "8,000,000 so'm" },
+    { value: 10000000, label: "10,000,000 so'm (Standart stavka)" },
+    { value: 12000000, label: "12,000,000 so'm" },
+    { value: 15000000, label: "15,000,000 so'm (Katta o'qituvchi)" },
+    { value: 18000000, label: "18,000,000 so'm" },
+    { value: 20000000, label: "20,000,000 so'm (Lead / Top ustoz)" },
+    { value: 25000000, label: "25,000,000 so'm (Kafedra mudiri)" },
+  ];
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -36,6 +80,7 @@ const Teachers = () => {
       setTeachers(data);
     } catch (err) {
       console.error("Teachers load error:", err.message);
+      toast.error("O'qituvchilar ro'yxatini yuklashda xatolik");
     } finally {
       setLoading(false);
     }
@@ -85,23 +130,26 @@ const Teachers = () => {
     try {
       if (editingTeacher) {
         await teachersApi.update(editingTeacher.id, payload);
+        toast.success(`"${formData.name}" ma'lumotlari yangilandi!`);
       } else {
         await teachersApi.create(payload);
+        toast.success(`Yangi o'qituvchi "${formData.name}" qo'shildi!`);
       }
       await loadData();
       setIsModalOpen(false);
     } catch (err) {
-      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
+      toast.error("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("O'qituvchini o'chirmoqchisiz?")) {
+  const handleDelete = async (id, name) => {
+    if (window.confirm(`Haqiqatan ham "${name}" o'qituvchisini o'chirmoqchisiz?`)) {
       try {
         await teachersApi.delete(id);
+        toast.success(`"${name}" muvaffaqiyatli o'chirildi!`);
         await loadData();
       } catch (err) {
-        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+        toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
       }
     }
   };
@@ -141,7 +189,7 @@ const Teachers = () => {
           <input
             type="text"
             className="form-input search-field"
-            placeholder="O'qituvchi ismi yoki fani bo'yicha..."
+            placeholder="O'qituvchi ismi yoki fani bo'yicha qidiruv..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -198,7 +246,7 @@ const Teachers = () => {
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(t.id)}
+                          onClick={() => handleDelete(t.id, t.name)}
                         >
                           <HiOutlineTrash /> O'chirish
                         </button>
@@ -213,8 +261,8 @@ const Teachers = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content card">
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
                 {editingTeacher
@@ -236,6 +284,7 @@ const Teachers = () => {
                   type="text"
                   className="form-input"
                   required
+                  placeholder="masalan: Sardor Rahimov"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
@@ -249,6 +298,7 @@ const Teachers = () => {
                     type="text"
                     className="form-input"
                     required
+                    placeholder="+998 90 123 45 67"
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
@@ -257,15 +307,19 @@ const Teachers = () => {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Mutaxassisligi / Fani</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    required
+                  <select
+                    className="form-select"
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                  />
+                  >
+                    {subjectOptions.map((subj, idx) => (
+                      <option key={idx} value={subj}>
+                        {subj}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="admin-form-grid">
@@ -273,27 +327,35 @@ const Teachers = () => {
                   <label className="form-label">
                     Oylik Maosh Stavkasi (so'm)
                   </label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    required
+                  <select
+                    className="form-select"
                     value={formData.salary}
                     onChange={(e) =>
-                      setFormData({ ...formData, salary: e.target.value })
+                      setFormData({ ...formData, salary: parseFloat(e.target.value) })
                     }
-                  />
+                  >
+                    {salaryOptions.map((sal, idx) => (
+                      <option key={idx} value={sal.value}>
+                        {sal.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Tajribasi</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    required
+                  <select
+                    className="form-select"
                     value={formData.experience}
                     onChange={(e) =>
                       setFormData({ ...formData, experience: e.target.value })
                     }
-                  />
+                  >
+                    {experienceOptions.map((exp, idx) => (
+                      <option key={idx} value={exp}>
+                        {exp}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="admin-modal-actions">
