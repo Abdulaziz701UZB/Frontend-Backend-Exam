@@ -15,7 +15,8 @@ import {
   HiOutlineClock,
   HiOutlineChartBar,
   HiOutlineCheckCircle,
-  HiOutlineSparkles
+  HiOutlineSparkles,
+  HiOutlineMapPin
 } from "react-icons/hi2";
 import "./Rooms.css";
 
@@ -45,8 +46,19 @@ const Rooms = () => {
   const [formData, setFormData] = useState({
     name: "301-xona (Yangi Lab)",
     capacity: 20,
+    floor: "2-qavat",
     status: "Active",
   });
+
+  const floorOptions = [
+    "1-qavat (Asosiy zal)",
+    "2-qavat (Dasturlash laboratoriyasi)",
+    "2-qavat (Sharqiy qanot)",
+    "3-qavat (Til markazi)",
+    "4-qavat (Konferens zal)",
+    "Bosh bino (A-blok)",
+    "Yangi korpus (B-blok)",
+  ];
 
   const loadData = async () => {
     try {
@@ -87,6 +99,7 @@ const Rooms = () => {
     setFormData({
       name: `Xona ${100 + rooms.length + 1}`,
       capacity: 20,
+      floor: "2-qavat",
       status: "Active",
     });
     setIsModalOpen(true);
@@ -97,6 +110,7 @@ const Rooms = () => {
     setFormData({
       name: r.name,
       capacity: r.capacity,
+      floor: r.floor || "2-qavat",
       status: r.status,
     });
     setIsModalOpen(true);
@@ -119,6 +133,7 @@ const Rooms = () => {
     const payload = {
       name: formData.name,
       capacity: parseInt(formData.capacity || 20),
+      floor: formData.floor,
       status: formData.status,
     };
 
@@ -167,7 +182,7 @@ const Rooms = () => {
             9. Xonalar & Bandlik Matritsasi
           </h1>
           <p className="page-subtitle">
-            O'quv xonalari, 06:00 - 22:00 vaqt oraliqlari va haftalik dars jadvali bandligi nazorati
+            O'quv xonalari, qavat va bino joylashuvi hamda 06:00 - 22:00 dars jadvali bandligi nazorati
           </p>
         </div>
         {canManageGroups && (
@@ -227,7 +242,7 @@ const Rooms = () => {
               Xonalar Haftalik Dars Jadvali & Bandlik Holati
             </h3>
             <p className="text-muted text-sm m-0">
-              06:00 dan 22:00 gacha bo'lgan barcha 7 ta vaqt oraliqlari bo'yicha xonalar bandligi
+              06:00 dan 22:00 gacha bo'lgan barcha 7 ta vaqt oraliqlari va xona joylashuvlari bo'yicha bandlik
             </p>
           </div>
         </div>
@@ -243,10 +258,16 @@ const Rooms = () => {
                 <div className="room-card-header">
                   <div className="room-title-wrap">
                     <h4 className="room-card-title">{r.name}</h4>
-                    <span className="room-capacity-badge">
-                      <HiOutlineUserGroup className="inline-icon-xs" />
-                      Maksimal sig'im: {r.capacity} o'quvchi
-                    </span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="room-capacity-badge">
+                        <HiOutlineUserGroup className="inline-icon-xs" />
+                        Sig'im: {r.capacity} kishi
+                      </span>
+                      <span className="room-capacity-badge text-indigo">
+                        <HiOutlineMapPin className="inline-icon-xs" />
+                        {r.floor || "2-qavat"}
+                      </span>
+                    </div>
                   </div>
                   <span className={`occupancy-rate-pill ${rateClass}`}>
                     {item.occupancyRate}% Band
@@ -278,12 +299,14 @@ const Rooms = () => {
                       <button
                         className="btn btn-secondary btn-sm"
                         onClick={() => openEditModal(r)}
+                        title="Tahrirlash"
                       >
                         <HiOutlinePencilSquare />
                       </button>
                       <button
                         className="btn btn-danger btn-sm"
                         onClick={() => handleDelete(r.id, r.name)}
+                        title="O'chirish"
                       >
                         <HiOutlineTrash />
                       </button>
@@ -303,6 +326,7 @@ const Rooms = () => {
               <tr>
                 <th>9 Xonali ID</th>
                 <th>Xona Nomi</th>
+                <th>Qavati / Joylashuvi</th>
                 <th>Maksimal Sig'imi</th>
                 <th>Faol Guruhlar</th>
                 <th>Holati</th>
@@ -319,6 +343,11 @@ const Rooms = () => {
                     </td>
                     <td>
                       <strong className="student-name-text">{r.name}</strong>
+                    </td>
+                    <td>
+                      <span className="group-tag-pill">
+                        <HiOutlineMapPin className="inline-icon-xs" /> {r.floor || "2-qavat"}
+                      </span>
                     </td>
                     <td>
                       <strong>{r.capacity} kishi</strong>
@@ -370,7 +399,7 @@ const Rooms = () => {
                   {selectedTimetableRoom.room.name} — Haftalik Dars Jadvali
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
-                  Xona 9 Xonali ID: <strong>#{format9DigitId(selectedTimetableRoom.room.id, "room")}</strong> | Sig'imi: {selectedTimetableRoom.room.capacity} kishi | {selectedTimetableRoom.occupancyRate}% Band
+                  Xona 9 Xonali ID: <strong>#{format9DigitId(selectedTimetableRoom.room.id, "room")}</strong> | Joylashuvi: <strong>{selectedTimetableRoom.room.floor || "2-qavat"}</strong> | Sig'imi: <strong>{selectedTimetableRoom.room.capacity} kishi</strong> ({selectedTimetableRoom.occupancyRate}% Band)
                 </p>
               </div>
               <button
@@ -499,6 +528,23 @@ const Rooms = () => {
 
               <div className="admin-form-grid">
                 <div className="form-group">
+                  <label className="form-label">Qavati / Joylashuvi:</label>
+                  <select
+                    className="form-select"
+                    value={formData.floor}
+                    onChange={(e) =>
+                      setFormData({ ...formData, floor: e.target.value })
+                    }
+                  >
+                    {floorOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label className="form-label">Maksimal Sig'im (o'quvchi):</label>
                   <input
                     type="number"
@@ -510,20 +556,20 @@ const Rooms = () => {
                     required
                   />
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label className="form-label">Holati:</label>
-                  <select
-                    className="form-select"
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                  >
-                    <option value="Active">Faol (Ishlamoqda)</option>
-                    <option value="Maintenance">Ta'mirda</option>
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Holati:</label>
+                <select
+                  className="form-select"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                >
+                  <option value="Active">Faol (Ishlamoqda)</option>
+                  <option value="Maintenance">Ta'mirda</option>
+                </select>
               </div>
 
               <div className="admin-modal-actions">

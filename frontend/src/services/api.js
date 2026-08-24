@@ -108,6 +108,7 @@ export const normalizeRoom = (r) => ({
   id: r.id,
   name: r.name,
   capacity: parseInt(r.capacity || 20),
+  floor: r.floor || (String(r.name).startsWith("1") ? "1-qavat" : String(r.name).startsWith("3") ? "3-qavat" : "2-qavat"),
   computersCount: parseInt(r.computers_count || r.computersCount || 0),
   projector: r.projector || "Mavjud",
   status: r.status || "Active",
