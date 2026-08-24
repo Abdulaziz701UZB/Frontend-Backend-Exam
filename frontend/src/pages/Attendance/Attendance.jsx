@@ -503,18 +503,6 @@ const Attendance = () => {
                     onChange={(e) => setSelectedDate(e.target.value)}
                   />
                 </div>
-
-                <div className="attendance-actions-right">
-                  {canMarkAttendance && (
-                    <button
-                      type="button"
-                      className="btn btn-mark-all btn-sm"
-                      onClick={handleMarkAllPresent}
-                    >
-                      <HiOutlineCheck className="inline-icon-xs" /> Barchasi Keldi
-                    </button>
-                  )}
-                </div>
               </div>
 
               <div className="card table-card mb-6">
