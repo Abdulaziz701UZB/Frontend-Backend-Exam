@@ -67,7 +67,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineSquares2X2 /></span>
-            <span className="link-text">1. Dashboard</span>
+            <span className="link-text">Dashboard</span>
           </NavLink>
 
           <NavLink
@@ -78,7 +78,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><FaUserGraduate /></span>
-            <span className="link-text">2. O'quvchilar Boshqaruvi</span>
+            <span className="link-text">O'quvchilar Boshqaruvi</span>
           </NavLink>
 
           <NavLink
@@ -89,7 +89,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineAcademicCap /></span>
-            <span className="link-text">3. Kurslar va Guruhlar</span>
+            <span className="link-text">Kurslar va Guruhlar</span>
           </NavLink>
 
           <NavLink
@@ -100,7 +100,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineClipboardDocumentCheck /></span>
-            <span className="link-text">4. Davomat</span>
+            <span className="link-text">Davomat</span>
           </NavLink>
 
           <NavLink
@@ -111,7 +111,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><FaChalkboardUser /></span>
-            <span className="link-text">5. O'qituvchilar</span>
+            <span className="link-text">O'qituvchilar</span>
           </NavLink>
 
           <NavLink
@@ -122,7 +122,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineBanknotes /></span>
-            <span className="link-text">6. To'lovlar & Kassa</span>
+            <span className="link-text">To'lovlar & Kassa</span>
           </NavLink>
 
           <NavLink
@@ -133,7 +133,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineUserPlus /></span>
-            <span className="link-text">7. Lidlar Boshqaruvi</span>
+            <span className="link-text">Lidlar Boshqaruvi</span>
           </NavLink>
 
           <NavLink
@@ -144,7 +144,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineBookOpen /></span>
-            <span className="link-text">8. Uy Vazifalari</span>
+            <span className="link-text">Uy Vazifalari</span>
           </NavLink>
 
           <NavLink
@@ -155,7 +155,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineBuildingOffice2 /></span>
-            <span className="link-text">9. Xonalar & Bandlik</span>
+            <span className="link-text">Xonalar & Bandlik</span>
           </NavLink>
 
           <NavLink
@@ -166,7 +166,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineSparkles /></span>
-            <span className="link-text">10. Sertifikatlar</span>
+            <span className="link-text">Sertifikatlar</span>
           </NavLink>
 
           <NavLink
@@ -177,7 +177,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineStar /></span>
-            <span className="link-text">11. Fikrlar & NPS</span>
+            <span className="link-text">Fikrlar & NPS</span>
           </NavLink>
 
           <NavLink
@@ -188,7 +188,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineDocumentText /></span>
-            <span className="link-text">12. Sinov Darslari</span>
+            <span className="link-text">Sinov Darslari</span>
           </NavLink>
         </nav>
 
