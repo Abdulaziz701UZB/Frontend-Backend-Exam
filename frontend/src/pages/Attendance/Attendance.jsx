@@ -33,7 +33,7 @@ const EXCUSED_REASONS = [
 ];
 
 const Attendance = () => {
-  const { canMarkAttendance } = useEduAuth();
+  const { currentRole, user, canMarkAttendance } = useEduAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -52,6 +52,23 @@ const Attendance = () => {
 
   const [attendanceMap, setAttendanceMap] = useState({});
   const [gradesMap, setGradesMap] = useState({});
+
+  const teacherFullName = (user?.name || user?.fullName || "").toLowerCase().trim();
+  
+  const accessibleGroups = currentRole === "admin"
+    ? groups
+    : groups.filter((g) => {
+        const gTeacher = (g.teacherName || "").toLowerCase().trim();
+        const gTeacherId = String(g.teacherId || g.teacher_id || "");
+        const curUserId = String(user?.id || "");
+        
+        if (curUserId && gTeacherId && gTeacherId === curUserId) return true;
+        if (teacherFullName && gTeacher) {
+          const tWords = teacherFullName.split(" ").filter((w) => w.length > 2);
+          return tWords.some((w) => gTeacher.includes(w)) || gTeacher.includes(teacherFullName) || teacherFullName.includes(gTeacher);
+        }
+        return false;
+      });
 
   const loadInitialData = async () => {
     try {
@@ -382,41 +399,51 @@ const Attendance = () => {
               Davomat yoki Baholarni kiritish uchun guruhni tanlang:
             </span>
             <span className="text-xs text-muted">
-              Jami: <strong>{groups.length} ta faol guruh</strong>
+              Jami: <strong>{accessibleGroups.length} ta guruh</strong> {currentRole === "teacher" ? `(Ustoz: ${user?.name || "Siz"})` : "(Barcha guruhlar)"}
             </span>
           </div>
 
-          <div className="group-cards-horizontal-grid">
-            {groups.map((g, idx) => {
-              const grpStudents = students.filter((s) => s.groupId === g.id);
+          {accessibleGroups.length === 0 ? (
+            <div className="card text-center py-10">
+              <HiOutlineUserGroup className="text-indigo text-4xl mb-3 inline-block" />
+              <h4 className="font-bold text-lg text-dark mb-1">Guruhlar topilmadi</h4>
+              <p className="text-muted text-sm">
+                Hurmatli {user?.name || "foydalanuvchi"}, sizga hozircha faol guruhlar biriktirilmagan. Guruh ochish yoki biriktirish uchun Administratorga murojaat qiling.
+              </p>
+            </div>
+          ) : (
+            <div className="group-cards-horizontal-grid">
+              {accessibleGroups.map((g, idx) => {
+                const grpStudents = students.filter((s) => s.groupId === g.id);
 
-              return (
-                <div
-                  key={g.id}
-                  className={`group-select-card color-scheme-${idx % 8}`}
-                  onClick={() => setSelectedGroup(g.id)}
-                >
-                  <h4 className="group-card-name">{g.name}</h4>
-                  <span className="group-card-course">{g.courseName}</span>
+                return (
+                  <div
+                    key={g.id}
+                    className={`group-select-card color-scheme-${idx % 8}`}
+                    onClick={() => setSelectedGroup(g.id)}
+                  >
+                    <h4 className="group-card-name">{g.name}</h4>
+                    <span className="group-card-course">{g.courseName}</span>
 
-                  <div className="group-card-meta-list">
-                    <div className="group-card-meta-item">
-                      <FaChalkboardUser /> Ustoz: <strong>{g.teacherName}</strong>
-                    </div>
-                    <div className="group-card-meta-item">
-                      <HiOutlineClock /> Vaqt: <strong>{g.scheduleTime}</strong>
-                    </div>
-                    <div className="group-card-meta-item">
-                      <HiOutlineMapPin /> Xona: <strong>{g.room}</strong>
-                    </div>
-                    <div className="group-card-meta-item text-indigo">
-                      <HiOutlineUserGroup /> O'quvchilar: <strong>{grpStudents.length} nafar</strong>
+                    <div className="group-card-meta-list">
+                      <div className="group-card-meta-item">
+                        <FaChalkboardUser /> Ustoz: <strong>{g.teacherName}</strong>
+                      </div>
+                      <div className="group-card-meta-item">
+                        <HiOutlineClock /> Vaqt: <strong>{g.scheduleTime}</strong>
+                      </div>
+                      <div className="group-card-meta-item">
+                        <HiOutlineMapPin /> Xona: <strong>{g.room}</strong>
+                      </div>
+                      <div className="group-card-meta-item text-indigo">
+                        <HiOutlineUserGroup /> O'quvchilar: <strong>{grpStudents.length} nafar</strong>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : (
         <>
