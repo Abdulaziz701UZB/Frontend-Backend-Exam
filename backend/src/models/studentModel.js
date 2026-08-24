@@ -47,6 +47,12 @@ export default (sequelize, DataTypes) => {
     {
       tableName: "students",
       timestamps: false,
+      indexes: [
+        { fields: ["phone"] },
+        { fields: ["group_id"] },
+        { fields: ["status"] },
+        { fields: ["payment_status"] },
+      ],
     },
   );
 };

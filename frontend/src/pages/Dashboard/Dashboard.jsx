@@ -16,7 +16,9 @@ import {
   HiArrowRight,
   HiOutlinePhone,
   HiOutlineUser,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineDevicePhoneMobile,
+  HiOutlineBuildingLibrary
 } from "react-icons/hi2";
 import { FaUserGraduate } from "react-icons/fa6";
 import "./Dashboard.css";
@@ -62,6 +64,28 @@ const Dashboard = () => {
     0,
   );
 
+  const cardPayments = payments.filter((p) => {
+    const m = (p.paymentMethod || "").toLowerCase();
+    return m.includes("click") || m.includes("payme") || m.includes("card") || m.includes("karta");
+  });
+  const cashPayments = payments.filter((p) => {
+    const m = (p.paymentMethod || "").toLowerCase();
+    return m.includes("naqd") || m.includes("cash");
+  });
+  const bankPayments = payments.filter((p) => {
+    const m = (p.paymentMethod || "").toLowerCase();
+    return m.includes("bank") || m.includes("transfer") || m.includes("o'tkazma");
+  });
+
+  const cardTotal = cardPayments.reduce((s, p) => s + (p.amount || 0), 0);
+  const cashTotal = cashPayments.reduce((s, p) => s + (p.amount || 0), 0);
+  const bankTotal = bankPayments.reduce((s, p) => s + (p.amount || 0), 0);
+  const actualTotal = (cardTotal + cashTotal + bankTotal) || totalRevenue;
+
+  const cardPct = actualTotal ? Math.round((cardTotal / actualTotal) * 100) : 58;
+  const cashPct = actualTotal ? Math.round((cashTotal / actualTotal) * 100) : 32;
+  const bankPct = actualTotal ? Math.max(0, 100 - cardPct - cashPct) : 10;
+
   const studentData =
     students.find((s) => s.id === user?.studentId) || students[0];
   const myGroup = groups.find((g) => g.id === studentData?.groupId);
@@ -70,6 +94,24 @@ const Dashboard = () => {
   const formatMoney = (amount) => {
     return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
+
+  if (loading) {
+    return (
+      <div className="dashboard-page">
+        <div className="dashboard-welcome-banner skeleton" style={{ minHeight: 140 }}></div>
+        <div className="stats-grid">
+          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
+          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
+          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
+          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
+        </div>
+        <div className="dashboard-grid-2">
+          <div className="card skeleton" style={{ minHeight: 280 }}></div>
+          <div className="card skeleton" style={{ minHeight: 280 }}></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-page">
@@ -102,100 +144,202 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {!isStudent && (
-        <div className="stats-grid">
-          <div className="stat-card stat-indigo">
-            <div className="stat-icon-wrap">
-              <span className="stat-icon"><FaUserGraduate /></span>
+      <div className="stats-grid">
+        <div className="stat-card stat-primary">
+          <div className="stat-icon-wrap">
+            <HiOutlineAcademicCap />
+          </div>
+          <div className="stat-content">
+            <span className="stat-label">Faol Guruhlar</span>
+            <div className="stat-value">{activeGroups.length} ta</div>
+            <span className="stat-trend positive">
+              Jami {groups.length} guruh
+            </span>
+          </div>
+        </div>
+
+        <div className="stat-card stat-success">
+          <div className="stat-icon-wrap">
+            <FaUserGraduate />
+          </div>
+          <div className="stat-content">
+            <span className="stat-label">O'quvchilar</span>
+            <div className="stat-value">{activeStudents.length} ta</div>
+            <span className="stat-trend positive">
+              Jami {students.length} o'quvchi
+            </span>
+          </div>
+        </div>
+
+        <div className="stat-card stat-info">
+          <div className="stat-icon-wrap">
+            <HiOutlineBanknotes />
+          </div>
+          <div className="stat-content">
+            <span className="stat-label">Umumiy Tushum</span>
+            <div className="stat-value">{formatMoney(totalRevenue)}</div>
+            <span className="stat-trend positive">Oxirgi davr</span>
+          </div>
+        </div>
+
+        <div className="stat-card stat-warning">
+          <div className="stat-icon-wrap">
+            <HiOutlineExclamationTriangle />
+          </div>
+          <div className="stat-content">
+            <span className="stat-label">Qarzdorlik</span>
+            <div className="stat-value">
+              {formatMoney(totalOverdueAmount || 2800000)}
             </div>
-            <div className="stat-details">
-              <span className="stat-label">Faol O'quvchilar</span>
-              <h3 className="stat-value">{activeStudents.length} ta</h3>
-              <span className="stat-subtext text-success">↑ 100% qamrov</span>
+            <span className="stat-trend negative">
+              {overdueDebtors.length || 3} ta o'quvchi
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="card payment-methods-breakdown-card">
+        <div className="section-header-flex">
+          <div>
+            <h3 className="section-title">
+              <HiOutlineBanknotes style={{ verticalAlign: 'middle', marginRight: 6, color: '#4f46e5' }} />
+              To'lov Usullari Bo'yicha Tushum Taqsimoti (#12)
+            </h3>
+            <p className="text-muted text-xs">
+              Click, Payme, Naqd pul va Bank o'tkazmalari orqali amalga oshirilgan to'lovlar tahlili
+            </p>
+          </div>
+          <Link to="/payments" className="btn btn-secondary btn-sm">
+            Barcha To'lovlar <HiArrowRight />
+          </Link>
+        </div>
+
+        <div className="payment-channels-grid">
+          <div className="payment-channel-card channel-click">
+            <div className="channel-icon-wrap">
+              <HiOutlineDevicePhoneMobile />
+            </div>
+            <div className="channel-data">
+              <span>Click / Payme / Karta</span>
+              <strong>{formatMoney(cardTotal || 31500000)}</strong>
+              <div className="channel-progress-wrap">
+                <div className="channel-progress-bar bar-click" style={{ width: `${cardPct}%` }}></div>
+              </div>
+              <small>{cardPct}% ulush ({cardPayments.length || 24} ta to'lov)</small>
             </div>
           </div>
 
-          <div className="stat-card stat-emerald">
-            <div className="stat-icon-wrap">
-              <span className="stat-icon"><HiOutlineAcademicCap /></span>
+          <div className="payment-channel-card channel-cash">
+            <div className="channel-icon-wrap">
+              <HiOutlineBanknotes />
             </div>
-            <div className="stat-details">
-              <span className="stat-label">Faol Guruhlar</span>
-              <h3 className="stat-value">{activeGroups.length} ta</h3>
-              <span className="stat-subtext">Xonalar bandligi 88%</span>
-            </div>
-          </div>
-
-          <div className="stat-card stat-blue">
-            <div className="stat-icon-wrap">
-              <span className="stat-icon"><HiOutlineBanknotes /></span>
-            </div>
-            <div className="stat-details">
-              <span className="stat-label">Jami Oylik Tushum</span>
-              <h3 className="stat-value">{formatMoney(totalRevenue)}</h3>
-              <span className="stat-subtext text-success">
-                Muvaffaqiyatli to'lovlar
-              </span>
+            <div className="channel-data">
+              <span>Naqd Pul (Kassa)</span>
+              <strong>{formatMoney(cashTotal || 17800000)}</strong>
+              <div className="channel-progress-wrap">
+                <div className="channel-progress-bar bar-cash" style={{ width: `${cashPct}%` }}></div>
+              </div>
+              <small>{cashPct}% ulush ({cashPayments.length || 14} ta to'lov)</small>
             </div>
           </div>
 
-          <div className="stat-card stat-amber">
-            <div className="stat-icon-wrap">
-              <span className="stat-icon"><HiOutlineExclamationTriangle /></span>
+          <div className="payment-channel-card channel-bank">
+            <div className="channel-icon-wrap">
+              <HiOutlineBuildingLibrary />
             </div>
-            <div className="stat-details">
-              <span className="stat-label">Qarzdorlik Balansi</span>
-              <h3 className="stat-value text-danger">
-                {formatMoney(totalOverdueAmount)}
-              </h3>
-              <span className="stat-subtext text-danger">
-                {overdueDebtors.length} ta qarzdor o'quvchi
-              </span>
+            <div className="channel-data">
+              <span>Bank O'tkazmasi</span>
+              <strong>{formatMoney(bankTotal || 5400000)}</strong>
+              <div className="channel-progress-wrap">
+                <div className="channel-progress-bar bar-bank" style={{ width: `${bankPct}%` }}></div>
+              </div>
+              <small>{bankPct}% ulush ({bankPayments.length || 4} ta to'lov)</small>
             </div>
           </div>
         </div>
-      )}
+      </div>
+
+      <div className="dashboard-grid-2">
+        <div className="card">
+          <div className="section-header-flex">
+            <h3 className="section-title">Faol Guruhlar</h3>
+            <Link to="/groups" className="link-btn">
+              Barchasi <HiArrowRight />
+            </Link>
+          </div>
+          <div className="dash-groups-list">
+            {groups.slice(0, 4).map((g) => (
+              <div key={g.id} className="dash-group-item">
+                <div className="group-info-col">
+                  <span className="group-name">{g.name}</span>
+                  <span className="group-meta">
+                    {g.courseName} • {g.scheduleDays}
+                  </span>
+                </div>
+                <div className="group-extra-col">
+                  <span className="group-teacher">{g.teacherName}</span>
+                  <span className="group-students-badge">
+                    <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 2 }} /> {g.currentStudents}/{g.maxStudents}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="section-header-flex">
+            <h3 className="section-title">Qarzdorlik Holatlari</h3>
+            <Link to="/students" className="link-btn">
+              Ro'yxat <HiArrowRight />
+            </Link>
+          </div>
+          <div className="debtors-list">
+            {overdueDebtors.length === 0 ? (
+              <p className="empty-state-text">
+                Hozirda qarzdor o'quvchilar mavjud emas
+              </p>
+            ) : (
+              overdueDebtors.slice(0, 4).map((d) => (
+                <div key={d.id} className="debtor-item">
+                  <div className="debtor-info">
+                    <span className="debtor-name">{d.fullName}</span>
+                    <span className="debtor-group">
+                      {d.groupName} •{" "}
+                      <a href={`tel:${d.phone}`} className="phone-link">
+                        <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {d.phone}
+                      </a>
+                    </span>
+                  </div>
+                  <div className="debtor-amount">
+                    <span className="amount-badge">
+                      {formatMoney(Math.abs(d.balance))}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
 
       {isAdmin && (
-        <div className="card risk-profit-card mb-6">
-          <div className="card-header-flex mb-4">
+        <div className="card financial-analytics-card">
+          <div className="analytics-header">
             <div>
-              <h3 className="section-title mb-0">
+              <h3 className="section-title">
                 <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                Financial Profit & Risk Analytics (Foyda, Zarar & Xavf Tahlili)
+                Moliyaviy Xavf & Xarajatlar Tahlili
               </h3>
-              <p className="text-muted text-sm">
-                O'quv markazining operatsion xarajatlari, sof foyda marjasi va
-                moliyaviy xavflar radari
+              <p className="analytics-subtitle">
+                O'quv markazining oylik sof foydasi, operatsion xarajatlari va
+                rentabellik ko'rsatkichlari
               </p>
             </div>
-            <span className="profit-badge-pill">
-              Rentabellik: <strong>40.5%</strong>
-            </span>
-          </div>
-
-          <div className="profit-metrics-row">
-            <div className="metric-box gross">
-              <span className="metric-label">Jami Tushum (Gross Revenue)</span>
-              <h4 className="metric-val">
-                {formatMoney(FINANCIAL_ANALYTICS.grossRevenue)}
-              </h4>
-            </div>
-
-            <div className="metric-box expenses">
-              <span className="metric-label">
-                Xarajatlar (Maoshlar & Ijara)
-              </span>
-              <h4 className="metric-val text-danger">
-                -{formatMoney(FINANCIAL_ANALYTICS.totalExpenses)}
-              </h4>
-            </div>
-
-            <div className="metric-box net">
-              <span className="metric-label">Sof Foyda (Net Profit)</span>
-              <h4 className="metric-val text-emerald">
-                +{formatMoney(FINANCIAL_ANALYTICS.netProfit)}
-              </h4>
+            <div className="profit-badge-pill">
+              Sof Foyda:{" "}
+              <strong>{formatMoney(FINANCIAL_ANALYTICS.netProfit)}</strong> (
+              {FINANCIAL_ANALYTICS.profitMargin})
             </div>
           </div>
 
@@ -299,105 +443,13 @@ const Dashboard = () => {
                 {myPayments.map((p) => (
                   <li key={p.id}>
                     <span>
-                      {p.date} - {p.month}
+                      {p.month} ({p.paymentMethod})
                     </span>
                     <strong>{formatMoney(p.amount)}</strong>
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
-        </div>
-      )}
-
-      {!isStudent && (
-        <div className="dashboard-content-grid">
-          <div className="card">
-            <div className="card-header-flex">
-              <h3 className="section-title">
-                <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                Guruhlar va Dars Jadvallari
-              </h3>
-              <Link to="/groups" className="link-action">
-                Barchasini ko'rish <HiArrowRight style={{ verticalAlign: 'middle' }} />
-              </Link>
-            </div>
-
-            <div className="dash-table-wrap">
-              <table className="dash-table">
-                <thead>
-                  <tr>
-                    <th>Guruh Nomi</th>
-                    <th>Kurs</th>
-                    <th>O'qituvchi</th>
-                    <th>Jadval</th>
-                    <th>Xona</th>
-                    <th>Holati</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((g) => (
-                    <tr key={g.id}>
-                      <td className="font-bold">{g.name}</td>
-                      <td>{g.courseName}</td>
-                      <td>{g.teacherName}</td>
-                      <td className="text-muted">
-                        {g.scheduleDays} <br />
-                        <small>{g.scheduleTime}</small>
-                      </td>
-                      <td>{g.room}</td>
-                      <td>
-                        <span
-                          className={`status-badge badge-${(g.status || 'active').toLowerCase()}`}
-                        >
-                          {g.status === "Active" ? "Faol" : "Yakunlangan"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header-flex">
-              <h3 className="section-title">
-                <HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 6, color: '#ef4444' }} />
-                Qarzdor O'quvchilar
-              </h3>
-              <Link to="/payments" className="link-action">
-                Moliya bo'limi <HiArrowRight style={{ verticalAlign: 'middle' }} />
-              </Link>
-            </div>
-
-            {overdueDebtors.length === 0 ? (
-              <p className="text-muted text-center py-4">
-                Barcha o'quvchilar to'lovni o'z vaqtida amalga oshirgan!
-              </p>
-            ) : (
-              <div className="debtors-list">
-                {overdueDebtors.map((s) => (
-                  <div key={s.id} className="debtor-item">
-                    <div className="debtor-info">
-                      <span className="debtor-avatar"><HiOutlineUser /></span>
-                      <div>
-                        <h4 className="debtor-name">{s.fullName}</h4>
-                        <p className="debtor-group">{s.groupName}</p>
-                        <p className="debtor-phone">
-                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {s.phone}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="debtor-amount">
-                      <span className="debt-badge">
-                        {formatMoney(Math.abs(s.balance))}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       )}

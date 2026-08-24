@@ -166,6 +166,10 @@ export const studentsApi = {
     const res = await api.delete(`/students/${id}`);
     return res.data;
   },
+  transfer: async (id, data) => {
+    const res = await api.post(`/students/${id}/transfer`, data);
+    return res.data;
+  },
 };
 
 export const teachersApi = {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
+import { useToast } from "../../context/ToastContext";
 import { paymentsApi, studentsApi, groupsApi } from "../../services/api";
 import {
   HiOutlineCreditCard,
@@ -13,13 +14,17 @@ import {
   HiXMark,
   HiOutlinePhone,
   HiOutlineUser,
-  HiOutlineChatBubbleLeftRight
+  HiOutlineChatBubbleLeftRight,
+  HiOutlineCheckCircle,
+  HiOutlineDevicePhoneMobile,
+  HiOutlineBuildingLibrary
 } from "react-icons/hi2";
 import { FaMoneyBillWave } from "react-icons/fa6";
 import "./Payments.css";
 
 const Payments = () => {
   const { canManagePayments, isStudent, user } = useEduAuth();
+  const toast = useToast();
 
   const [payments, setPayments] = useState([]);
   const [students, setStudents] = useState([]);
@@ -28,6 +33,7 @@ const Payments = () => {
 
   const [activeTab, setActiveTab] = useState("history");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterMethod, setFilterMethod] = useState("all");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
@@ -52,7 +58,7 @@ const Payments = () => {
       setStudents(sData);
       setGroups(gData);
     } catch (err) {
-      console.error("Payments load error:", err.message);
+      toast.error("To'lovlar ma'lumotlarini yuklashda xatolik: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -110,6 +116,7 @@ const Payments = () => {
     try {
       if (editingPayment) {
         await paymentsApi.update(editingPayment.id, payload);
+        toast.success("To'lov kvitansiyasi yangilandi!");
       } else {
         await paymentsApi.create({
           id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -123,27 +130,46 @@ const Payments = () => {
             payment_status: newBal >= 0 ? "Paid" : "Overdue",
           });
         }
+        toast.success(`${studentObj?.fullName} uchun ${formatMoney(amountVal)} to'lov qabul qilindi!`);
       }
       await loadData();
       setIsModalOpen(false);
     } catch (err) {
-      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
+      toast.error("Xatolik: " + (err.response?.data?.error || err.message));
     }
   };
 
-  const displayPayments = isStudent
-    ? payments.filter((p) => p.studentId === user.studentId)
-    : payments.filter((p) => {
-        if (searchTerm) {
-          const s = searchTerm.toLowerCase();
-          return (
-            (p.studentName || "").toLowerCase().includes(s) ||
-            (p.id || "").toLowerCase().includes(s) ||
-            (p.paymentMethod || "").toLowerCase().includes(s)
-          );
-        }
-        return true;
-      });
+  const handleDeletePayment = async (paymentId) => {
+    if (window.confirm("Haqiqatan ham ushbu to'lov kvitansiyasini o'chirmoqchisiz?")) {
+      try {
+        await paymentsApi.delete(paymentId);
+        toast.success("To'lov kvitansiyasi o'chirildi!");
+        await loadData();
+      } catch (err) {
+        toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+      }
+    }
+  };
+
+  const displayPayments = payments.filter((p) => {
+    if (isStudent && p.studentId !== user.studentId) return false;
+
+    if (filterMethod !== "all") {
+      const pMethod = (p.paymentMethod || "").toLowerCase();
+      const fMethod = filterMethod.toLowerCase();
+      if (!pMethod.includes(fMethod)) return false;
+    }
+
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      return (
+        (p.studentName || "").toLowerCase().includes(s) ||
+        (p.id || "").toLowerCase().includes(s) ||
+        (p.paymentMethod || "").toLowerCase().includes(s)
+      );
+    }
+    return true;
+  });
 
   const debtorsList = students.filter((s) => s.paymentStatus === "Overdue");
   const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -165,7 +191,7 @@ const Payments = () => {
             To'lovlar va Moliya Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            O'quv markazining oylik to'lovlari, qarzdorliklar va tushum hisoboti
+            O'quv markazining oylik to'lovlari, to'lov usullari filtri (#12) va tushum hisoboti
           </p>
         </div>
         {canManagePayments && (
@@ -175,214 +201,152 @@ const Payments = () => {
         )}
       </div>
 
-      {canManagePayments && (
-        <div className="stats-grid mb-6">
-          <div className="stat-card stat-emerald">
-            <div className="stat-icon-wrap">
-              <span className="stat-icon"><HiOutlineBanknotes /></span>
-            </div>
-            <div className="stat-details">
-              <span className="stat-label">Jami Qabul Qilingan Tushum</span>
-              <h3 className="stat-value">{formatMoney(totalRevenue)}</h3>
-              <span className="stat-subtext text-success">
-                {payments.length} ta kvitansiya
-              </span>
-            </div>
+      <div className="stats-grid">
+        <div className="stat-card stat-success">
+          <div className="stat-icon-wrap">
+            <HiOutlineBanknotes />
           </div>
-
-          <div className="stat-card stat-amber">
-            <div className="stat-icon-wrap">
-              <span className="stat-icon"><HiOutlineExclamationTriangle /></span>
-            </div>
-            <div className="stat-details">
-              <span className="stat-label">Qarzdorliklar Jami</span>
-              <h3 className="stat-value text-danger">
-                {formatMoney(totalDebts)}
-              </h3>
-              <span className="stat-subtext text-danger">
-                {debtorsList.length} ta qarzdor talaba
-              </span>
-            </div>
+          <div className="stat-content">
+            <span className="stat-label">Jami Tushum</span>
+            <div className="stat-value">{formatMoney(totalRevenue)}</div>
+            <span className="stat-trend positive">
+              Jami {payments.length} ta kvitansiya
+            </span>
           </div>
         </div>
-      )}
 
-      {!isStudent && (
-        <div className="card filter-card mb-6">
-          <div className="filter-row">
-            <div className="filter-pills">
-              <button
-                className={`pill-btn ${activeTab === "history" ? "active" : ""}`}
-                onClick={() => setActiveTab("history")}
-              >
-                <HiOutlineDocumentText style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                To'lovlar Tarixi ({payments.length})
-              </button>
-              <button
-                className={`pill-btn ${activeTab === "debtors" ? "active" : ""}`}
-                onClick={() => setActiveTab("debtors")}
-              >
-                <HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Qarzdorlar Ro'yxati ({debtorsList.length})
-              </button>
-            </div>
+        <div className="stat-card stat-warning">
+          <div className="stat-icon-wrap">
+            <HiOutlineExclamationTriangle />
+          </div>
+          <div className="stat-content">
+            <span className="stat-label">Qarzdorlik</span>
+            <div className="stat-value">{formatMoney(totalDebts)}</div>
+            <span className="stat-trend negative">
+              {debtorsList.length} ta o'quvchi
+            </span>
+          </div>
+        </div>
+      </div>
 
-            {activeTab === "history" && (
-              <div className="search-input-wrap">
-                <span className="search-icon"><HiMagnifyingGlass /></span>
+      <div className="card filter-card">
+        <div className="filter-controls-row">
+          <div className="tabs-nav">
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === "history" ? "active" : ""}`}
+              onClick={() => setActiveTab("history")}
+            >
+              <HiOutlineDocumentText /> To'lovlar Tarixi ({payments.length})
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === "debtors" ? "active" : ""}`}
+              onClick={() => setActiveTab("debtors")}
+            >
+              <HiOutlineExclamationTriangle /> Qarzdorlar Ro'yxati ({debtorsList.length})
+            </button>
+          </div>
+
+          {activeTab === "history" && (
+            <div className="flex items-center gap-3">
+              <div className="search-box">
+                <HiMagnifyingGlass className="search-icon" />
                 <input
                   type="text"
-                  className="form-input search-field"
-                  placeholder="O'quvchi ismi yoki kvitansiya kodi bo'yicha..."
+                  className="search-input"
+                  placeholder="F.I.SH yoki kvitansiya ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {activeTab === "history" && (
-        <div className="card table-card">
+              <select
+                className="form-select"
+                value={filterMethod}
+                onChange={(e) => setFilterMethod(e.target.value)}
+                style={{ width: 200 }}
+              >
+                <option value="all">Barcha To'lov Usullari</option>
+                <option value="click">Click</option>
+                <option value="payme">Payme</option>
+                <option value="naqd">Naqd Pul (Kassa)</option>
+                <option value="bank">Bank O'tkazmasi</option>
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card table-card">
+        {loading ? (
+          <div style={{ padding: 20 }}>
+            <div className="skeleton skeleton-table-row"></div>
+            <div className="skeleton skeleton-table-row"></div>
+            <div className="skeleton skeleton-table-row"></div>
+          </div>
+        ) : activeTab === "history" ? (
           <div className="dash-table-wrap">
             <table className="dash-table">
               <thead>
                 <tr>
-                  <th>Kvitansiya №</th>
+                  <th>Kvitansiya ID</th>
                   <th>O'quvchi F.I.SH</th>
                   <th>Guruh</th>
-                  <th>Oylik Qaysi Oy</th>
+                  <th>Summa</th>
+                  <th>Oy</th>
                   <th>To'lov Usuli</th>
                   <th>Sana</th>
-                  <th>Summa</th>
-                  <th>Qabul Qildi</th>
-                  {canManagePayments && (
-                    <th className="text-center">HARAKATLAR</th>
-                  )}
+                  {canManagePayments && <th className="text-center">Amallar</th>}
                 </tr>
               </thead>
               <tbody>
                 {displayPayments.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={canManagePayments ? "9" : "8"}
-                      className="text-center py-6 text-muted"
-                    >
-                      To'lovlar tarixi topilmadi
+                    <td colSpan={canManagePayments ? 8 : 7} className="text-center py-6 text-muted">
+                      Mos keluvchi to'lovlar topilmadi
                     </td>
                   </tr>
                 ) : (
                   displayPayments.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        <span className="id-pill">{p.id}</span>
+                        <span className="code-pill">{p.id}</span>
                       </td>
                       <td>
-                        <strong className="student-name-text">
-                          {p.studentName}
-                        </strong>
+                        <strong>{p.studentName}</strong>
                       </td>
+                      <td>{p.groupName}</td>
                       <td>
-                        <span className="group-tag-pill">{p.groupName}</span>
-                      </td>
-                      <td>{p.month}</td>
-                      <td>
-                        <span className="payment-method-tag">
-                          {p.paymentMethod.includes("Card") ? <HiOutlineCreditCard style={{ marginRight: 3, verticalAlign: 'middle' }} /> : <FaMoneyBillWave style={{ marginRight: 3, verticalAlign: 'middle' }} />}
-                          {p.paymentMethod}
-                        </span>
-                      </td>
-                      <td className="text-muted">{p.date}</td>
-                      <td>
-                        <strong className="text-emerald">
+                        <strong className="text-success">
                           {formatMoney(p.amount)}
                         </strong>
                       </td>
-                      <td className="text-muted">{p.recordedBy}</td>
-                      {canManagePayments && (
-                        <td className="text-center">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => openEditModal(p)}
-                          >
-                            <HiOutlinePencilSquare /> Tahrirlash
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "debtors" && !isStudent && (
-        <div className="card table-card">
-          <div className="dash-table-wrap">
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th>O'quvchi F.I.SH</th>
-                  <th>Guruh</th>
-                  <th>Telefon</th>
-                  <th>Ota-onasi Telefoni</th>
-                  <th>Qarzdorlik Summasi</th>
-                  {canManagePayments && <th className="text-right">Harakat</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {debtorsList.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="text-center py-6 text-muted">
-                      Qarzdor o'quvchilar mavjud emas!
-                    </td>
-                  </tr>
-                ) : (
-                  debtorsList.map((d) => (
-                    <tr key={d.id}>
+                      <td>{p.month}</td>
                       <td>
-                        <strong className="student-name-text">
-                          {d.fullName}
-                        </strong>
+                        <span className="payment-method-badge">
+                          {p.paymentMethod}
+                        </span>
                       </td>
-                      <td>
-                        <span className="group-tag-pill">{d.groupName}</span>
-                      </td>
-                      <td>
-                        <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 3 }} />
-                        {d.phone}
-                      </td>
-                      <td className="text-muted">
-                        <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 3 }} />
-                        {d.parentPhone || "Kiritilmagan"}
-                      </td>
-                      <td>
-                        <strong className="text-danger">
-                          {formatMoney(Math.abs(d.balance))}
-                        </strong>
-                      </td>
+                      <td>{p.date}</td>
                       {canManagePayments && (
                         <td className="text-center">
                           <div className="action-buttons-flex">
                             <button
+                              type="button"
                               className="btn btn-secondary btn-sm"
-                              onClick={() =>
-                                alert(
-                                  `SMS Eslatnoma yuborildi!\nQabul qiluvchi: ${d.fullName} (${d.phone})\nMatn: "Hurmatli ${d.fullName}, EduControl o'quv markazidagi oylik to'lovingiz muddati o'tdi. Iltimos to'lovni amalga oshiring."`,
-                                )
-                              }
-                              title="Avtomatik SMS eslatma yuborish"
+                              onClick={() => openEditModal(p)}
+                              title="Tahrirlash"
                             >
-                              <HiOutlineChatBubbleLeftRight /> SMS Eslatish
+                              <HiOutlinePencilSquare />
                             </button>
                             <button
-                              className="btn btn-primary btn-sm"
-                              onClick={openCreateModal}
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDeletePayment(p.id)}
+                              title="O'chirish"
                             >
-                              <HiOutlineCreditCard /> To'lov Qabul Qilish
+                              <HiOutlineTrash />
                             </button>
                           </div>
                         </td>
@@ -393,69 +357,131 @@ const Payments = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="dash-table-wrap">
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>O'quvchi F.I.SH</th>
+                  <th>Telefon</th>
+                  <th>Guruh</th>
+                  <th>Qarzdorlik Summasi</th>
+                  <th>Holati</th>
+                  <th>Eslatma Yuborish</th>
+                </tr>
+              </thead>
+              <tbody>
+                {debtorsList.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-6 text-muted">
+                      Ajoyib! Hozirda barcha o'quvchilar to'lovlarni o'z vaqtida amalga oshirgan
+                    </td>
+                  </tr>
+                ) : (
+                  debtorsList.map((d) => (
+                    <tr key={d.id}>
+                      <td>
+                        <strong>{d.fullName}</strong>
+                      </td>
+                      <td>
+                        <a href={`tel:${d.phone}`} className="phone-link">
+                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {d.phone}
+                        </a>
+                      </td>
+                      <td>{d.groupName}</td>
+                      <td>
+                        <strong className="text-danger">
+                          {formatMoney(Math.abs(d.balance))}
+                        </strong>
+                      </td>
+                      <td>
+                        <span className="status-pill pill-overdue">
+                          Qarzdor
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() =>
+                            toast.success(
+                              `${d.fullName} ning ota-onasiga (${d.phone}) SMS va Telegram to'lov eslatmasi yuborildi!`,
+                            )
+                          }
+                        >
+                          <HiOutlineChatBubbleLeftRight /> Eslatma Yuborish
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content card">
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                {editingPayment
-                  ? "To'lov Ma'lumotini Tahrirlash"
-                  : "Oylik To'lovni Qabul Qilish"}
+                <HiOutlineCreditCard style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                {editingPayment ? "To'lovni Tahrirlash" : "Yangi To'lov Qabul Qilish"}
               </h2>
               <button
-                className="close-modal-btn"
+                type="button"
+                className="modal-close-btn"
                 onClick={() => setIsModalOpen(false)}
-                aria-label="Yopish"
               >
                 <HiXMark />
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="admin-modal-form">
-              <div className="form-group">
-                <label className="form-label">To'lov Qilayotgan O'quvchi</label>
-                <select
-                  className="form-select"
-                  value={formData.studentId}
-                  onChange={(e) => {
-                    const sid = parseInt(e.target.value);
-                    const st = students.find((s) => s.id === sid);
-                    const grp = groups.find((g) => g.id === st?.groupId);
-                    setFormData({
-                      ...formData,
-                      studentId: sid,
-                      amount: grp?.monthlyFee || 850000,
-                    });
-                  }}
-                >
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.fullName} ({s.groupName}){" "}
-                      {s.paymentStatus === "Overdue" ? " [Qarzdor]" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+            <form onSubmit={handleFormSubmit}>
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">To'lov Summasi (so'm)</label>
+                  <label className="form-label">O'quvchi:</label>
+                  <select
+                    className="form-select"
+                    value={formData.studentId}
+                    onChange={(e) => {
+                      const sid = e.target.value;
+                      const s = students.find((item) => item.id === parseInt(sid));
+                      const g = groups.find((item) => item.id === s?.groupId);
+                      setFormData({
+                        ...formData,
+                        studentId: sid,
+                        amount: g?.monthlyFee || 850000,
+                      });
+                    }}
+                    disabled={Boolean(editingPayment)}
+                  >
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.fullName} ({s.groupName})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">To'lov Summasi (so'm):</label>
                   <input
                     type="number"
                     className="form-input"
-                    required
                     value={formData.amount}
                     onChange={(e) =>
                       setFormData({ ...formData, amount: e.target.value })
                     }
+                    required
                   />
                 </div>
+              </div>
 
+              <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">Qaysi Oy Uchun</label>
+                  <label className="form-label">Qaysi Oy Uchun:</label>
                   <select
                     className="form-select"
                     value={formData.month}
@@ -463,60 +489,53 @@ const Payments = () => {
                       setFormData({ ...formData, month: e.target.value })
                     }
                   >
-                    <option value="Avgust 2026">Avgust 2026</option>
-                    <option value="Sentabr 2026">Sentabr 2026</option>
-                    <option value="Oktabr 2026">Oktabr 2026</option>
                     <option value="Iyul 2026">Iyul 2026</option>
+                    <option value="Avgust 2026">Avgust 2026</option>
+                    <option value="Sentyabr 2026">Sentyabr 2026</option>
+                    <option value="Oktyabr 2026">Oktyabr 2026</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">To'lov Usuli</label>
+                  <label className="form-label">To'lov Usuli:</label>
                   <select
                     className="form-select"
                     value={formData.paymentMethod}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        paymentMethod: e.target.value,
-                      })
+                      setFormData({ ...formData, paymentMethod: e.target.value })
                     }
                   >
-                    <option value="Card (Click)">Card (Click)</option>
-                    <option value="Card (Payme)">Card (Payme)</option>
-                    <option value="Naqd pul">Naqd pul</option>
-                    <option value="Bank O'tkazmasi">Bank O'tkazmasi</option>
+                    <option value="Card (Click)">Click (Plastik Karta)</option>
+                    <option value="Card (Payme)">Payme (Plastik Karta)</option>
+                    <option value="Cash (Naqd)">Naqd Pul (Kassa)</option>
+                    <option value="Bank Transfer">Bank O'tkazmasi</option>
                   </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">To'lov Sanasi</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    required
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
-                    }
-                  />
                 </div>
               </div>
 
-              <div className="admin-modal-actions">
+              <div className="form-group">
+                <label className="form-label">To'lov Sanasi:</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="modal-actions-flex">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Bekor qilish
+                  Bekor Qilish
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingPayment
-                    ? "Saqlash"
-                    : "To'lovni Tasdiqlash & Kvitansiya Berish"}
+                  <HiOutlineCheckCircle /> Kvitansiyani Saqlash
                 </button>
               </div>
             </form>

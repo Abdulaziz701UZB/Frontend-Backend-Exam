@@ -42,6 +42,12 @@ export default (sequelize, DataTypes) => {
     {
       tableName: "payments",
       timestamps: false,
+      indexes: [
+        { fields: ["student_id"] },
+        { fields: ["date"] },
+        { fields: ["payment_method"] },
+        { fields: ["month"] },
+      ],
     },
   );
 };

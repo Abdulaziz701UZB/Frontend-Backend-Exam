@@ -21,6 +21,7 @@ import TelegramBot from "./pages/TelegramBot/TelegramBot";
 import Login from "./pages/Login/Login";
 
 import { EduAuthProvider, useEduAuth } from "./context/EduAuthContext";
+import { ToastProvider } from "./context/ToastContext";
 import "./App.css";
 
 function ProtectedApp() {
@@ -105,11 +106,13 @@ function MainRoutes() {
 
 function App() {
   return (
-    <EduAuthProvider>
-      <Router>
-        <MainRoutes />
-      </Router>
-    </EduAuthProvider>
+    <ToastProvider>
+      <EduAuthProvider>
+        <Router>
+          <MainRoutes />
+        </Router>
+      </EduAuthProvider>
+    </ToastProvider>
   );
 }
 

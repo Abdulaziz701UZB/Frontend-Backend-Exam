@@ -186,4 +186,37 @@ router.put("/students/:id", studentController.updateStudent);
  */
 router.delete("/students/:id", studentController.deleteStudent);
 
+/**
+ * @swagger
+ * /students/{id}/transfer:
+ *   post:
+ *     tags: [Students]
+ *     summary: O'quvchini boshqa guruhga o'tkazish (Transfer Student)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newGroupId
+ *             properties:
+ *               newGroupId:
+ *                 type: string
+ *               newGroupName:
+ *                 type: string
+ *               transferReason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: O'quvchi boshqa guruhga muvaffaqiyatli o'tkazildi
+ */
+router.post("/students/:id/transfer", studentController.transferStudent);
+
 export default router;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
+import { useToast } from "../../context/ToastContext";
 import { studentsApi, groupsApi } from "../../services/api";
 import {
   HiOutlinePlus,
@@ -10,13 +11,17 @@ import {
   HiOutlinePhone,
   HiOutlineCheckCircle,
   HiOutlineExclamationTriangle,
-  HiOutlineUser
+  HiOutlineUser,
+  HiOutlineArrowsRightLeft,
+  HiOutlineAcademicCap,
+  HiOutlineSparkles
 } from "react-icons/hi2";
 import { FaUserGraduate } from "react-icons/fa6";
 import "./Students.css";
 
 const Students = () => {
   const { canManageStudents } = useEduAuth();
+  const toast = useToast();
 
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -27,6 +32,11 @@ const Students = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [transferringStudent, setTransferringStudent] = useState(null);
+  const [targetGroupId, setTargetGroupId] = useState("");
+  const [transferReason, setTransferReason] = useState("O'quvchi / ota-ona istagi");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -48,7 +58,7 @@ const Students = () => {
       setStudents(studentsData);
       setGroups(groupsData);
     } catch (err) {
-      console.error("Students load error:", err.message);
+      toast.error("O'quvchilar ro'yxatini yuklashda xatolik: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -86,6 +96,14 @@ const Students = () => {
     setIsModalOpen(true);
   };
 
+  const openTransferModal = (student) => {
+    setTransferringStudent(student);
+    const availableGroups = groups.filter((g) => g.id !== student.groupId);
+    setTargetGroupId(availableGroups[0]?.id || "");
+    setTransferReason("O'quvchi / ota-ona istagi");
+    setIsTransferModalOpen(true);
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const groupObj = groups.find((g) => g.id === formData.groupId) || groups[0];
@@ -105,13 +123,38 @@ const Students = () => {
     try {
       if (editingStudent) {
         await studentsApi.update(editingStudent.id, payload);
+        toast.success("O'quvchi ma'lumotlari yangilandi!");
       } else {
         await studentsApi.create(payload);
+        toast.success("Yangi o'quvchi muvaffaqiyatli qo'shildi!");
       }
       await loadData();
       setIsModalOpen(false);
     } catch (err) {
-      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
+      toast.error("Xatolik: " + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleTransferSubmit = async (e) => {
+    e.preventDefault();
+    if (!transferringStudent || !targetGroupId) return;
+
+    const targetGroupObj = groups.find((g) => g.id === targetGroupId);
+    const targetGroupName = targetGroupObj
+      ? `${targetGroupObj.name} (${targetGroupObj.courseName})`
+      : targetGroupId;
+
+    try {
+      await studentsApi.transfer(transferringStudent.id, {
+        newGroupId: targetGroupId,
+        newGroupName: targetGroupName,
+        transferReason: transferReason,
+      });
+      toast.success(`${transferringStudent.fullName} yangi guruhga (${targetGroupName}) muvaffaqiyatli o'tkazildi!`);
+      setIsTransferModalOpen(false);
+      await loadData();
+    } catch (err) {
+      toast.error("Guruhni o'zgartirishda xatolik: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -123,9 +166,10 @@ const Students = () => {
     ) {
       try {
         await studentsApi.delete(studentId);
+        toast.success("O'quvchi muvaffaqiyatli o'chirildi!");
         await loadData();
       } catch (err) {
-        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+        toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
       }
     }
   };
@@ -153,14 +197,14 @@ const Students = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            O'quvchilar va Guruhga Biriktirish
+            <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 8, color: '#4f46e5' }} />
+            O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            O'quv markazining barcha talabalari directoryasi va guruhlar
-            bo'yicha taqsimot
+            Barcha o'quvchilar ro'yxati, to'lov balanslari va guruhlar o'rtasida o'tkazish (Transfer)
           </p>
         </div>
+
         {canManageStudents && (
           <button className="btn btn-primary" onClick={openCreateModal}>
             <HiOutlinePlus /> Yangi O'quvchi Qo'shish
@@ -169,31 +213,29 @@ const Students = () => {
       </div>
 
       <div className="card filter-card">
-        <div className="filter-row">
-          <div className="search-input-wrap">
-            <span className="search-icon"><HiMagnifyingGlass /></span>
+        <div className="filter-controls-row">
+          <div className="search-box">
+            <HiMagnifyingGlass className="search-icon" />
             <input
               type="text"
-              className="form-input search-field"
-              placeholder="Masalan: Abdulaziz Abdulhayev yoki +998 90 599 06 00..."
+              className="search-input"
+              placeholder="O'quvchi ismi, telefon yoki guruh bo'yicha qidirish..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <div className="group-filter-wrap">
-            <label className="form-label mb-0">Guruh bo'yicha filter:</label>
+            <label className="filter-label">Guruh:</label>
             <select
-              className="form-select filter-select"
+              className="form-select"
               value={selectedGroupFilter}
               onChange={(e) => setSelectedGroupFilter(e.target.value)}
             >
-              <option value="All">
-                Barcha Guruhlar ({students.length} ta o'quvchi)
-              </option>
+              <option value="All">Barcha Guruhlar</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name} ({g.courseName})
+                  {g.name}
                 </option>
               ))}
             </select>
@@ -202,182 +244,260 @@ const Students = () => {
       </div>
 
       <div className="card table-card">
-        <div className="dash-table-wrap">
-          <table className="dash-table">
-            <thead>
-              <tr>
-                <th style={{ width: "50px" }}>ID</th>
-                <th>F.I.SH (O'QUVCHI)</th>
-                <th>TELEFON / OTA-ONA</th>
-                <th>BIRIKTIRILGAN GURUH</th>
-                <th>QO'SHILGAN SANA</th>
-                <th>TO'LOV HOLATI</th>
-                <th>BALANS</th>
-                {canManageStudents && (
-                  <th className="text-center">HARAKATLAR</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.length === 0 ? (
+        {loading ? (
+          <div style={{ padding: 20 }}>
+            <div className="skeleton skeleton-table-row"></div>
+            <div className="skeleton skeleton-table-row"></div>
+            <div className="skeleton skeleton-table-row"></div>
+            <div className="skeleton skeleton-table-row"></div>
+          </div>
+        ) : (
+          <div className="dash-table-wrap">
+            <table className="dash-table">
+              <thead>
                 <tr>
-                  <td
-                    colSpan={canManageStudents ? "8" : "7"}
-                    className="text-center py-6 text-muted"
-                  >
-                    O'quvchilar topilmadi
-                  </td>
+                  <th>F.I.SH</th>
+                  <th>Telefon Raqami</th>
+                  <th>Guruh</th>
+                  <th>Qo'shilgan Sana</th>
+                  <th>To'lov Holati</th>
+                  <th>Balans / Qarz</th>
+                  <th>Holat</th>
+                  {canManageStudents && <th className="text-center">Amallar</th>}
                 </tr>
-              ) : (
-                filteredStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td>
-                      <span className="id-pill">#{student.id}</span>
+              </thead>
+              <tbody>
+                {filteredStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan={canManageStudents ? 8 : 7} className="text-center py-6 text-muted">
+                      Mos keluvchi o'quvchilar topilmadi
                     </td>
-                    <td>
-                      <div className="student-name-cell">
-                        <span className="avatar-circle"><FaUserGraduate /></span>
-                        <div>
-                          <strong className="student-name-text">
-                            {student.fullName}
-                          </strong>
-                          <span className="student-status-tag">
-                            {student.status}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="phone-cell">
-                        <span className="user-phone">
-                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {student.phone}
-                        </span>
-                        <small className="parent-phone">
-                          <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 2 }} /> {student.parentPhone || "+998 90 599 06 00"}
-                        </small>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="group-tag-pill">
-                        {student.groupName}
-                      </span>
-                    </td>
-                    <td className="text-muted">{student.joinDate}</td>
-                    <td>
-                      <span
-                        className={`status-pill pill-${(student.paymentStatus || 'paid').toLowerCase()}`}
-                      >
-                        {student.paymentStatus === "Paid" ? (
-                          <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 4 }} /> To'langan</>
-                        ) : (
-                          <><HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 4 }} /> Qarzdor</>
-                        )}
-                      </span>
-                    </td>
-                    <td>
-                      <strong
-                        className={
-                          student.balance < 0 ? "text-danger" : "text-success"
-                        }
-                      >
-                        {formatMoney(student.balance)}
-                      </strong>
-                    </td>
-                    {canManageStudents && (
-                      <td className="text-center">
-                        <div className="action-buttons-flex">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => openEditModal(student)}
-                          >
-                            <HiOutlinePencilSquare /> Tahrirlash
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDeleteStudent(student.id)}
-                          >
-                            <HiOutlineTrash /> O'chirish
-                          </button>
+                  </tr>
+                ) : (
+                  filteredStudents.map((s) => (
+                    <tr key={s.id}>
+                      <td>
+                        <div className="student-name-col">
+                          <strong className="student-name-text">{s.fullName}</strong>
+                          {s.parentPhone && (
+                            <small className="text-muted flex items-center gap-1">
+                              Ota-ona: {s.parentPhone}
+                            </small>
+                          )}
                         </div>
                       </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                      <td>
+                        <a href={`tel:${s.phone}`} className="phone-link">
+                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {s.phone}
+                        </a>
+                      </td>
+                      <td>
+                        <span className="group-badge-pill">{s.groupName}</span>
+                      </td>
+                      <td>{s.joinDate || "2026-08-01"}</td>
+                      <td>
+                        <span
+                          className={`status-pill pill-${(s.paymentStatus || "paid").toLowerCase()}`}
+                        >
+                          {s.paymentStatus === "Paid" ? (
+                            <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 2 }} /> To'langan</>
+                          ) : (
+                            <><HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 2 }} /> Qarzdor</>
+                          )}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`balance-tag ${
+                            s.balance < 0 ? "balance-neg" : "balance-pos"
+                          }`}
+                        >
+                          {formatMoney(s.balance)}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            s.status === "Active"
+                              ? "badge-active"
+                              : "badge-finished"
+                          }`}
+                        >
+                          {s.status === "Active" ? "Faol" : "Muzlatilgan"}
+                        </span>
+                      </td>
+
+                      {canManageStudents && (
+                        <td className="text-center">
+                          <div className="action-buttons-flex">
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => openTransferModal(s)}
+                              title="Guruhni O'zgartirish (Transfer #18)"
+                            >
+                              <HiOutlineArrowsRightLeft />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => openEditModal(s)}
+                              title="Tahrirlash"
+                            >
+                              <HiOutlinePencilSquare />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDeleteStudent(s.id)}
+                              title="O'chirish"
+                            >
+                              <HiOutlineTrash />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content card">
+      {isTransferModalOpen && transferringStudent && (
+        <div className="modal-overlay" onClick={() => setIsTransferModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                {editingStudent
-                  ? "O'quvchi Ma'lumotlarini Tahrirlash"
-                  : "Yangi O'quvchi Qo'shish & Guruhga Biriktirish"}
+                <HiOutlineArrowsRightLeft style={{ verticalAlign: 'middle', marginRight: 6, color: '#4f46e5' }} />
+                Guruhlar O'rtasida O'tkazish (Transfer #18)
               </h2>
               <button
-                className="close-modal-btn"
-                onClick={() => setIsModalOpen(false)}
-                aria-label="Yopish"
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setIsTransferModalOpen(false)}
               >
                 <HiXMark />
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="admin-modal-form">
+            <form onSubmit={handleTransferSubmit}>
+              <div className="alert alert-info mb-4" style={{ background: '#e0e7ff', borderLeft: '4px solid #4f46e5', padding: '12px 16px', borderRadius: 8 }}>
+                <strong>O'quvchi:</strong> {transferringStudent.fullName} <br />
+                <strong>Hozirgi Guruhi:</strong> {transferringStudent.groupName}
+              </div>
+
               <div className="form-group">
-                <label className="form-label">
-                  O'quvchining F.I.SH (Familya va Ism)
-                </label>
+                <label className="form-label">Qaysi Yangi Guruhga O'tkazilsin:</label>
+                <select
+                  className="form-select"
+                  value={targetGroupId}
+                  onChange={(e) => setTargetGroupId(e.target.value)}
+                  required
+                >
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name} ({g.courseName}) • Ustoz: {g.teacherName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">O'tkazish Sababi / Izoh:</label>
                 <input
                   type="text"
                   className="form-input"
+                  placeholder="masalan: Dars vaqti to'g'ri kelmaganligi sababli kechki guruhga o'tkazildi"
+                  value={transferReason}
+                  onChange={(e) => setTransferReason(e.target.value)}
                   required
-                  placeholder="Masalan: Abdulaziz Abdulhayev"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
                 />
               </div>
 
+              <div className="modal-actions-flex">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsTransferModalOpen(false)}
+                >
+                  Bekor Qilish
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  <HiOutlineCheckCircle /> Guruhni O'zgartirish
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>
+                <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                {editingStudent
+                  ? "O'quvchi Ma'lumotlarini Tahrirlash"
+                  : "Yangi O'quvchi Ro'yxatdan O'tkazish"}
+              </h2>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setIsModalOpen(false)}
+              >
+                <HiXMark />
+              </button>
+            </div>
+
+            <form onSubmit={handleFormSubmit}>
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">
-                    O'quvchining Telefon Raqami
-                  </label>
+                  <label className="form-label">O'quvchi F.I.SH:</label>
                   <input
                     type="text"
                     className="form-input"
-                    required
-                    placeholder="+998 90 599 06 00"
-                    value={formData.phone}
+                    placeholder="masalan: Abdulaziz Abdulhayev"
+                    value={formData.fullName}
                     onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
+                      setFormData({ ...formData, fullName: e.target.value })
                     }
+                    required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Ota-onasi Telefon Raqami</label>
+                  <label className="form-label">Telefon Raqami:</label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="+998 90 599 06 00"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-grid">
+                <div className="form-group">
+                  <label className="form-label">Ota-onasi Telefoni:</label>
+                  <input
+                    type="text"
+                    className="form-input"
                     value={formData.parentPhone}
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
                     }
                   />
                 </div>
-              </div>
 
-              <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">Biriktiriladigan Guruh</label>
+                  <label className="form-label">Biriktirilgan Guruh:</label>
                   <select
                     className="form-select"
                     value={formData.groupId}
@@ -387,54 +507,65 @@ const Students = () => {
                   >
                     {groups.map((g) => (
                       <option key={g.id} value={g.id}>
-                        {g.name} ({g.courseName}) - {g.teacherName}
+                        {g.name} ({g.courseName})
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
 
+              <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">To'lov Holati</label>
+                  <label className="form-label">To'lov Holati:</label>
                   <select
                     className="form-select"
                     value={formData.paymentStatus}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        paymentStatus: e.target.value,
-                      })
+                      setFormData({ ...formData, paymentStatus: e.target.value })
                     }
                   >
-                    <option value="Paid">Paid (To'langan)</option>
-                    <option value="Overdue">Overdue (Qarzdor)</option>
+                    <option value="Paid">To'langan (Paid)</option>
+                    <option value="Overdue">Qarzdorlik bor (Overdue)</option>
                   </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Balans (so'm):</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={formData.balance}
+                    onChange={(e) =>
+                      setFormData({ ...formData, balance: e.target.value })
+                    }
+                  />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">
-                  Balans (Musbat yoki Manfiy masalan: -850000)
-                </label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={formData.balance}
+                <label className="form-label">O'qish Holati (Status):</label>
+                <select
+                  className="form-select"
+                  value={formData.status}
                   onChange={(e) =>
-                    setFormData({ ...formData, balance: e.target.value })
+                    setFormData({ ...formData, status: e.target.value })
                   }
-                />
+                >
+                  <option value="Active">Faol O'qimoqda</option>
+                  <option value="Inactive">Muzlatilgan / Bitirgan</option>
+                </select>
               </div>
 
-              <div className="admin-modal-actions">
+              <div className="modal-actions-flex">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Bekor qilish
+                  Bekor Qilish
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingStudent ? "Saqlash" : "O'quvchini Saqlash"}
+                  <HiOutlineCheckCircle /> Saqlash
                 </button>
               </div>
             </form>

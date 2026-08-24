@@ -35,6 +35,12 @@ export default (sequelize, DataTypes) => {
     {
       tableName: "attendance",
       timestamps: false,
+      indexes: [
+        { fields: ["group_id"] },
+        { fields: ["student_id"] },
+        { fields: ["date"] },
+        { fields: ["status"] },
+      ],
     },
   );
 };

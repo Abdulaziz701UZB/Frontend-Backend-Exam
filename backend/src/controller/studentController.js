@@ -130,3 +130,35 @@ export const searchStudents = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const transferStudent = async (req, res) => {
+  try {
+    const { newGroupId, newGroupName, transferReason } = req.body;
+    if (!newGroupId) {
+      return res.status(400).json({ error: "Yangi guruh tanlanishi shart" });
+    }
+
+    const student = await Student.findByPk(req.params.id);
+    if (!student) {
+      return res.status(404).json({ error: "O'quvchi topilmadi" });
+    }
+
+    const oldGroupName = student.group_name;
+    await student.update({
+      group_id: newGroupId,
+      group_name: newGroupName || newGroupId,
+    });
+
+    const updated = await Student.findByPk(req.params.id, {
+      include: [{ model: Group, as: "group" }],
+    });
+
+    res.status(200).json({
+      message: `O'quvchi ${oldGroupName} guruhidan ${newGroupName || newGroupId} guruhiga muvaffaqiyatli o'tkazildi!`,
+      student: updated,
+      transferReason: transferReason || "O'quvchi / ota-ona istagi",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
