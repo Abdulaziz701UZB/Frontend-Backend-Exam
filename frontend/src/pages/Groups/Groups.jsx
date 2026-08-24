@@ -479,13 +479,13 @@ const Groups = () => {
                       setFormData({ ...formData, scheduleTime: e.target.value })
                     }
                   >
-                    <option value="06:00 - 08:00">06:00 - 08:00 (Ertalabki)</option>
-                    <option value="08:00 - 10:00">08:00 - 10:00 (Tonggi)</option>
-                    <option value="10:00 - 12:00">10:00 - 12:00 (Tushgacha)</option>
-                    <option value="14:00 - 16:00">14:00 - 16:00 (Tushki)</option>
-                    <option value="16:00 - 18:00">16:00 - 18:00 (Kunduzgi)</option>
-                    <option value="18:00 - 20:00">18:00 - 20:00 (Kechki)</option>
-                    <option value="20:00 - 22:00">20:00 - 22:00 (Tungi / Night)</option>
+                    <option value="06:00 - 08:00">06:00 - 08:00</option>
+                    <option value="08:00 - 10:00">08:00 - 10:00</option>
+                    <option value="10:00 - 12:00">10:00 - 12:00</option>
+                    <option value="14:00 - 16:00">14:00 - 16:00</option>
+                    <option value="16:00 - 18:00">16:00 - 18:00</option>
+                    <option value="18:00 - 20:00">18:00 - 20:00</option>
+                    <option value="20:00 - 22:00">20:00 - 22:00</option>
                   </select>
                 </div>
               </div>
