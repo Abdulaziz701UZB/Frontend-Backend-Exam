@@ -282,6 +282,77 @@
   flex-shrink: 0;
 }
 
+.login-support-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 4px;
+}
+
+.login-contact-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0284c7;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(2, 132, 199, 0.08);
+  transition: all 0.2s ease;
+}
+
+.login-contact-admin-link:hover {
+  background: rgba(2, 132, 199, 0.16);
+  color: #0369a1;
+}
+
+.login-contact-admin-link .tg-link-icon {
+  font-size: 14px;
+  color: #0284c7;
+}
+
+.login-contact-admin-link .tg-arrow-icon {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.login-floating-theme-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+  z-index: 10;
+}
+
+.login-floating-theme-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.login-floating-theme-btn .theme-icon.sun {
+  font-size: 18px;
+  color: #f59e0b;
+}
+
+.login-floating-theme-btn .theme-icon.moon {
+  font-size: 18px;
+  color: #6366f1;
+}
+
 .login-submit-btn {
   display: flex;
   align-items: center;
@@ -315,12 +386,319 @@
   cursor: not-allowed;
 }
 
+.login-qr-open-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.login-qr-open-btn:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+  color: #4f46e5;
+}
+
+.login-qr-open-btn .qr-btn-icon {
+  font-size: 19px;
+}
+
 .login-footer-info {
-  margin-top: 28px;
+  margin-top: 24px;
   text-align: center;
   font-size: 12px;
   color: #94a3b8;
   font-weight: 500;
+}
+
+/* QR Code Modal */
+.login-qr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeInModal 0.25s ease-out;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.login-qr-modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleUpModal {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.login-qr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.qr-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qr-header-title-wrap .qr-header-icon {
+  font-size: 24px;
+  color: #4f46e5;
+}
+
+.qr-header-title-wrap h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.login-qr-close-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-qr-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.login-qr-modal-body {
+  text-align: center;
+}
+
+.qr-code-frame {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.qr-simulated-box {
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+  display: inline-block;
+}
+
+.qr-matrix-svg {
+  display: block;
+}
+
+.qr-instructions {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 20px;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+}
+
+.qr-step-text {
+  font-size: 13px;
+  color: #334155;
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.qr-step-text:last-child {
+  margin-bottom: 0;
+}
+
+.btn-open-telegram-bot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 20px;
+  background: #0284c7;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 14px;
+  font-size: 14.5px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.btn-open-telegram-bot:hover {
+  background: #0369a1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.45);
+}
+
+.btn-open-telegram-bot .tg-modal-icon {
+  font-size: 20px;
+}
+
+/* Dark Theme Overrides for Login Page */
+body.dark-theme .login-page-wrapper {
+  background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0%, rgba(15, 23, 42, 1) 90%);
+}
+
+body.dark-theme .login-card-container {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme .login-system-title {
+  color: #f8fafc;
+}
+
+body.dark-theme .login-system-subtitle {
+  color: #94a3b8;
+}
+
+body.dark-theme .login-floating-theme-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .login-floating-theme-btn:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+body.dark-theme .login-form-label {
+  color: #cbd5e1;
+}
+
+body.dark-theme .login-form-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-theme .login-form-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+body.dark-theme .login-phone-input-group {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+body.dark-theme .login-phone-input-field {
+  background: transparent;
+  color: #f8fafc;
+}
+
+body.dark-theme .phone-prefix-badge {
+  background: #334155;
+  color: #818cf8;
+  border-right-color: #475569;
+}
+
+body.dark-theme .login-credentials-hint {
+  background: rgba(22, 101, 52, 0.2);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+body.dark-theme .login-qr-open-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-theme .login-qr-open-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: #6366f1;
+  color: #a5b4fc;
+}
+
+body.dark-theme .login-contact-admin-link {
+  background: rgba(2, 132, 199, 0.15);
+  color: #38bdf8;
+}
+
+body.dark-theme .login-contact-admin-link:hover {
+  background: rgba(2, 132, 199, 0.25);
+  color: #7dd3fc;
+}
+
+body.dark-theme .login-qr-modal-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+body.dark-theme .login-qr-modal-header {
+  border-bottom-color: #334155;
+}
+
+body.dark-theme .qr-header-title-wrap h3 {
+  color: #f8fafc;
+}
+
+body.dark-theme .qr-simulated-box {
+  background: #ffffff;
+  border-color: #475569;
+}
+
+body.dark-theme .qr-instructions {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+body.dark-theme .qr-step-text {
+  color: #cbd5e1;
+}
+
+body.dark-theme .login-qr-close-btn {
+  background: #334155;
+  color: #94a3b8;
+}
+
+body.dark-theme .login-qr-close-btn:hover {
+  background: #475569;
+  color: #f8fafc;
 }
 
 @media (max-width: 480px) {
@@ -329,20 +707,23 @@
   }
 
   .login-card-container {
-    padding: 24px 18px;
+    padding: 28px 18px 20px;
     border-radius: 20px;
   }
 
   .login-system-title {
-    font-size: 22px;
+    font-size: 26px;
   }
 
   .login-logo-badge {
-    width: 50px;
-    height: 50px;
+    width: 90px;
+    height: 90px;
   }
 
-  .login-logo-icon {
-    font-size: 26px;
+  .login-floating-theme-btn {
+    top: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }

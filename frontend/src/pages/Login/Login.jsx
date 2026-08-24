@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import {
-  HiBolt,
   HiLockClosed,
   HiOutlineDevicePhoneMobile,
   HiEye,
   HiEyeSlash,
   HiArrowRightOnRectangle,
   HiExclamationCircle,
-  HiShieldCheck
+  HiShieldCheck,
+  HiQrCode,
+  HiSun,
+  HiMoon,
+  HiXMark,
+  HiArrowTopRightOnSquare
 } from "react-icons/hi2";
+import { FaTelegram } from "react-icons/fa6";
 import "./Login.css";
 
 const Login = () => {
@@ -22,6 +27,24 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    return localStorage.getItem("velnex_theme") === "dark" || document.body.classList.contains("dark-theme");
+  });
+
+  useEffect(() => {
+    if (isDarkTheme) {
+      document.body.classList.add("dark-theme");
+      localStorage.setItem("velnex_theme", "dark");
+    } else {
+      document.body.classList.remove("dark-theme");
+      localStorage.setItem("velnex_theme", "light");
+    }
+  }, [isDarkTheme]);
+
+  const toggleTheme = () => {
+    setIsDarkTheme((prev) => !prev);
+  };
 
   const format9DigitsOnly = (input) => {
     let digits = input.replace(/\D/g, "");
@@ -69,6 +92,16 @@ const Login = () => {
 
   return (
     <div className="login-page-wrapper">
+      <button
+        type="button"
+        className="login-floating-theme-btn"
+        onClick={toggleTheme}
+        title={isDarkTheme ? "Yorug' rejimga o'tish" : "Tungi rejimga o'tish"}
+      >
+        {isDarkTheme ? <HiSun className="theme-icon sun" /> : <HiMoon className="theme-icon moon" />}
+        <span>{isDarkTheme ? "Yorug' Rejim" : "Tungi Rejim"}</span>
+      </button>
+
       <div className="login-card-container">
         <div className="login-brand-header">
           <div className="login-logo-badge">
@@ -136,6 +169,20 @@ const Login = () => {
             </div>
           </div>
 
+          <div className="login-support-row">
+            <a
+              href="https://t.me/Abdulaziz7o1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="login-contact-admin-link"
+              title="Admin bilan Telegram orqali bog'lanish"
+            >
+              <FaTelegram className="tg-link-icon" />
+              <span>Admin bilan bog'lanish (@Abdulaziz7o1)</span>
+              <HiArrowTopRightOnSquare className="tg-arrow-icon" />
+            </a>
+          </div>
+
           <div className="login-credentials-hint">
             <HiShieldCheck className="hint-icon" />
             <span>Universal parol: <strong>10102013</strong> yoki <strong>1010201300</strong></span>
@@ -155,12 +202,103 @@ const Login = () => {
               </>
             )}
           </button>
+
+          <button
+            type="button"
+            className="login-qr-open-btn"
+            onClick={() => setShowQrModal(true)}
+          >
+            <HiQrCode className="qr-btn-icon" />
+            <span>QR Kod orqali kirish (Admin Bot)</span>
+          </button>
         </form>
 
         <div className="login-footer-info">
           <span>VELNEX • PostgreSQL & Express REST API</span>
         </div>
       </div>
+
+      {showQrModal && (
+        <div className="login-qr-modal-backdrop" onClick={() => setShowQrModal(false)}>
+          <div className="login-qr-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="login-qr-modal-header">
+              <div className="qr-header-title-wrap">
+                <HiQrCode className="qr-header-icon" />
+                <h3>Admin Bot QR Kod orqali Kirish</h3>
+              </div>
+              <button
+                className="login-qr-close-btn"
+                onClick={() => setShowQrModal(false)}
+                aria-label="Yopish"
+              >
+                <HiXMark />
+              </button>
+            </div>
+
+            <div className="login-qr-modal-body">
+              <div className="qr-code-frame">
+                <div className="qr-simulated-box">
+                  <svg className="qr-matrix-svg" viewBox="0 0 200 200" width="180" height="180">
+                    <rect width="200" height="200" fill="#ffffff" />
+                    <rect x="15" y="15" width="50" height="50" fill="#0f172a" rx="8" />
+                    <rect x="25" y="25" width="30" height="30" fill="#ffffff" rx="4" />
+                    <rect x="33" y="33" width="14" height="14" fill="#4f46e5" />
+                    <rect x="135" y="15" width="50" height="50" fill="#0f172a" rx="8" />
+                    <rect x="145" y="25" width="30" height="30" fill="#ffffff" rx="4" />
+                    <rect x="153" y="33" width="14" height="14" fill="#4f46e5" />
+                    <rect x="15" y="135" width="50" height="50" fill="#0f172a" rx="8" />
+                    <rect x="25" y="145" width="30" height="30" fill="#ffffff" rx="4" />
+                    <rect x="33" y="153" width="14" height="14" fill="#4f46e5" />
+                    <circle cx="90" cy="30" r="5" fill="#334155" />
+                    <circle cx="110" cy="30" r="5" fill="#334155" />
+                    <circle cx="80" cy="50" r="6" fill="#334155" />
+                    <circle cx="100" cy="50" r="6" fill="#334155" />
+                    <circle cx="120" cy="50" r="6" fill="#334155" />
+                    <circle cx="30" cy="90" r="5" fill="#334155" />
+                    <circle cx="50" cy="90" r="5" fill="#334155" />
+                    <circle cx="30" cy="110" r="5" fill="#334155" />
+                    <circle cx="50" cy="110" r="5" fill="#334155" />
+                    <circle cx="150" cy="90" r="5" fill="#334155" />
+                    <circle cx="170" cy="90" r="5" fill="#334155" />
+                    <circle cx="150" cy="110" r="5" fill="#334155" />
+                    <circle cx="170" cy="110" r="5" fill="#334155" />
+                    <circle cx="90" cy="150" r="5" fill="#334155" />
+                    <circle cx="110" cy="150" r="5" fill="#334155" />
+                    <circle cx="90" cy="170" r="5" fill="#334155" />
+                    <circle cx="110" cy="170" r="5" fill="#334155" />
+                    <circle cx="130" cy="150" r="5" fill="#334155" />
+                    <circle cx="150" cy="170" r="5" fill="#334155" />
+                    <circle cx="170" cy="150" r="5" fill="#334155" />
+                    <rect x="75" y="75" width="50" height="50" fill="#ffffff" rx="10" />
+                    <image href="/velnex-logo.png" x="80" y="80" width="40" height="40" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="qr-instructions">
+                <p className="qr-step-text">
+                  1. Telegram ilovasida <strong>@VelnexAdminBot</strong> ni oching.
+                </p>
+                <p className="qr-step-text">
+                  2. Botdagi <strong>/login</strong> buyrug'ini yuboring yoki kamerangiz bilan QR kodni skanerlang.
+                </p>
+              </div>
+
+              <div className="qr-modal-actions">
+                <a
+                  href="https://t.me/VelnexAdminBot"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-open-telegram-bot"
+                >
+                  <FaTelegram className="tg-modal-icon" />
+                  <span>Admin Botni Telegramda Ochish</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
