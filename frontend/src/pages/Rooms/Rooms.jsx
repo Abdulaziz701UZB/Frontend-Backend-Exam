@@ -10,13 +10,12 @@ import {
   HiOutlinePencilSquare,
   HiOutlineTrash,
   HiXMark,
-  HiOutlineComputerDesktop,
-  HiOutlineTv,
   HiOutlineUserGroup,
   HiOutlineCalendarDays,
   HiOutlineClock,
   HiOutlineChartBar,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineSparkles
 } from "react-icons/hi2";
 import "./Rooms.css";
 
@@ -46,8 +45,6 @@ const Rooms = () => {
   const [formData, setFormData] = useState({
     name: "301-xona (Yangi Lab)",
     capacity: 20,
-    computersCount: 20,
-    projector: "Mavjud",
     status: "Active",
   });
 
@@ -88,10 +85,8 @@ const Rooms = () => {
   const openCreateModal = () => {
     setEditingRoom(null);
     setFormData({
-      name: `Xona ${100 + rooms.length + 1} (Yangi Sinf)`,
-      capacity: 18,
-      computersCount: 15,
-      projector: "Mavjud",
+      name: `Xona ${100 + rooms.length + 1}`,
+      capacity: 20,
       status: "Active",
     });
     setIsModalOpen(true);
@@ -102,8 +97,6 @@ const Rooms = () => {
     setFormData({
       name: r.name,
       capacity: r.capacity,
-      computersCount: r.computersCount,
-      projector: r.projector,
       status: r.status,
     });
     setIsModalOpen(true);
@@ -126,8 +119,6 @@ const Rooms = () => {
     const payload = {
       name: formData.name,
       capacity: parseInt(formData.capacity || 20),
-      computers_count: parseInt(formData.computersCount || 0),
-      projector: formData.projector,
       status: formData.status,
     };
 
@@ -162,7 +153,7 @@ const Rooms = () => {
   };
 
   const totalCapacity = rooms.reduce((acc, r) => acc + (r.capacity || 0), 0);
-  const totalComputers = rooms.reduce((acc, r) => acc + (r.computersCount || 0), 0);
+  const totalFreeSlots = occupancyData.reduce((acc, o) => acc + (o.freeSlotsCount || 0), 0);
   const avgOccupancy = occupancyData.length > 0
     ? Math.round(occupancyData.reduce((acc, o) => acc + (o.occupancyRate || 0), 0) / occupancyData.length)
     : 0;
@@ -219,11 +210,11 @@ const Rooms = () => {
 
         <div className="room-kpi-card">
           <div className="room-kpi-icon kpi-purple">
-            <HiOutlineComputerDesktop />
+            <HiOutlineSparkles />
           </div>
           <div className="room-kpi-content">
-            <span>Kompyuterlar</span>
-            <strong>{totalComputers} ta PC</strong>
+            <span>Bo'sh Dars Slotlari</span>
+            <strong>{totalFreeSlots} ta slot</strong>
           </div>
         </div>
       </div>
@@ -275,17 +266,6 @@ const Rooms = () => {
                   </div>
                 </div>
 
-                <div className="room-features-row">
-                  <div className="room-feature-item">
-                    <HiOutlineComputerDesktop />
-                    <span>{r.computersCount} PC</span>
-                  </div>
-                  <div className="room-feature-item">
-                    <HiOutlineTv />
-                    <span>{r.projector}</span>
-                  </div>
-                </div>
-
                 <div className="room-card-actions">
                   <button
                     className="btn btn-secondary btn-sm"
@@ -323,9 +303,7 @@ const Rooms = () => {
               <tr>
                 <th>9 Xonali ID</th>
                 <th>Xona Nomi</th>
-                <th>Sig'imi</th>
-                <th>Kompyuterlar</th>
-                <th>Proektor</th>
+                <th>Maksimal Sig'imi</th>
                 <th>Faol Guruhlar</th>
                 <th>Holati</th>
                 {canManageGroups && <th className="text-center">Harakatlar</th>}
@@ -345,13 +323,6 @@ const Rooms = () => {
                     <td>
                       <strong>{r.capacity} kishi</strong>
                     </td>
-                    <td>
-                      <span className="text-indigo">
-                        <HiOutlineComputerDesktop className="inline-icon-xs" />
-                        {r.computersCount} ta
-                      </span>
-                    </td>
-                    <td>{r.projector}</td>
                     <td>
                       <span className="group-tag-pill">
                         {occ?.activeGroupsCount || 0} ta guruh
@@ -538,38 +509,6 @@ const Rooms = () => {
                     }
                     required
                   />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Kompyuterlar Soni:</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={formData.computersCount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        computersCount: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="admin-form-grid">
-                <div className="form-group">
-                  <label className="form-label">Proektor / Ekran:</label>
-                  <select
-                    className="form-select"
-                    value={formData.projector}
-                    onChange={(e) =>
-                      setFormData({ ...formData, projector: e.target.value })
-                    }
-                  >
-                    <option value="Mavjud">Mavjud</option>
-                    <option value="Mavjud (Smart TV)">Mavjud (Smart TV)</option>
-                    <option value="Mavjud emas">Mavjud emas</option>
-                  </select>
                 </div>
 
                 <div className="form-group">
