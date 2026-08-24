@@ -368,6 +368,13 @@ const Attendance = () => {
 
   const { stats: reasonStats, total: totalAbsences } = getReasonStats();
 
+  const todayAbsentCount = Object.values(attendanceMap).filter(
+    (a) => a.status === "Absent",
+  ).length;
+  const todayExcusedCount = Object.values(attendanceMap).filter(
+    (a) => a.status === "Excused",
+  ).length;
+
   return (
     <div className="attendance-page">
       <div className="page-header-flex">
