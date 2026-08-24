@@ -426,9 +426,11 @@ const Attendance = () => {
                     <span className="group-card-course">{g.courseName}</span>
 
                     <div className="group-card-meta-list">
-                      <div className="group-card-meta-item">
-                        <FaChalkboardUser /> Ustoz: <strong>{g.teacherName}</strong>
-                      </div>
+                      {currentRole === "admin" && (
+                        <div className="group-card-meta-item">
+                          <FaChalkboardUser /> Ustoz: <strong>{g.teacherName}</strong>
+                        </div>
+                      )}
                       <div className="group-card-meta-item">
                         <HiOutlineClock /> Vaqt: <strong>{g.scheduleTime}</strong>
                       </div>
@@ -459,7 +461,7 @@ const Attendance = () => {
               <div>
                 <h3 className="journal-group-title">{currentGroupObj?.name}</h3>
                 <span className="journal-group-subtitle">
-                  {currentGroupObj?.courseName} • Ustoz: <strong>{currentGroupObj?.teacherName}</strong> • Xona: {currentGroupObj?.room} ({currentGroupObj?.scheduleTime})
+                  {currentGroupObj?.courseName} {currentRole === "admin" ? `• Ustoz: ${currentGroupObj?.teacherName}` : ""} • Xona: {currentGroupObj?.room} ({currentGroupObj?.scheduleTime})
                 </span>
               </div>
             </div>
