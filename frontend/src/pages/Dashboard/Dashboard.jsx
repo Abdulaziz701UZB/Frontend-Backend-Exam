@@ -160,7 +160,7 @@ const Dashboard = () => {
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card">
+        <Link to="/students" className="stat-card stat-card-link">
           <div className="stat-icon-wrap icon-primary">
             <HiOutlineUsers />
           </div>
@@ -171,9 +171,9 @@ const Dashboard = () => {
               <HiArrowTrendingUp /> +12% bu oy
             </span>
           </div>
-        </div>
+        </Link>
 
-        <div className="stat-card">
+        <Link to="/payments" className="stat-card stat-card-link">
           <div className="stat-icon-wrap icon-success">
             <HiOutlineCreditCard />
           </div>
@@ -184,9 +184,9 @@ const Dashboard = () => {
               <HiArrowTrendingUp /> +8.4% o'sish
             </span>
           </div>
-        </div>
+        </Link>
 
-        <div className="stat-card">
+        <Link to="/groups" className="stat-card stat-card-link">
           <div className="stat-icon-wrap icon-warning">
             <HiOutlineAcademicCap />
           </div>
@@ -197,9 +197,9 @@ const Dashboard = () => {
             </div>
             <span className="stat-trend positive">Barcha kurslar faol</span>
           </div>
-        </div>
+        </Link>
 
-        <div className="stat-card">
+        <Link to="/payments?tab=debtors" className="stat-card stat-card-link">
           <div className="stat-icon-wrap icon-danger">
             <HiOutlineExclamationCircle />
           </div>
@@ -212,7 +212,7 @@ const Dashboard = () => {
               {overdueDebtors.length || 3} ta o'quvchi
             </span>
           </div>
-        </div>
+        </Link>
       </div>
 
       <div className="card payment-methods-breakdown-card">
