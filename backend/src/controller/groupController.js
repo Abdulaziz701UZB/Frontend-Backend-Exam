@@ -1,4 +1,4 @@
-import { Group, Course, Teacher } from "../models/index.js";
+import { Group, Course, Teacher, Room } from "../models/index.js";
 import { validateGroup } from "../validation/groupValidation.js";
 import { Op } from "sequelize";
 
@@ -21,6 +21,54 @@ export const createGroup = async (req, res) => {
       status: req.body.status || "Active",
       start_date: req.body.start_date || req.body.startDate || new Date().toISOString().split("T")[0],
     };
+
+    if (newGroupData.status === "Active" && !req.body.overrideConflict) {
+      const existingRoomConflict = await Group.findOne({
+        where: {
+          room: newGroupData.room,
+          schedule_days: newGroupData.schedule_days,
+          schedule_time: newGroupData.schedule_time,
+          status: "Active",
+        },
+      });
+
+      if (existingRoomConflict) {
+        return res.status(409).json({
+          error: `Xona band: "${newGroupData.room}" ayni shu vaqtda "${existingRoomConflict.name}" guruhi tomonidan band qilingan!`,
+          conflictType: "ROOM_CONFLICT",
+          conflictedGroup: existingRoomConflict.name,
+        });
+      }
+
+      if (newGroupData.teacher_id) {
+        const existingTeacherConflict = await Group.findOne({
+          where: {
+            teacher_id: newGroupData.teacher_id,
+            schedule_days: newGroupData.schedule_days,
+            schedule_time: newGroupData.schedule_time,
+            status: "Active",
+          },
+        });
+
+        if (existingTeacherConflict) {
+          return res.status(409).json({
+            error: `O'qituvchi band: O'qituvchi ayni shu vaqtda "${existingTeacherConflict.name}" guruhida dars o'tadi!`,
+            conflictType: "TEACHER_CONFLICT",
+            conflictedGroup: existingTeacherConflict.name,
+          });
+        }
+      }
+
+      const roomObj = await Room.findOne({ where: { name: newGroupData.room } });
+      const maxStudents = req.body.max_students || req.body.maxStudents || 15;
+      if (roomObj && roomObj.capacity && maxStudents > roomObj.capacity) {
+        return res.status(400).json({
+          error: `Sig'im xatosi: "${roomObj.name}" xonasi sig'imi ${roomObj.capacity} kishi, guruh esa ${maxStudents} kishilik!`,
+          conflictType: "CAPACITY_EXCEEDED",
+        });
+      }
+    }
+
     const group = await Group.create(newGroupData);
     const result = await Group.findByPk(group.id, {
       include: [
@@ -84,6 +132,46 @@ export const updateGroup = async (req, res) => {
       monthly_fee: req.body.monthly_fee !== undefined ? req.body.monthly_fee : req.body.monthlyFee !== undefined ? req.body.monthlyFee : group.monthly_fee,
       status: req.body.status || group.status,
     };
+
+    if (updateData.status === "Active" && !req.body.overrideConflict) {
+      const existingRoomConflict = await Group.findOne({
+        where: {
+          id: { [Op.ne]: req.params.id },
+          room: updateData.room,
+          schedule_days: updateData.schedule_days,
+          schedule_time: updateData.schedule_time,
+          status: "Active",
+        },
+      });
+
+      if (existingRoomConflict) {
+        return res.status(409).json({
+          error: `Xona band: "${updateData.room}" ayni shu vaqtda "${existingRoomConflict.name}" guruhi tomonidan band qilingan!`,
+          conflictType: "ROOM_CONFLICT",
+          conflictedGroup: existingRoomConflict.name,
+        });
+      }
+
+      if (updateData.teacher_id) {
+        const existingTeacherConflict = await Group.findOne({
+          where: {
+            id: { [Op.ne]: req.params.id },
+            teacher_id: updateData.teacher_id,
+            schedule_days: updateData.schedule_days,
+            schedule_time: updateData.schedule_time,
+            status: "Active",
+          },
+        });
+
+        if (existingTeacherConflict) {
+          return res.status(409).json({
+            error: `O'qituvchi band: O'qituvchi ayni shu vaqtda "${existingTeacherConflict.name}" guruhida dars o'tadi!`,
+            conflictType: "TEACHER_CONFLICT",
+            conflictedGroup: existingTeacherConflict.name,
+          });
+        }
+      }
+    }
 
     await group.update(updateData);
     const updatedGroup = await Group.findByPk(req.params.id, {

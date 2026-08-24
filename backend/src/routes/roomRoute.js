@@ -53,6 +53,20 @@ router.post("/rooms", roomController.createRoom);
 
 /**
  * @swagger
+ * /rooms/occupancy:
+ *   get:
+ *     tags: [Rooms]
+ *     summary: Xonalarning jonli dars jadvali va bandlik foizini olish
+ *     responses:
+ *       200:
+ *         description: Xonalar bandlik matritsasi
+ *       500:
+ *         description: Server xatosi
+ */
+router.get("/rooms/occupancy", roomController.getRoomOccupancy);
+
+/**
+ * @swagger
  * /rooms:
  *   get:
  *     tags: [Rooms]

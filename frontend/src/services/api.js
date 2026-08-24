@@ -342,6 +342,10 @@ export const roomsApi = {
     const res = await api.get("/rooms");
     return (res.data || []).map(normalizeRoom);
   },
+  getOccupancy: async () => {
+    const res = await api.get("/rooms/occupancy");
+    return res.data || [];
+  },
   getById: async (id) => {
     const res = await api.get(`/rooms/${id}`);
     return normalizeRoom(res.data);

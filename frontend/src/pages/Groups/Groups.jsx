@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
-import { groupsApi, coursesApi, teachersApi } from "../../services/api";
+import { useToast } from "../../context/ToastContext";
+import { groupsApi, coursesApi, teachersApi, roomsApi } from "../../services/api";
 import {
   HiOutlineAcademicCap,
   HiOutlinePlus,
@@ -12,17 +13,21 @@ import {
   HiOutlineClock,
   HiOutlineMapPin,
   HiOutlineBanknotes,
-  HiOutlineExclamationTriangle
+  HiOutlineExclamationTriangle,
+  HiOutlineUserGroup,
+  HiOutlineCheckCircle
 } from "react-icons/hi2";
 import { FaChalkboardUser, FaDoorClosed } from "react-icons/fa6";
 import "./Groups.css";
 
 const Groups = () => {
   const { canManageGroups } = useEduAuth();
+  const toast = useToast();
 
   const [groups, setGroups] = useState([]);
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [filterStatus, setFilterStatus] = useState("All");
@@ -46,16 +51,19 @@ const Groups = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [groupsData, coursesData, teachersData] = await Promise.all([
+      const [groupsData, coursesData, teachersData, roomsData] = await Promise.all([
         groupsApi.getAll(),
         coursesApi.getAll(),
         teachersApi.getAll(),
+        roomsApi.getAll(),
       ]);
       setGroups(groupsData);
       setCourses(coursesData);
       setTeachers(teachersData);
+      setRooms(roomsData);
     } catch (err) {
       console.error("Groups load error:", err.message);
+      toast.error("Guruhlar ma'lumotlarini yuklashda xatolik");
     } finally {
       setLoading(false);
     }
@@ -113,11 +121,12 @@ const Groups = () => {
   const openCreateModal = () => {
     setEditingGroup(null);
     setAllowConflictSave(false);
+    const defaultRoom = rooms[0]?.name || "201-xona (Kompyuter zali)";
     setFormData({
       courseId: courses[0]?.id || 1,
       name: "",
       teacherId: teachers[0]?.id || 101,
-      room: "201-xona (Kompyuter zali)",
+      room: defaultRoom,
       scheduleDays: "Dushanba - Chorshanba - Juma",
       scheduleTime: "14:00 - 16:00",
       monthlyFee: courses[0]?.price || 850000,
@@ -146,8 +155,8 @@ const Groups = () => {
     e.preventDefault();
 
     if (activeConflicts && !allowConflictSave) {
-      alert(
-        "Diqqat! Xona yoki o'qituvchi dars jadvalida to'qnashuv aniqlandi. Iltimos, xona yoki vaqtni o'zgartiring, yoki 'Ogohlantirishga qaramay saqlash' katakchasini belgilang.",
+      toast.warning(
+        "Diqqat! Xona yoki o'qituvchi dars jadvalida to'qnashuv aniqlandi. Iltimos, xona yoki vaqtni o'zgartiring!",
       );
       return;
     }
@@ -169,35 +178,39 @@ const Groups = () => {
       schedule_time: formData.scheduleTime,
       monthly_fee: parseFloat(formData.monthlyFee),
       status: formData.status,
+      overrideConflict: allowConflictSave,
     };
 
     try {
       if (editingGroup) {
         await groupsApi.update(editingGroup.id, payload);
+        toast.success(`"${formData.name}" guruhi yangilandi!`);
       } else {
         await groupsApi.create({
           id: `G-${Math.floor(100 + Math.random() * 900)}`,
           ...payload,
         });
+        toast.success(`"${formData.name}" yangi guruhi yaratildi!`);
       }
       await loadData();
       setIsModalOpen(false);
     } catch (err) {
-      alert("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
+      toast.error("Xatolik: " + (err.response?.data?.error || err.message));
     }
   };
 
-  const handleDeleteGroup = async (groupId) => {
+  const handleDeleteGroup = async (groupId, groupName) => {
     if (
       window.confirm(
-        "Haqiqatan ham ushbu guruhni yopmoqchisiz/o'chirmoqchisiz?",
+        `Haqiqatan ham "${groupName || groupId}" guruhini o'chirmoqchimisiz?`,
       )
     ) {
       try {
         await groupsApi.delete(groupId);
+        toast.success(`"${groupName}" guruhi o'chirildi!`);
         await loadData();
       } catch (err) {
-        alert("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
+        toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
       }
     }
   };
@@ -209,7 +222,8 @@ const Groups = () => {
       return (
         (g.name || "").toLowerCase().includes(s) ||
         (g.courseName || "").toLowerCase().includes(s) ||
-        (g.teacherName || "").toLowerCase().includes(s)
+        (g.teacherName || "").toLowerCase().includes(s) ||
+        (g.room || "").toLowerCase().includes(s)
       );
     }
     return true;
@@ -218,6 +232,8 @@ const Groups = () => {
   const formatMoney = (amount) => {
     return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
+
+  const selectedRoomObj = rooms.find((r) => r.name === formData.room);
 
   return (
     <div className="groups-page">
@@ -246,42 +262,38 @@ const Groups = () => {
             <input
               type="text"
               className="form-input search-field"
-              placeholder="Guruh, kurs yoki o'qituvchi bo'yicha qidiruv..."
+              placeholder="Guruh, kurs, o'qituvchi yoki xona bo'yicha qidiruv..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <div className="filter-pills">
-            <button
-              className={`pill-btn ${filterStatus === "All" ? "active" : ""}`}
-              onClick={() => setFilterStatus("All")}
-            >
-              Barchasi ({groups.length})
-            </button>
-            <button
-              className={`pill-btn ${filterStatus === "Active" ? "active" : ""}`}
-              onClick={() => setFilterStatus("Active")}
-            >
-              Faol Guruhlar (
-              {groups.filter((g) => g.status === "Active").length})
-            </button>
-            <button
-              className={`pill-btn ${filterStatus === "Finished" ? "active" : ""}`}
-              onClick={() => setFilterStatus("Finished")}
-            >
-              Yakunlanganlar (
-              {groups.filter((g) => g.status === "Finished").length})
-            </button>
+            {["All", "Active", "Finished", "Upcoming"].map((status) => (
+              <button
+                key={status}
+                className={`pill-btn ${filterStatus === status ? "active" : ""}`}
+                onClick={() => setFilterStatus(status)}
+              >
+                {status === "All"
+                  ? "Barcha Guruhlar"
+                  : status === "Active"
+                    ? "Faol Guruhlar"
+                    : status === "Finished"
+                      ? "Bitirganlar"
+                      : "Yaqinda Ochiladigan"}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="groups-grid">
-        {filteredGroups.length === 0 ? (
-          <div className="card empty-card">
-            <h3>Guruhlar topilmadi</h3>
-            <p>Qidiruv so'rovini yoki filtrni o'zgartiring</p>
+        {loading ? (
+          <div className="skeleton-card" style={{ height: 260 }}></div>
+        ) : filteredGroups.length === 0 ? (
+          <div className="card" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px 20px" }}>
+            <p className="text-muted">Guruhlar topilmadi</p>
           </div>
         ) : (
           filteredGroups.map((group) => (
@@ -289,17 +301,14 @@ const Groups = () => {
               <div className="group-card-header">
                 <span className="group-id-badge">{group.id}</span>
                 <span
-                  className={`status-badge badge-${(group.status || 'active').toLowerCase()}`}
+                  className={`status-pill ${group.status === "Active" ? "pill-paid" : "pill-overdue"}`}
                 >
                   {group.status === "Active" ? "Faol" : "Yakunlangan"}
                 </span>
               </div>
 
               <h3 className="group-name">{group.name}</h3>
-              <p className="group-course">
-                <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                {group.courseName}
-              </p>
+              <p className="group-course">{group.courseName}</p>
 
               <div className="group-details-list">
                 <div className="detail-item">
@@ -313,7 +322,7 @@ const Groups = () => {
                 <div className="detail-item">
                   <span className="detail-icon"><HiOutlineCalendarDays /></span>
                   <div>
-                    <label>Dars Kunlari</label>
+                    <label>Kunlar</label>
                     <p>{group.scheduleDays}</p>
                   </div>
                 </div>
@@ -321,15 +330,15 @@ const Groups = () => {
                 <div className="detail-item">
                   <span className="detail-icon"><HiOutlineClock /></span>
                   <div>
-                    <label>Dars Vaqti</label>
-                    <p>{group.scheduleTime}</p>
+                    <label>Vaqt</label>
+                    <p className="text-indigo font-bold">{group.scheduleTime}</p>
                   </div>
                 </div>
 
                 <div className="detail-item">
                   <span className="detail-icon"><HiOutlineMapPin /></span>
                   <div>
-                    <label>Xona</label>
+                    <label>Dars Xonasi</label>
                     <p>{group.room}</p>
                   </div>
                 </div>
@@ -338,9 +347,7 @@ const Groups = () => {
                   <span className="detail-icon"><HiOutlineBanknotes /></span>
                   <div>
                     <label>Oylik To'lov</label>
-                    <p className="font-bold text-indigo">
-                      {formatMoney(group.monthlyFee)}
-                    </p>
+                    <p className="font-bold">{formatMoney(group.monthlyFee)}</p>
                   </div>
                 </div>
               </div>
@@ -355,7 +362,7 @@ const Groups = () => {
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteGroup(group.id)}
+                    onClick={() => handleDeleteGroup(group.id, group.name)}
                   >
                     <HiOutlineTrash /> O'chirish
                   </button>
@@ -367,8 +374,8 @@ const Groups = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content card">
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
                 {editingGroup ? "Guruhni Tahrirlash" : "Yangi Guruh Yaratish"}
@@ -405,9 +412,14 @@ const Groups = () => {
                   <select
                     className="form-select"
                     value={formData.courseId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, courseId: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const selCourse = courses.find((c) => c.id === parseInt(e.target.value));
+                      setFormData({
+                        ...formData,
+                        courseId: e.target.value,
+                        monthlyFee: selCourse?.price || formData.monthlyFee,
+                      });
+                    }}
                   >
                     {courses.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -468,17 +480,19 @@ const Groups = () => {
                     }
                   >
                     <option value="09:00 - 11:00">09:00 - 11:00</option>
-                    <option value="10:00 - 12:00">10:00 - 12:00</option>
+                    <option value="11:00 - 13:00">11:00 - 13:00</option>
                     <option value="14:00 - 16:00">14:00 - 16:00</option>
-                    <option value="16:30 - 18:30">16:30 - 18:30</option>
-                    <option value="18:30 - 20:30">18:30 - 20:30</option>
+                    <option value="16:00 - 18:00">16:00 - 18:00</option>
+                    <option value="18:00 - 20:00">18:00 - 20:00</option>
                   </select>
                 </div>
               </div>
 
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">Dars Xonasi</label>
+                  <label className="form-label">
+                    Dars Xonasi {selectedRoomObj ? `(Sig'imi: ${selectedRoomObj.capacity} kishi)` : ""}
+                  </label>
                   <select
                     className="form-select"
                     value={formData.room}
@@ -486,28 +500,24 @@ const Groups = () => {
                       setFormData({ ...formData, room: e.target.value })
                     }
                   >
-                    <option value="201-xona (Kompyuter zali)">
-                      201-xona (Kompyuter zali)
-                    </option>
-                    <option value="202-xona (Dizayn Lab)">
-                      202-xona (Dizayn Lab)
-                    </option>
-                    <option value="203-xona (Backend Lab)">
-                      203-xona (Backend Lab)
-                    </option>
-                    <option value="102-xona (Media xona)">
-                      102-xona (Media xona)
-                    </option>
-                    <option value="301-xona (Yangi Lab)">
-                      301-xona (Yangi Lab)
-                    </option>
+                    {rooms.length > 0 ? (
+                      rooms.map((r) => (
+                        <option key={r.id} value={r.name}>
+                          {r.name} — Sig'imi: {r.capacity} kishi
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="201-xona (Kompyuter zali)">201-xona (Kompyuter zali)</option>
+                        <option value="202-xona (Dizayn Lab)">202-xona (Dizayn Lab)</option>
+                        <option value="203-xona (Backend Lab)">203-xona (Backend Lab)</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">
-                    Oylik To'lov Miqdori (so'm)
-                  </label>
+                  <label className="form-label">Oylik Kurs To'lovi</label>
                   <input
                     type="number"
                     className="form-input"
@@ -520,32 +530,15 @@ const Groups = () => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Guruh Holati</label>
-                <select
-                  className="form-select"
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                >
-                  <option value="Active">Active (Darslar davom etmoqda)</option>
-                  <option value="Finished">Finished (Guruh yakunlangan)</option>
-                </select>
-              </div>
-
               {activeConflicts && (
                 <div className="conflict-alert-box">
                   <div className="conflict-alert-header">
-                    <span className="conflict-alert-icon"><HiOutlineExclamationTriangle /></span>
-                    <strong>Jadvalda To'qnashuv (Conflict) Aniqlandi!</strong>
+                    <HiOutlineExclamationTriangle className="conflict-alert-icon" />
+                    <span>Dars Jadvali To'qnashuvi Aniqlandi!</span>
                   </div>
                   <ul className="conflict-list">
-                    {activeConflicts.map((c, i) => (
-                      <li key={i}>
-                        {c.type === "room" ? <FaDoorClosed style={{ marginRight: 4 }} /> : <FaChalkboardUser style={{ marginRight: 4 }} />}
-                        {c.message}
-                      </li>
+                    {activeConflicts.map((c, idx) => (
+                      <li key={idx}>{c.message}</li>
                     ))}
                   </ul>
                   <label className="conflict-override-checkbox">
@@ -554,9 +547,7 @@ const Groups = () => {
                       checked={allowConflictSave}
                       onChange={(e) => setAllowConflictSave(e.target.checked)}
                     />
-                    <span>
-                      Ogohlantirishga qaramay baribir saqlash (Force Override)
-                    </span>
+                    <span>Ogohlantirishga qaramay saqlashga ruxsat berish (Admin Override)</span>
                   </label>
                 </div>
               )}
@@ -569,11 +560,8 @@ const Groups = () => {
                 >
                   Bekor qilish
                 </button>
-                <button
-                  type="submit"
-                  className={`btn ${activeConflicts && !allowConflictSave ? "btn-danger" : "btn-primary"}`}
-                >
-                  {editingGroup ? "Guruhni Saqlash" : "Guruhni Yaratish"}
+                <button type="submit" className="btn btn-primary">
+                  {editingGroup ? "Guruhni Yangilash" : "Guruhni Yaratish"}
                 </button>
               </div>
             </form>
