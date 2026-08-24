@@ -269,3 +269,58 @@
     width: 150px;
   }
 }
+
+@media (max-width: 640px) {
+  .attendance-toggle-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .att-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .reason-categorizer-box {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .attendance-absent-pill,
+  .reason-select,
+  .reason-custom-note {
+    height: 34px;
+    min-height: 34px;
+    font-size: 12px !important;
+  }
+
+  .reason-select {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .reason-custom-note {
+    min-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .group-info-pill {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .student-stat-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stat-progress-wrap {
+    width: 100%;
+  }
+}

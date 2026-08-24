@@ -243,7 +243,6 @@
 }
 
 @media (max-width: 768px) {
-
   .page-header-flex,
   .filter-row {
     flex-direction: column;
@@ -252,6 +251,39 @@
 
   .search-input-wrap {
     max-width: 100%;
+    width: 100%;
+  }
+
+  .groups-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-pills {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .pill-btn {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .group-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .group-name {
+    font-size: 17px;
+  }
+
+  .group-card-actions {
+    flex-direction: column;
+  }
+
+  .group-card-actions .btn {
     width: 100%;
   }
 }

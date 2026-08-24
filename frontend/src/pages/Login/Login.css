@@ -275,3 +275,27 @@
   color: #94a3b8;
   font-weight: 500;
 }
+
+@media (max-width: 480px) {
+  .login-page-wrapper {
+    padding: 16px;
+  }
+
+  .login-card-container {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+
+  .login-system-title {
+    font-size: 22px;
+  }
+
+  .login-logo-badge {
+    width: 50px;
+    height: 50px;
+  }
+
+  .login-logo-icon {
+    font-size: 26px;
+  }
+}
