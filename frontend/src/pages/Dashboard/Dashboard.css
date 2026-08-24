@@ -508,17 +508,35 @@
   font-size: 13.5px;
 }
 
-@media (max-width: 992px) {
-  .dashboard-welcome-banner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.dashboard-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
 
-  .dashboard-content-grid,
-  .analytics-details-grid,
-  .student-personal-grid {
-    grid-template-columns: 1fr;
-  }
+.section-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4f46e5;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.link-btn:hover {
+  color: #4338ca;
+  transform: translateX(2px);
 }
 
 .payment-methods-breakdown-card {
@@ -619,7 +637,16 @@
   font-weight: 600;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 992px) {
+  .dashboard-welcome-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-grid-2,
+  .dashboard-content-grid,
+  .analytics-details-grid,
+  .student-personal-grid,
   .payment-channels-grid {
     grid-template-columns: 1fr;
   }
