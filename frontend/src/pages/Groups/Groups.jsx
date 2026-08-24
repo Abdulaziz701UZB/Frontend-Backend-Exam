@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { groupsApi, coursesApi, teachersApi, roomsApi, studentsApi } from "../../services/api";
+import { format9DigitId, formatSpaced9DigitId } from "../../utils/idFormatter";
 import {
   HiOutlineAcademicCap,
   HiOutlinePlus,
@@ -28,6 +30,8 @@ import "./Groups.css";
 const Groups = () => {
   const { canManageGroups } = useEduAuth();
   const toast = useToast();
+  const { id: urlParamId } = useParams();
+  const navigate = useNavigate();
 
   const [groups, setGroups] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -83,6 +87,19 @@ const Groups = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (urlParamId && groups.length > 0) {
+      const match = groups.find(
+        (g) =>
+          String(g.id) === String(urlParamId) ||
+          format9DigitId(g.id, "group") === String(urlParamId)
+      );
+      if (match) {
+        setSelectedGroupDetail(match);
+      }
+    }
+  }, [urlParamId, groups]);
 
   const checkScheduleConflict = () => {
     if (formData.status !== "Active") return null;
@@ -166,6 +183,14 @@ const Groups = () => {
   const openDetailModal = (group, e) => {
     if (e) e.stopPropagation();
     setSelectedGroupDetail(group);
+    navigate(`/groups/${format9DigitId(group.id, "group")}`);
+  };
+
+  const closeDetailModal = () => {
+    setSelectedGroupDetail(null);
+    if (urlParamId) {
+      navigate("/groups");
+    }
   };
 
   const handleFormSubmit = async (e) => {
@@ -206,7 +231,7 @@ const Groups = () => {
         toast.success(`"${formData.name}" guruhi yangilandi!`);
       } else {
         await groupsApi.create({
-          id: `G-${Math.floor(100 + Math.random() * 900)}`,
+          id: `G-${Math.floor(100000000 + Math.random() * 900000000)}`,
           ...payload,
         });
         toast.success(`"${formData.name}" yangi guruhi yaratildi!`);
@@ -309,7 +334,7 @@ const Groups = () => {
             3. Kurslar va Guruhlar
           </h1>
           <p className="page-subtitle">
-            O'quv markazining barcha faol va yakunlangan dars guruhlari, to'qnashuv detektori va chuqur moliyaviy tahlili
+            O'quv markazining barcha faol guruhlari, 9 xonali guruh ID lari, to'qnashuv detektori va moliyaviy tahlili
           </p>
         </div>
         {canManageGroups && (
@@ -366,10 +391,10 @@ const Groups = () => {
               <div
                 key={group.id}
                 className="group-card"
-                onClick={() => setSelectedGroupDetail(group)}
+                onClick={(e) => openDetailModal(group, e)}
               >
                 <div className="group-card-header">
-                  <span className="group-id-badge">{group.id}</span>
+                  <span className="group-id-badge">#{format9DigitId(group.id, "group")}</span>
                   <span
                     className={`status-pill ${group.status === "Active" ? "pill-paid" : "pill-overdue"}`}
                   >
@@ -461,7 +486,7 @@ const Groups = () => {
       </div>
 
       {selectedGroupDetail && groupFin && (
-        <div className="modal-overlay" onClick={() => setSelectedGroupDetail(null)}>
+        <div className="modal-overlay" onClick={closeDetailModal}>
           <div
             className="modal-content card group-detail-modal-card"
             onClick={(e) => e.stopPropagation()}
@@ -473,12 +498,12 @@ const Groups = () => {
                   {selectedGroupDetail.name} — Tahlil va O'quvchilar
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
-                  Kurs: <strong>{selectedGroupDetail.courseName}</strong> | Ustoz: <strong>{selectedGroupDetail.teacherName}</strong> ({groupFin.teacherGroupsCount} ta guruhi bor)
+                  Guruh 9 Xonali ID: <strong>#{format9DigitId(selectedGroupDetail.id, "group")}</strong> | Ustoz: <strong>{selectedGroupDetail.teacherName}</strong> ({groupFin.teacherGroupsCount} ta guruhi bor)
                 </p>
               </div>
               <button
                 className="close-modal-btn"
-                onClick={() => setSelectedGroupDetail(null)}
+                onClick={closeDetailModal}
                 aria-label="Yopish"
               >
                 <HiXMark />
@@ -514,7 +539,9 @@ const Groups = () => {
                 </div>
                 <div className="kpi-content">
                   <span className="kpi-label">Guruh Sof Foydasi</span>
-                  <strong className="kpi-value text-indigo">{formatMoney(groupFin.netProfit)}</strong>
+                  <strong className={`kpi-value ${groupFin.netProfit >= 0 ? "text-indigo" : "text-danger"}`}>
+                    {formatMoney(groupFin.netProfit)}
+                  </strong>
                   <span className="kpi-subtext">{groupFin.profitMargin}% Rentabellik marjasi</span>
                 </div>
               </div>
@@ -573,7 +600,7 @@ const Groups = () => {
                 <table className="dash-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>9 Xonali ID</th>
                       <th>O'quvchi F.I.SH</th>
                       <th>Telefon Raqami</th>
                       <th>Davomat Foizi</th>
@@ -592,7 +619,7 @@ const Groups = () => {
                     ) : (
                       groupFin.groupStudents.map((s, idx) => (
                         <tr key={s.id}>
-                          <td><span className="id-pill">#{s.id}</span></td>
+                          <td><span className="id-pill">#{format9DigitId(s.id, "student")}</span></td>
                           <td>
                             <strong className="student-name-text">{s.fullName}</strong>
                           </td>
@@ -627,7 +654,7 @@ const Groups = () => {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setSelectedGroupDetail(null)}
+                onClick={closeDetailModal}
               >
                 Yopish
               </button>

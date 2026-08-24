@@ -69,18 +69,22 @@ function ProtectedApp() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:id" element={<Groups />} />
             <Route path="/students" element={<Students />} />
+            <Route path="/students/:id" element={<Students />} />
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/payments/:id" element={<Payments />} />
             <Route path="/teachers" element={<Teachers />} />
+            <Route path="/teachers/:id" element={<Teachers />} />
             <Route path="/exams" element={<Exams />} />
             <Route path="/homework" element={<Homework />} />
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/rooms" element={<Rooms />} />
+            <Route path="/rooms/:id" element={<Rooms />} />
             <Route path="/leads" element={<Leads />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/trial-lessons" element={<TrialLessons />} />
-            <Route path="/telegram-bot" element={<TelegramBot />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

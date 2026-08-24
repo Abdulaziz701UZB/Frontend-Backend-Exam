@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { studentsApi, groupsApi, teachersApi, paymentsApi, attendanceApi } from "../../services/api";
+import { format9DigitId, formatSpaced9DigitId } from "../../utils/idFormatter";
 import {
   HiOutlineUsers,
   HiOutlinePlus,
@@ -31,6 +32,8 @@ const Students = () => {
   const { canManageStudents } = useEduAuth();
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { id: urlParamId } = useParams();
+  const navigate = useNavigate();
 
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -99,6 +102,19 @@ const Students = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (urlParamId && students.length > 0) {
+      const match = students.find(
+        (s) =>
+          String(s.id) === String(urlParamId) ||
+          format9DigitId(s.id, "student") === String(urlParamId)
+      );
+      if (match) {
+        setSelectedDossierStudent(match);
+      }
+    }
+  }, [urlParamId, students]);
 
   useEffect(() => {
     const action = searchParams.get("action");
@@ -188,6 +204,7 @@ const Students = () => {
     if (e) e.stopPropagation();
     setSelectedDossierStudent(student);
     setDossierActiveTab("payments");
+    navigate(`/students/${format9DigitId(student.id, "student")}`);
   };
 
   const closeModals = () => {
@@ -195,6 +212,9 @@ const Students = () => {
     setIsTransferModalOpen(false);
     setSelectedDossierStudent(null);
     setSearchParams({});
+    if (urlParamId) {
+      navigate("/students");
+    }
   };
 
   const handleSearchSubmit = (e) => {
@@ -237,7 +257,7 @@ const Students = () => {
         toast.success("O'quvchi ma'lumotlari yangilandi!");
       } else {
         await studentsApi.create({
-          id: `S-${Math.floor(100 + Math.random() * 900)}`,
+          id: `S-${Math.floor(100000000 + Math.random() * 900000000)}`,
           ...payload,
         });
         toast.success("Yangi o'quvchi ro'yxatdan o'tkazildi!");
@@ -304,9 +324,9 @@ const Students = () => {
     const phoneMatch = appliedFilters.phone.trim()
       ? (() => {
           const rawQuery = appliedFilters.phone.replace(/\D/g, "");
-          const rawPhone = (s.phone || "").replace(/\D/g, "");
-          const rawParent = (s.parentPhone || "").replace(/\D/g, "");
-          return rawPhone.includes(rawQuery) || rawParent.includes(rawQuery) || (s.phone || "").includes(appliedFilters.phone);
+          const rawPhone = String(s.phone || "").replace(/\D/g, "");
+          const rawParent = String(s.parentPhone || "").replace(/\D/g, "");
+          return rawPhone.includes(rawQuery) || rawParent.includes(rawQuery) || String(s.phone || "").includes(appliedFilters.phone);
         })()
       : true;
 
@@ -324,7 +344,7 @@ const Students = () => {
   const getStudentDossierData = (student) => {
     if (!student) return null;
     const studentPayments = payments.filter((p) => String(p.studentId) === String(student.id));
-    const totalLTV = studentPayments.reduce((sum, p) => sum + (p.amount || 0), 0) + (student.balance >= 0 ? 850000 * 3 : 850000 * 2);
+    const totalLTV = studentPayments.reduce((sum, p) => sum + (p.amount || 0), 0) + (student.balance >= 0 ? 850000 * 4 : 850000 * 2);
 
     const mockAttendance = [
       { date: "22.08.2026", status: "present", note: "Vaqtida keldi" },
@@ -362,7 +382,7 @@ const Students = () => {
             2. O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            Barcha o'quvchilar ro'yxati, to'lov balanslari, 360° o'quvchi dosyesi va guruhlar o'rtasida o'tkazish (Transfer)
+            Barcha o'quvchilar ro'yxati, to'lov balanslari, 9 xonali identifikatorlar va 360° o'quvchi dosyesi
           </p>
         </div>
 
@@ -465,6 +485,7 @@ const Students = () => {
             <table className="dash-table">
               <thead>
                 <tr>
+                  <th>O'quvchi 9 Xonali ID</th>
                   <th>F.I.SH (Dosye ko'rish uchun bosing)</th>
                   <th>Telefon Raqami</th>
                   <th>Guruhi</th>
@@ -479,7 +500,7 @@ const Students = () => {
               <tbody>
                 {filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center text-muted py-6">
+                    <td colSpan="8" className="text-center text-muted py-6">
                       Kiritilgan mezonlar bo'yicha hech qanday o'quvchi topilmadi
                     </td>
                   </tr>
@@ -491,6 +512,9 @@ const Students = () => {
                       onClick={() => openDossier(s)}
                     >
                       <td>
+                        <span className="id-pill">#{format9DigitId(s.id, "student")}</span>
+                      </td>
+                      <td>
                         <div className="student-name-cell">
                           <span className="avatar-circle">
                             <FaUserGraduate />
@@ -499,7 +523,7 @@ const Students = () => {
                             <span className="student-name-text">
                               {s.fullName}
                             </span>
-                            <span className="student-status-tag">360° dosye ochish</span>
+                            <span className="student-status-tag">360° dosye /students/{format9DigitId(s.id, "student")}</span>
                           </div>
                         </div>
                       </td>
@@ -602,7 +626,7 @@ const Students = () => {
                   {selectedDossierStudent.fullName} — 360° O'quvchi Dosyesi
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
-                  O'quvchi ID: <strong>#{selectedDossierStudent.id}</strong> | Guruhi: <strong>{selectedDossierStudent.groupName}</strong>
+                  O'quvchi 9 Xonali ID: <strong>#{format9DigitId(selectedDossierStudent.id, "student")}</strong> | Guruhi: <strong>{selectedDossierStudent.groupName}</strong>
                 </p>
               </div>
               <button
@@ -623,7 +647,7 @@ const Students = () => {
                   <h3 className="dossier-name">{selectedDossierStudent.fullName}</h3>
                   <p className="dossier-subtext">
                     <span>{selectedDossierStudent.phone}</span> • 
-                    <span className="status-pill pill-paid">Faol O'quvchi</span>
+                    <span className="status-pill pill-paid">ID: {formatSpaced9DigitId(selectedDossierStudent.id, "student")}</span>
                   </p>
                 </div>
               </div>
@@ -679,7 +703,7 @@ const Students = () => {
                     <table className="dash-table">
                       <thead>
                         <tr>
-                          <th>Kvitansiya ID</th>
+                          <th>Kvitansiya 9 Xonali ID</th>
                           <th>To'lov Sanasi</th>
                           <th>To'lov Usuli</th>
                           <th>Summa</th>
@@ -689,7 +713,7 @@ const Students = () => {
                       </thead>
                       <tbody>
                         <tr>
-                          <td><span className="id-pill">#PAY-9812</span></td>
+                          <td><span className="id-pill">#800109812</span></td>
                           <td>15.08.2026</td>
                           <td><span className="group-tag-pill">Click</span></td>
                           <td><strong>{formatMoney(850000)}</strong></td>
@@ -705,7 +729,7 @@ const Students = () => {
                           </td>
                         </tr>
                         <tr>
-                          <td><span className="id-pill">#PAY-8421</span></td>
+                          <td><span className="id-pill">#800108421</span></td>
                           <td>15.07.2026</td>
                           <td><span className="group-tag-pill">Payme</span></td>
                           <td><strong>{formatMoney(850000)}</strong></td>

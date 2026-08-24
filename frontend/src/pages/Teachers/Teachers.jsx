@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { teachersApi, groupsApi, studentsApi } from "../../services/api";
+import { format9DigitId, formatSpaced9DigitId } from "../../utils/idFormatter";
 import {
   HiOutlineUsers,
   HiOutlinePlus,
@@ -25,6 +27,8 @@ import "./Teachers.css";
 const Teachers = () => {
   const { canManageGroups } = useEduAuth();
   const toast = useToast();
+  const { id: urlParamId } = useParams();
+  const navigate = useNavigate();
 
   const [teachers, setTeachers] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -107,6 +111,19 @@ const Teachers = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (urlParamId && teachers.length > 0) {
+      const match = teachers.find(
+        (t) =>
+          String(t.id) === String(urlParamId) ||
+          format9DigitId(t.id, "teacher") === String(urlParamId)
+      );
+      if (match) {
+        setSelectedTeacherDetail(match);
+      }
+    }
+  }, [urlParamId, teachers]);
+
   const openCreateModal = () => {
     setEditingTeacher(null);
     setFormData({
@@ -137,6 +154,14 @@ const Teachers = () => {
   const openDetailModal = (teacher, e) => {
     if (e) e.stopPropagation();
     setSelectedTeacherDetail(teacher);
+    navigate(`/teachers/${format9DigitId(teacher.id, "teacher")}`);
+  };
+
+  const closeDetailModal = () => {
+    setSelectedTeacherDetail(null);
+    if (urlParamId) {
+      navigate("/teachers");
+    }
   };
 
   const handleFormSubmit = async (e) => {
@@ -216,7 +241,7 @@ const Teachers = () => {
             5. O'qituvchilar va Xodimlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            O'quv markazining barcha o'qituvchilari, mutaxassisliklari, maosh kalkulyatori va shaxsiy dars jadvallari
+            O'quv markazining barcha o'qituvchilari, 9 xonali identifikatorlar, maosh kalkulyatori va shaxsiy dars jadvallari
           </p>
         </div>
         {canManageGroups && (
@@ -244,7 +269,7 @@ const Teachers = () => {
           <table className="dash-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>9 Xonali ID</th>
                 <th>O'qituvchi F.I.SH (Tahlil uchun bosing)</th>
                 <th>Mutaxassisligi / Fani</th>
                 <th>Telefon</th>
@@ -261,14 +286,14 @@ const Teachers = () => {
                   onClick={() => openDetailModal(t)}
                 >
                   <td>
-                    <span className="id-pill">#{t.id}</span>
+                    <span className="id-pill">#{format9DigitId(t.id, "teacher")}</span>
                   </td>
                   <td>
                     <div className="student-name-cell">
                       <span className="avatar-circle"><FaChalkboardUser /></span>
                       <div>
                         <strong className="student-name-text">{t.name}</strong>
-                        <span className="student-status-tag">KPI & Dars jadvali</span>
+                        <span className="student-status-tag">/teachers/{format9DigitId(t.id, "teacher")}</span>
                       </div>
                     </div>
                   </td>
@@ -311,7 +336,7 @@ const Teachers = () => {
       </div>
 
       {selectedTeacherDetail && teacherStats && (
-        <div className="modal-overlay" onClick={() => setSelectedTeacherDetail(null)}>
+        <div className="modal-overlay" onClick={closeDetailModal}>
           <div
             className="modal-content card teacher-detail-modal-card"
             onClick={(e) => e.stopPropagation()}
@@ -323,12 +348,12 @@ const Teachers = () => {
                   {selectedTeacherDetail.name} — O'qituvchi KPI & Jadvallari
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
-                  Mutaxassislik: <strong>{selectedTeacherDetail.subject}</strong> | Tajriba: <strong>{selectedTeacherDetail.experience}</strong>
+                  O'qituvchi 9 Xonali ID: <strong>#{format9DigitId(selectedTeacherDetail.id, "teacher")}</strong> | Fani: <strong>{selectedTeacherDetail.subject}</strong>
                 </p>
               </div>
               <button
                 className="close-modal-btn"
-                onClick={() => setSelectedTeacherDetail(null)}
+                onClick={closeDetailModal}
                 aria-label="Yopish"
               >
                 <HiXMark />
@@ -394,7 +419,9 @@ const Teachers = () => {
                   const gStudentCount = students.filter((s) => s.groupId === g.id).length;
                   return (
                     <div key={g.id} className="teacher-group-item">
-                      <strong className="teacher-group-title">{g.name}</strong>
+                      <strong className="teacher-group-title">
+                        #{format9DigitId(g.id, "group")} — {g.name}
+                      </strong>
                       <span className="text-muted text-xs">{g.courseName}</span>
                       <span className="text-indigo text-xs font-bold">
                         <HiOutlineClock className="inline-icon-xs" /> {g.scheduleDays} • {g.scheduleTime}
@@ -476,7 +503,7 @@ const Teachers = () => {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setSelectedTeacherDetail(null)}
+                onClick={closeDetailModal}
               >
                 Yopish
               </button>
