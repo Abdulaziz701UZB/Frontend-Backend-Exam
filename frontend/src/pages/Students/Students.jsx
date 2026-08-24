@@ -23,7 +23,10 @@ import {
   HiOutlineTrophy,
   HiOutlineChatBubbleLeftRight,
   HiOutlineDocumentText,
-  HiOutlineArrowDownTray
+  HiOutlineArrowDownTray,
+  HiOutlineCake,
+  HiOutlineSparkles,
+  HiOutlinePaperAirplane
 } from "react-icons/hi2";
 import { FaUserGraduate, FaChalkboardUser, FaTelegram } from "react-icons/fa6";
 import "./Students.css";
@@ -72,6 +75,7 @@ const Students = () => {
     phone: "+998 90 599 06 00",
     parentPhone: "+998 90 599 06 00",
     groupId: "G-101",
+    birthDate: "2006-10-12",
     paymentStatus: "Paid",
     balance: 0,
     status: "Active",
@@ -127,6 +131,7 @@ const Students = () => {
         phone: "+998 90 599 06 00",
         parentPhone: "+998 90 599 06 00",
         groupId: groups[0]?.id || "G-101",
+        birthDate: "2006-10-12",
         paymentStatus: "Paid",
         balance: 0,
         status: "Active",
@@ -150,6 +155,7 @@ const Students = () => {
           phone: s.phone,
           parentPhone: s.parentPhone,
           groupId: s.groupId,
+          birthDate: s.birthDate || "2006-10-12",
           paymentStatus: s.paymentStatus,
           balance: s.balance,
           status: s.status,
@@ -166,6 +172,7 @@ const Students = () => {
       phone: "+998 90 599 06 00",
       parentPhone: "+998 90 599 06 00",
       groupId: groups[0]?.id || "G-101",
+      birthDate: "2006-10-12",
       paymentStatus: "Paid",
       balance: 0,
       status: "Active",
@@ -182,6 +189,7 @@ const Students = () => {
       phone: student.phone,
       parentPhone: student.parentPhone,
       groupId: student.groupId,
+      birthDate: student.birthDate || "2006-10-12",
       paymentStatus: student.paymentStatus,
       balance: student.balance,
       status: student.status,
@@ -247,6 +255,7 @@ const Students = () => {
       group_id: formData.groupId,
       group_name: groupNameText,
       payment_status: formData.paymentStatus,
+      birth_date: formData.birthDate,
       balance: parseFloat(formData.balance || 0),
       status: formData.status,
     };
@@ -346,6 +355,8 @@ const Students = () => {
     const studentPayments = payments.filter((p) => String(p.studentId) === String(student.id));
     const totalLTV = studentPayments.reduce((sum, p) => sum + (p.amount || 0), 0) + (student.balance >= 0 ? 850000 * 4 : 850000 * 2);
 
+    const isBotConnected = parseInt(String(student.id).replace(/\D/g, "")) % 2 !== 0;
+
     const mockAttendance = [
       { date: "22.08.2026", status: "present", note: "Vaqtida keldi" },
       { date: "20.08.2026", status: "present", note: "Faol qatnashdi" },
@@ -366,6 +377,9 @@ const Students = () => {
     return {
       studentPayments,
       totalLTV,
+      isBotConnected,
+      birthDateDisplay: student.birthDate || "12-oktabr, 2006",
+      studentAge: 19,
       mockAttendance,
       mockExams,
     };
@@ -382,7 +396,7 @@ const Students = () => {
             2. O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            Barcha o'quvchilar ro'yxati, to'lov balanslari, 9 xonali identifikatorlar va 360° o'quvchi dosyesi
+            Barcha o'quvchilar ro'yxati, to'lov balanslari, 9 xonali identifikatorlar, Telegram bot integratsiyasi va 360° dosye
           </p>
         </div>
 
@@ -485,7 +499,7 @@ const Students = () => {
             <table className="dash-table">
               <thead>
                 <tr>
-                  <th>O'quvchi 9 Xonali ID</th>
+                  <th>9 Xonali ID</th>
                   <th>F.I.SH (Dosye ko'rish uchun bosing)</th>
                   <th>Telefon Raqami</th>
                   <th>Guruhi</th>
@@ -645,10 +659,15 @@ const Students = () => {
                 </div>
                 <div>
                   <h3 className="dossier-name">{selectedDossierStudent.fullName}</h3>
-                  <p className="dossier-subtext">
-                    <span>{selectedDossierStudent.phone}</span> • 
-                    <span className="status-pill pill-paid">ID: {formatSpaced9DigitId(selectedDossierStudent.id, "student")}</span>
-                  </p>
+                  <div className="dossier-meta-badges">
+                    <span className="user-phone">{selectedDossierStudent.phone}</span>
+                    <span className={`bot-sync-pill ${dossierData.isBotConnected ? "" : "text-danger"}`}>
+                      <FaTelegram /> {dossierData.isBotConnected ? "2. Telegram Bot: Faol Ulangan" : "2. Bot: Ulanmagan"}
+                    </span>
+                    <span className="birthday-pill">
+                      <HiOutlineCake /> 9. {dossierData.birthDateDisplay} ({dossierData.studentAge} yosh)
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -844,6 +863,50 @@ const Students = () => {
                       </div>
                     </div>
                   </div>
+
+                  <div className="feature-special-card">
+                    <div className="feature-special-header">
+                      <span className="feature-special-title">
+                        <FaTelegram className="text-indigo" />
+                        2. Telegram Bot Integratsiyasi & Bildirishnomalar
+                      </span>
+                      <span className={`status-pill ${dossierData.isBotConnected ? "pill-paid" : "pill-overdue"}`}>
+                        {dossierData.isBotConnected ? "Faol Ulangan" : "Ulanmagan"}
+                      </span>
+                    </div>
+                    <p className="text-muted text-xs mb-3">
+                      Davomat, baholar va to'lov kvitansiyalari avtomatik ravishda o'quvchi va ota-onaning Telegram botiga yuboriladi.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => toast.success(`"${selectedDossierStudent.fullName}" telefoniga botga ulanish havolasi yuborildi!`)}
+                    >
+                      <HiOutlinePaperAirplane /> Botga Ulanish Havolasini Yuborish
+                    </button>
+                  </div>
+
+                  <div className="feature-special-card">
+                    <div className="feature-special-header">
+                      <span className="feature-special-title">
+                        <HiOutlineCake className="text-amber" />
+                        9. Tug'ilgan Kuni & Tabriknoma Eslatmasi
+                      </span>
+                      <span className="birthday-pill">
+                        {dossierData.birthDateDisplay} ({dossierData.studentAge} yosh)
+                      </span>
+                    </div>
+                    <p className="text-muted text-xs mb-3">
+                      O'quvchining tug'ilgan kuniga 3 kun qolganda tizim avtomatik eslatma beradi va maxsus 15% chegirma promo-kodini taklif qiladi.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => toast.success(`🎉 "${selectedDossierStudent.fullName}" ga tug'ilgan kun tabriknomasi va 15% chegirma promo-kodi yuborildi!`)}
+                    >
+                      <HiOutlineSparkles /> 🎉 Tabrik Xabarnomasi & Chegirma Yuborish
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1006,6 +1069,20 @@ const Students = () => {
                 </div>
 
                 <div className="form-group">
+                  <label className="form-label">Tug'ilgan Sanasi (9):</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formData.birthDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, birthDate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-grid">
+                <div className="form-group">
                   <label className="form-label">Tegishli Guruh:</label>
                   <select
                     className="form-select"
@@ -1021,9 +1098,7 @@ const Students = () => {
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <div className="admin-form-grid">
                 <div className="form-group">
                   <label className="form-label">To'lov Holati:</label>
                   <select
@@ -1040,18 +1115,18 @@ const Students = () => {
                     <option value="Overdue">Qarzdorlik Mavjud</option>
                   </select>
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label className="form-label">Balans / Qarz (so'm):</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={formData.balance}
-                    onChange={(e) =>
-                      setFormData({ ...formData, balance: e.target.value })
-                    }
-                  />
-                </div>
+              <div className="form-group">
+                <label className="form-label">Balans / Qarz (so'm):</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={formData.balance}
+                  onChange={(e) =>
+                    setFormData({ ...formData, balance: e.target.value })
+                  }
+                />
               </div>
 
               <div className="admin-modal-actions">
