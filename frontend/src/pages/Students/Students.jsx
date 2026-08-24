@@ -70,12 +70,26 @@ const Students = () => {
   const [selectedDossierStudent, setSelectedDossierStudent] = useState(null);
   const [dossierActiveTab, setDossierActiveTab] = useState("payments");
 
+  const format9Digits = (input) => {
+    let digits = (input || "").replace(/\D/g, "");
+    if (digits.startsWith("998")) {
+      digits = digits.slice(3);
+    }
+    digits = digits.slice(0, 9);
+    let res = "";
+    if (digits.length > 0) res += digits.slice(0, 2);
+    if (digits.length > 2) res += " " + digits.slice(2, 5);
+    if (digits.length > 5) res += " " + digits.slice(5, 7);
+    if (digits.length > 7) res += " " + digits.slice(7, 9);
+    return res;
+  };
+
   const [formData, setFormData] = useState({
     fullName: "",
-    phone: "+998 90 599 06 00",
-    parentPhone: "+998 90 599 06 00",
+    phone: "",
+    parentPhone: "",
     groupId: "G-101",
-    birthDate: "2006-10-12",
+    birthDate: "",
     paymentStatus: "Paid",
     balance: 0,
     status: "Active",
@@ -186,10 +200,10 @@ const Students = () => {
     setEditingStudent(student);
     setFormData({
       fullName: student.fullName,
-      phone: student.phone,
-      parentPhone: student.parentPhone,
+      phone: format9Digits(student.phone),
+      parentPhone: format9Digits(student.parentPhone),
       groupId: student.groupId,
-      birthDate: student.birthDate || "2006-10-12",
+      birthDate: student.birthDate || "",
       paymentStatus: student.paymentStatus,
       balance: student.balance,
       status: student.status,
@@ -250,8 +264,8 @@ const Students = () => {
 
     const payload = {
       full_name: formData.fullName,
-      phone: formData.phone,
-      parent_phone: formData.parentPhone,
+      phone: formData.phone ? `+998 ${formData.phone.trim()}` : "",
+      parent_phone: formData.parentPhone ? `+998 ${formData.parentPhone.trim()}` : "",
       group_id: formData.groupId,
       group_name: groupNameText,
       payment_status: formData.paymentStatus,
@@ -1044,31 +1058,39 @@ const Students = () => {
 
                 <div className="form-group">
                   <label className="form-label">Telefon Raqami:</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder=""
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    required
-                  />
+                  <div className="phone-input-group">
+                    <span className="phone-prefix-badge">+998</span>
+                    <input
+                      type="tel"
+                      className="phone-input-field"
+                      placeholder=""
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: format9Digits(e.target.value) })
+                      }
+                      maxLength={12}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="admin-form-grid">
                 <div className="form-group">
                   <label className="form-label">Ota-onasi Telefoni:</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder=""
-                    value={formData.parentPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentPhone: e.target.value })
-                    }
-                  />
+                  <div className="phone-input-group">
+                    <span className="phone-prefix-badge">+998</span>
+                    <input
+                      type="tel"
+                      className="phone-input-field"
+                      placeholder=""
+                      value={formData.parentPhone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, parentPhone: format9Digits(e.target.value) })
+                      }
+                      maxLength={12}
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">

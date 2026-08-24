@@ -281,3 +281,64 @@ body.dark-theme .toast-message {
   background-color: #c7d2fe;
   color: #312e81;
 }
+
+/* ===== GLOBAL PHONE PREFIX INPUT GROUP ===== */
+.phone-input-group {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  background: var(--bg-main, #f8fafc);
+  transition: all 0.2s ease;
+  overflow: hidden;
+  width: 100%;
+}
+
+.phone-input-group:focus-within {
+  background: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.phone-prefix-badge {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #4f46e5;
+  background: #eef2ff;
+  border-right: 1.5px solid #e0e7ff;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.phone-input-field {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main, #0f172a);
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  width: 100%;
+}
+
+body.dark-theme .phone-input-group {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-theme .phone-prefix-badge {
+  background: #312e81;
+  color: #c7d2fe;
+  border-right-color: #3730a3;
+}
+
+body.dark-theme .phone-input-field {
+  color: #f8fafc;
+}

@@ -43,6 +43,20 @@ const Teachers = () => {
 
   const [selectedTeacherDetail, setSelectedTeacherDetail] = useState(null);
 
+  const format9Digits = (input) => {
+    let digits = (input || "").replace(/\D/g, "");
+    if (digits.startsWith("998")) {
+      digits = digits.slice(3);
+    }
+    digits = digits.slice(0, 9);
+    let res = "";
+    if (digits.length > 0) res += digits.slice(0, 2);
+    if (digits.length > 2) res += " " + digits.slice(2, 5);
+    if (digits.length > 5) res += " " + digits.slice(5, 7);
+    if (digits.length > 7) res += " " + digits.slice(7, 9);
+    return res;
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -144,7 +158,7 @@ const Teachers = () => {
     setEditingTeacher(teacher);
     setFormData({
       name: teacher.name,
-      phone: teacher.phone,
+      phone: format9Digits(teacher.phone),
       subject: teacher.subject,
       salary: teacher.salary || 10000000,
       experience: teacher.experience || "3 yil",
@@ -178,12 +192,16 @@ const Teachers = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = {
+      ...formData,
+      phone: formData.phone ? `+998 ${formData.phone.trim()}` : "",
+    };
     try {
       if (editingTeacher) {
-        await teachersApi.update(editingTeacher.id, formData);
+        await teachersApi.update(editingTeacher.id, payload);
         toast.success("O'qituvchi ma'lumotlari muvaffaqiyatli yangilandi!");
       } else {
-        await teachersApi.create(formData);
+        await teachersApi.create(payload);
         toast.success("Yangi o'qituvchi muvaffaqiyatli qo'shildi!");
       }
       closeModal();
@@ -623,16 +641,20 @@ const Teachers = () => {
 
               <div className="form-group">
                 <label className="form-label">Telefon Raqami:</label>
-                <input
-                  type="text"
-                  required
-                  className="form-input"
-                  placeholder=""
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                />
+                <div className="phone-input-group">
+                  <span className="phone-prefix-badge">+998</span>
+                  <input
+                    type="tel"
+                    required
+                    className="phone-input-field"
+                    placeholder=""
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: format9Digits(e.target.value) })
+                    }
+                    maxLength={12}
+                  />
+                </div>
               </div>
 
               <div className="form-group">

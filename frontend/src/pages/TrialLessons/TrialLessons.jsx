@@ -78,11 +78,25 @@ const TrialLessons = () => {
     loadData();
   }, []);
 
+  const format9Digits = (input) => {
+    let digits = (input || "").replace(/\D/g, "");
+    if (digits.startsWith("998")) {
+      digits = digits.slice(3);
+    }
+    digits = digits.slice(0, 9);
+    let res = "";
+    if (digits.length > 0) res += digits.slice(0, 2);
+    if (digits.length > 2) res += " " + digits.slice(2, 5);
+    if (digits.length > 5) res += " " + digits.slice(5, 7);
+    if (digits.length > 7) res += " " + digits.slice(7, 9);
+    return res;
+  };
+
   const openCreateModal = () => {
     setModalMode("create");
     setFormData({
       studentName: "",
-      phone: "+998 90 ",
+      phone: "",
       teacherName: teachers[0]?.name || "Abdulaziz Abdulhayev",
       courseName: courses[0]?.name || "Frontend ReactJS",
       date: new Date().toISOString().split("T")[0],
@@ -99,7 +113,7 @@ const TrialLessons = () => {
     setCurrentTrialId(tr.id);
     setFormData({
       studentName: tr.studentName,
-      phone: tr.phone,
+      phone: format9Digits(tr.phone),
       teacherName: tr.teacherName,
       courseName: tr.courseName,
       date: tr.date,
@@ -116,7 +130,7 @@ const TrialLessons = () => {
     try {
       const payload = {
         student_name: formData.studentName,
-        phone: formData.phone,
+        phone: formData.phone ? `+998 ${formData.phone.trim()}` : "",
         teacher_name: formData.teacherName,
         course_name: formData.courseName,
         date: formData.date,
@@ -424,16 +438,20 @@ const TrialLessons = () => {
 
                 <div className="form-group">
                   <label className="form-label">Telefon Raqami:</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder=""
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    required
-                  />
+                  <div className="phone-input-group">
+                    <span className="phone-prefix-badge">+998</span>
+                    <input
+                      type="tel"
+                      className="phone-input-field"
+                      placeholder=""
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: format9Digits(e.target.value) })
+                      }
+                      maxLength={12}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
