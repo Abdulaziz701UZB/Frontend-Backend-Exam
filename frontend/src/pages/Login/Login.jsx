@@ -202,44 +202,9 @@ const Login = () => {
 
       <div className="login-card-container">
         <div className="login-brand-header">
-          <div className="login-logo-mascot-row">
-            <div className="login-logo-badge">
-              <img src="/velnex-logo.png" alt="VELNEX" className="login-logo-img" />
-            </div>
-
-            <div className={`login-mascot-wrapper ${isPasswordFocused ? (showPassword ? "mascot-peek" : "mascot-hide") : (isPhoneFocused ? "mascot-look-down" : "mascot-normal")}`}>
-              <svg className="mascot-svg" viewBox="0 0 110 90" width="90" height="75">
-                <circle cx="55" cy="45" r="35" fill="#4f46e5" />
-                <circle cx="55" cy="45" r="31" fill="#6366f1" />
-                
-                {/* Left Eye */}
-                <circle cx="42" cy="42" r="11" fill="#ffffff" />
-                <circle className="mascot-pupil left" cx="42" cy={isPhoneFocused ? "46" : "42"} r="5.5" fill="#0f172a" />
-                <circle cx="40" cy={isPhoneFocused ? "44" : "40"} r="2" fill="#ffffff" />
-                
-                {/* Right Eye */}
-                <circle cx="68" cy="42" r="11" fill="#ffffff" />
-                <circle className="mascot-pupil right" cx="68" cy={isPhoneFocused ? "46" : "42"} r="5.5" fill="#0f172a" />
-                <circle cx="66" cy={isPhoneFocused ? "44" : "40"} r="2" fill="#ffffff" />
-
-                {/* Smile */}
-                <path d="M 48 58 Q 55 64 62 58" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-
-                {/* Cheeks */}
-                <circle cx="32" cy="50" r="3.5" fill="rgba(244, 114, 182, 0.7)" />
-                <circle cx="78" cy="50" r="3.5" fill="rgba(244, 114, 182, 0.7)" />
-
-                {/* Hands for covering eyes */}
-                <g className="mascot-hand left-hand">
-                  <rect x="25" y="28" width="26" height="24" rx="12" fill="#3730a3" stroke="#4338ca" strokeWidth="2" />
-                </g>
-                <g className="mascot-hand right-hand">
-                  <rect x="59" y="28" width="26" height="24" rx="12" fill="#3730a3" stroke="#4338ca" strokeWidth="2" />
-                </g>
-              </svg>
-            </div>
+          <div className="login-logo-badge">
+            <img src="/velnex-logo.png" alt="VELNEX" className="login-logo-img" />
           </div>
-
           <h1 className="login-system-title">VELNEX</h1>
           <p className="login-system-subtitle">
             {t.subtitle}
@@ -307,6 +272,38 @@ const Login = () => {
           </div>
 
           <div className="login-support-row">
+            <div className={`login-tiny-mascot ${isPasswordFocused ? (showPassword ? "mascot-peek" : "mascot-hide") : (isPhoneFocused ? "mascot-look-down" : "mascot-normal")}`}>
+              <svg className="mascot-svg" viewBox="0 0 110 90" width="38" height="32">
+                <circle cx="55" cy="45" r="35" fill="#4f46e5" />
+                <circle cx="55" cy="45" r="31" fill="#6366f1" />
+                
+                {/* Left Eye */}
+                <circle cx="42" cy="42" r="11" fill="#ffffff" />
+                <circle className="mascot-pupil left" cx="42" cy={isPhoneFocused ? "46" : "42"} r="5.5" fill="#0f172a" />
+                <circle cx="40" cy={isPhoneFocused ? "44" : "40"} r="2" fill="#ffffff" />
+                
+                {/* Right Eye */}
+                <circle cx="68" cy="42" r="11" fill="#ffffff" />
+                <circle className="mascot-pupil right" cx="68" cy={isPhoneFocused ? "46" : "42"} r="5.5" fill="#0f172a" />
+                <circle cx="66" cy={isPhoneFocused ? "44" : "40"} r="2" fill="#ffffff" />
+
+                {/* Smile */}
+                <path d="M 48 58 Q 55 64 62 58" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+                {/* Cheeks */}
+                <circle cx="32" cy="50" r="3.5" fill="rgba(244, 114, 182, 0.7)" />
+                <circle cx="78" cy="50" r="3.5" fill="rgba(244, 114, 182, 0.7)" />
+
+                {/* Hands for covering eyes */}
+                <g className="mascot-hand left-hand">
+                  <rect x="25" y="28" width="26" height="24" rx="12" fill="#3730a3" stroke="#4338ca" strokeWidth="2" />
+                </g>
+                <g className="mascot-hand right-hand">
+                  <rect x="59" y="28" width="26" height="24" rx="12" fill="#3730a3" stroke="#4338ca" strokeWidth="2" />
+                </g>
+              </svg>
+            </div>
+
             <a
               href="https://t.me/Abdulaziz7o1"
               target="_blank"
