@@ -16,9 +16,13 @@ import {
   HiArrowRight,
   HiOutlinePhone,
   HiOutlineUser,
+  HiOutlineUsers,
   HiOutlineCheckCircle,
   HiOutlineDevicePhoneMobile,
-  HiOutlineBuildingLibrary
+  HiOutlineBuildingLibrary,
+  HiArrowTrendingUp,
+  HiOutlineExclamationCircle,
+  HiOutlineBookOpen
 } from "react-icons/hi2";
 import { FaUserGraduate } from "react-icons/fa6";
 import "./Dashboard.css";
