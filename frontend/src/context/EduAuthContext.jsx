@@ -68,8 +68,8 @@ export const EduAuthProvider = ({ children }) => {
   const login = (identifier, password, roleHint = "admin") => {
     setAuthError("");
 
-    if (!identifier || !identifier.trim()) {
-      setAuthError("Iltimos, telefon raqamingiz yoki elektron pochtangizni kiriting!");
+    if (!identifier || !identifier.trim() || identifier.trim() === "+998") {
+      setAuthError("Iltimos, telefon raqamingizni to'liq kiriting!");
       return false;
     }
 
