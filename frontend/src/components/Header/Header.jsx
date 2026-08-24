@@ -34,9 +34,9 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const [passwordInput, setPasswordInput] = useState("");
 
   const currentDate = new Date().toLocaleDateString("uz-UZ", {
-    weekday: "long",
+    weekday: "short",
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   });
 
@@ -89,16 +89,29 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
           >
             <HiBars3 />
           </button>
-          <div className="header-welcome">
-            <h1 className="header-greeting">
-              Xush kelibsiz, {firstName}{" "}
-              <span className="waving-hand-wrap" title="Salom!">
-                <MdWavingHand className="waving-hand-icon" />
+
+          <div className="crm-user-profile mobile-profile-left">
+            <div className="user-avatar-wrap">
+              <span className="user-avatar-emoji">
+                {currentRole === "admin" && <FaCrown />}
+                {currentRole === "teacher" && <FaChalkboardUser />}
+                {currentRole === "student" && <FaGraduationCap />}
               </span>
-            </h1>
-            <p className="header-date">
-              <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 4 }} /> {currentDate}
-            </p>
+            </div>
+            <div className="user-info-text">
+              <div className="header-greeting-row">
+                <span className="user-display-name">
+                  Xush kelibsiz, {firstName}
+                </span>
+                <span className="waving-hand-wrap">
+                  <MdWavingHand className="waving-hand-icon" />
+                </span>
+              </div>
+              <span className="header-date-text">
+                <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                {currentDate}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -108,7 +121,8 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             onClick={onOpenCmdPalette}
             title="Tezkor qidiruv modali (Ctrl + K)"
           >
-            <HiMagnifyingGlass /> <span>Tezkor Qidiruv</span>{" "}
+            <HiMagnifyingGlass />
+            <span className="cmd-text-label">Tezkor Qidiruv</span>
             <code className="cmd-kbd">Ctrl + K</code>
           </button>
 
@@ -117,57 +131,41 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               <button
                 className={`role-btn ${currentRole === "admin" ? "active" : ""}`}
                 onClick={() => openAuthModal("admin")}
-                title="Admin sifati kiring (Parol so'raladi)"
+                title="Admin sifatida kiring"
               >
-                <FaCrown /> Admin
+                <FaCrown /> <span>Admin</span>
               </button>
               <button
                 className={`role-btn ${currentRole === "teacher" ? "active" : ""}`}
                 onClick={() => openAuthModal("teacher")}
-                title="O'qituvchi sifatida kiring (Parol so'raladi)"
+                title="O'qituvchi sifatida kiring"
               >
-                <FaChalkboardUser /> O'qituvchi
+                <FaChalkboardUser /> <span>O'qituvchi</span>
               </button>
               <button
                 className={`role-btn ${currentRole === "student" ? "active" : ""}`}
                 onClick={() => openAuthModal("student")}
-                title="O'quvchi sifatida kiring (Parol so'raladi)"
+                title="O'quvchi sifatida kiring"
               >
-                <FaGraduationCap /> O'quvchi
+                <FaGraduationCap /> <span>O'quvchi</span>
               </button>
-            </div>
-          </div>
-
-          <div className="crm-user-profile">
-            <div className="user-avatar-wrap">
-              <span className="user-avatar-emoji">
-                {currentRole === "admin" && <FaCrown />}
-                {currentRole === "teacher" && <FaChalkboardUser />}
-                {currentRole === "student" && <FaGraduationCap />}
-              </span>
-            </div>
-            <div className="user-info-text">
-              <p className="user-display-name">{displayName}</p>
-              <p className="user-display-role">
-                {user?.roleTitle || (currentRole === "teacher" ? "O'qituvchi" : currentRole === "student" ? "O'quvchi" : "Administrator")}
-              </p>
             </div>
           </div>
 
           <button
             className="crm-logout-btn"
             onClick={handleLogout}
-            title="Tizimdan chiqish (Log Out)"
+            title="Tizimdan chiqish"
           >
             <HiOutlineArrowRightOnRectangle className="logout-icon" />
-            <span>Chiqish</span>
+            <span className="logout-text">Chiqish</span>
           </button>
         </div>
       </div>
 
       {authModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content card auth-modal-card">
+        <div className="modal-overlay" onClick={() => setAuthModalOpen(false)}>
+          <div className="modal-content card auth-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
                 <HiLockClosed style={{ marginRight: 6, verticalAlign: 'middle' }} />
