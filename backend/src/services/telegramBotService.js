@@ -5,7 +5,7 @@ let BOTS_CONFIG = {
     id: "parent",
     name: "Ota-onalar Boti",
     token: process.env.TELEGRAM_PARENT_BOT_TOKEN || "",
-    username: "@EduControlParentBot",
+    username: "@VelnexParentBot",
     description: "Farzand davomati, to'lov cheklari va baholarni ota-onaga yetkazish",
     isEnabled: true,
   },
@@ -13,7 +13,7 @@ let BOTS_CONFIG = {
     id: "student",
     name: "O'quvchilar Boti & WebApp",
     token: process.env.TELEGRAM_STUDENT_BOT_TOKEN || "",
-    username: "@EduControlStudentBot",
+    username: "@VelnexStudentBot",
     description: "Dars jadvali, uyga vazifalar va WebApp shaxsiy kabinet",
     isEnabled: true,
   },
@@ -21,7 +21,7 @@ let BOTS_CONFIG = {
     id: "teacher",
     name: "O'qituvchilar Boti",
     token: process.env.TELEGRAM_TEACHER_BOT_TOKEN || "",
-    username: "@EduControlTeacherBot",
+    username: "@VelnexTeacherBot",
     description: "Tezkor davomat olish, guruhlar ro'yxati va oylik maosh",
     isEnabled: true,
   },
@@ -30,7 +30,7 @@ let BOTS_CONFIG = {
     name: "Bosh Admin & Rahbar Boti",
     token: process.env.TELEGRAM_ADMIN_BOT_TOKEN || "",
     adminChatId: process.env.TELEGRAM_ADMIN_CHAT_ID || "",
-    username: "@EduControlAdminBot",
+    username: "@VelnexAdminBot",
     description: "Yangi arizalar (Lidlar) signali, kechki kunlik hisobot va ommaviy e'lonlar",
     isEnabled: true,
   },
@@ -151,7 +151,7 @@ export const notifyAttendanceChange = async (studentName, status, groupName, dat
     `📚 <b>Guruh:</b> ${groupName || "Frontend ReactJS"}\n` +
     `📅 <b>Sana:</b> ${date}\n` +
     `📊 <b>Holati:</b> ${statusText}\n\n` +
-    `<i>EduControl Ota-onalar Avtomatlashtirilgan Boti</i>`;
+    `<i>VELNEX Ota-onalar Avtomatlashtirilgan Boti</i>`;
 
   const logItem = {
     id: Date.now(),
@@ -177,7 +177,7 @@ export const notifyPaymentReceived = async (studentName, amount, month, paymentM
     `💰 <b>Summa:</b> ${formattedAmount}\n` +
     `📅 <b>Davr:</b> ${month}\n` +
     `💳 <b>Usul:</b> ${paymentMethod || "Karta (Click)"}\n\n` +
-    `<i>To'lovingiz qabul qilindi. EduControl tizimi orqali tasdiqlangan.</i>`;
+    `<i>To'lovingiz qabul qilindi. VELNEX tizimi orqali tasdiqlangan.</i>`;
 
   const logItem = {
     id: Date.now(),

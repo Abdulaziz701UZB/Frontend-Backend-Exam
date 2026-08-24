@@ -1,6 +1,6 @@
-# EduControl - O'quv Markazini Boshqarish Tizimi (CRM)
+# VELNEX - O'quv Markazini Boshqarish Tizimi (CRM)
 
-EduControl — zamonaviy o'quv markazlari faoliyatini to'liq avtomatlashtirish uchun mo'ljallangan kompleks CRM platformasi.
+VELNEX — zamonaviy o'quv markazlari faoliyatini to'liq avtomatlashtirish uchun mo'ljallangan kompleks SaaS CRM platformasi.
 
 ## Loyiha Texnologiyalari
 

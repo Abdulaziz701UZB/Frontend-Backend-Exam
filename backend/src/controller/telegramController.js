@@ -54,7 +54,7 @@ export const sendTelegramTestMessage = async (req, res) => {
     } else if (type === "LEAD" || botKey === "adminBot") {
       await notifyNewLeadReceived("Jasurbek Rustamov", "+998 90 599 06 00", "Frontend ReactJS");
     } else {
-      await sendBotRawMessage(botKey || "studentBot", "998939876543", "Test xabarnomasi: EduControl boti tayyor!");
+      await sendBotRawMessage(botKey || "studentBot", "998939876543", "Test xabarnomasi: VELNEX boti tayyor!");
     }
 
     res.status(200).json({ message: "Test xabari muvaffaqiyatli yuborildi", botKey, type });

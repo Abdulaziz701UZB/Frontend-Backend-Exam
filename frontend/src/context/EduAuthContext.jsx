@@ -10,7 +10,7 @@ const DEFAULT_USER = {
   id: 201,
   name: "Abdulaziz Abdulhayev (Bosh Admin)",
   phone: "+998 90 599 06 00",
-  email: "admin@educontrol.uz",
+  email: "admin@velnex.uz",
   roleTitle: "Bosh Administrator",
 };
 

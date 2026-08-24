@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "EduControl CRM - O'quv Markazini Boshqarish API",
+      title: "VELNEX CRM - O'quv Markazini Boshqarish API",
       version: "1.0.0",
-      description: "EduControl platformasining barcha 10 ta CRM modullari uchun to'liq interaktiv REST API hujjatlari va PostgreSQL ulanishi.",
+      description: "VELNEX platformasining barcha 10 ta CRM modullari uchun to'liq interaktiv REST API hujjatlari va PostgreSQL ulanishi.",
     },
     servers: [
       {
@@ -26,7 +26,7 @@ const setupSwagger = (app) => {
     "/api-docs",
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
-      customSiteTitle: "EduControl API Documentation",
+      customSiteTitle: "VELNEX API Documentation",
       customCss: ".swagger-ui .topbar { display: none }",
     })
   );

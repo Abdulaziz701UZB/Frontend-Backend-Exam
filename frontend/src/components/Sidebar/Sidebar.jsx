@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <span className="logo-spark">✨</span>
           </div>
           <div className="brand-text">
-            <span className="brand-title">EduControl</span>
+            <span className="brand-title">VELNEX</span>
             <span className="brand-subtitle">O'quv Markazi CRM</span>
           </div>
           <button className="mobile-sidebar-close" onClick={onClose} aria-label="Menuni yopish">

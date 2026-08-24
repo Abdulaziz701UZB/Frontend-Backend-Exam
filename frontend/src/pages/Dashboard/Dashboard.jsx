@@ -128,7 +128,7 @@ const Dashboard = () => {
       <div className="dashboard-welcome-banner">
         <div className="banner-text">
           <h2>
-            EduControl CRM Boshqaruv Markazi <HiRocketLaunch className="banner-rocket-icon" />
+            VELNEX CRM Boshqaruv Markazi <HiRocketLaunch className="banner-rocket-icon" />
           </h2>
           <p>
             O'quv markazingiz davomati, to'lovlari va dars jadvallarini real

@@ -20,7 +20,7 @@ app.use("/api", apiRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "EduControl CRM API Server faol ishlamoqda",
+    message: "VELNEX CRM API Server faol ishlamoqda",
     database: "PostgreSQL (Sequelize ORM) ulangan",
     swaggerDocs: "http://localhost:5000/api-docs",
     modulesCount: 11,
@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, async () => {
-  console.log(`EduControl Backend server is running on http://localhost:${PORT}`);
+  console.log(`VELNEX Backend server is running on http://localhost:${PORT}`);
   console.log(`Swagger API Documentation: http://localhost:${PORT}/api-docs`);
   try {
     await sequelize.authenticate();

@@ -1,7 +1,7 @@
 {
-  "name": "educontrol-backend",
+  "name": "velnex-backend",
   "version": "1.0.0",
-  "description": "EduControl CRM API Server with Swagger Documentation",
+  "description": "VELNEX CRM API Server with Swagger Documentation",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
