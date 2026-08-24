@@ -4,6 +4,7 @@ import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { paymentsApi, studentsApi, groupsApi } from "../../services/api";
 import { format9DigitId } from "../../utils/idFormatter";
+import StudentProfileModal from "../../components/StudentProfileModal/StudentProfileModal";
 import {
   HiOutlineCreditCard,
   HiOutlinePlus,
@@ -33,6 +34,7 @@ const Payments = () => {
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProfileStudent, setSelectedProfileStudent] = useState(null);
 
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "debtors" ? "debtors" : "history");
   const [filterMethod, setFilterMethod] = useState("all");
@@ -372,7 +374,13 @@ const Payments = () => {
                         <span className="id-pill">#{format9DigitId(s.id, "student")}</span>
                       </td>
                       <td>
-                        <strong className="student-name-text">{s.fullName}</strong>
+                        <button
+                          type="button"
+                          className="student-name-text font-bold hover-indigo bg-transparent border-0 p-0 text-left cursor-pointer"
+                          onClick={() => setSelectedProfileStudent(s)}
+                        >
+                          {s.fullName}
+                        </button>
                       </td>
                       <td>
                         <HiOutlinePhone className="inline-icon-xs" /> {s.phone}
@@ -394,7 +402,7 @@ const Payments = () => {
                         <button
                           type="button"
                           className="btn btn-primary btn-sm"
-                          onClick={() => navigate(`/students/${format9DigitId(s.id, "student")}`)}
+                          onClick={() => setSelectedProfileStudent(s)}
                         >
                           <FaUserGraduate /> Profil Ko'rish
                         </button>
@@ -519,6 +527,13 @@ const Payments = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {selectedProfileStudent && (
+        <StudentProfileModal
+          student={selectedProfileStudent}
+          onClose={() => setSelectedProfileStudent(null)}
+        />
       )}
     </div>
   );

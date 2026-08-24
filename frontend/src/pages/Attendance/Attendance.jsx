@@ -4,6 +4,7 @@ import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { attendanceApi, groupsApi, studentsApi } from "../../services/api";
 import { format9DigitId } from "../../utils/idFormatter";
+import StudentProfileModal from "../../components/StudentProfileModal/StudentProfileModal";
 import {
   HiOutlineClipboardDocumentCheck,
   HiOutlineCheck,
@@ -43,6 +44,7 @@ const Attendance = () => {
   const [loading, setLoading] = useState(true);
 
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedProfileStudent, setSelectedProfileStudent] = useState(null);
   const [activeTabMode, setActiveTabMode] = useState("attendance");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -568,12 +570,13 @@ const Attendance = () => {
                               </td>
                               <td>
                                 <div>
-                                  <Link
-                                    to={`/students/${format9DigitId(student.id, "student")}`}
-                                    className="student-name-text font-bold hover-indigo"
+                                  <button
+                                    type="button"
+                                    className="student-name-text font-bold hover-indigo bg-transparent border-0 p-0 text-left cursor-pointer"
+                                    onClick={() => setSelectedProfileStudent(student)}
                                   >
                                     {student.fullName}
-                                  </Link>
+                                  </button>
                                   {isHighRisk && (
                                     <div className="mt-1">
                                       <span className="consecutive-danger-pill">
@@ -704,7 +707,7 @@ const Attendance = () => {
                                 <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
-                                  onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
+                                  onClick={() => setSelectedProfileStudent(student)}
                                 >
                                   <FaUserGraduate /> Profil Ko'rish
                                 </button>
@@ -791,12 +794,25 @@ const Attendance = () => {
                       </span>
                       <span className="reason-count">{reasonStats.other_excused}</span>
                     </div>
-                    <div className="reason-stat-item">
-                      <span className="reason-tag">
-                        <span className="tag-dot dot-unexcused"></span>
-                        Sababsiz Dars Qoldirish
-                      </span>
-                      <span className="reason-count">{reasonStats.unexcused}</span>
+                  </div>
+                </div>
+
+                <div className="card">
+                  <h3 className="section-title mb-4">
+                    <HiOutlineDocumentCheck className="title-icon-indigo" />
+                    Telegram Xabarnomalar Xulosasi
+                  </h3>
+                  <p className="text-muted text-sm mb-4">
+                    Dars boshlanishi bilan o'quvchining yo'qligi haqidagi xabarlar to'g'ridan-to'g'ri ota-onaning Telegram botiga yuboriladi.
+                  </p>
+                  <div className="stats-list">
+                    <div className="stat-row">
+                      <span>Botga Ulangan O'quvchilar:</span>
+                      <strong className="text-emerald">{activeGroupStudents.length} ta (100%)</strong>
+                    </div>
+                    <div className="stat-row">
+                      <span>Bugun Yuborilgan Ogohlantirishlar:</span>
+                      <strong>{todayAbsentCount + todayExcusedCount} ta xabar</strong>
                     </div>
                   </div>
                 </div>
@@ -841,12 +857,13 @@ const Attendance = () => {
                             <tr key={student.id}>
                               <td>{idx + 1}</td>
                               <td>
-                                <Link
-                                  to={`/students/${format9DigitId(student.id, "student")}`}
-                                  className="student-name-text font-bold hover-indigo"
+                                <button
+                                  type="button"
+                                  className="student-name-text font-bold hover-indigo bg-transparent border-0 p-0 text-left cursor-pointer"
+                                  onClick={() => setSelectedProfileStudent(student)}
                                 >
                                   {student.fullName}
-                                </Link>
+                                </button>
                               </td>
                               <td>
                                 <select
@@ -870,7 +887,7 @@ const Attendance = () => {
                                 <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
-                                  onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
+                                  onClick={() => setSelectedProfileStudent(student)}
                                 >
                                   <FaUserGraduate /> Profil Ko'rish
                                 </button>
@@ -886,6 +903,13 @@ const Attendance = () => {
             </>
           )}
         </>
+      )}
+
+      {selectedProfileStudent && (
+        <StudentProfileModal
+          student={selectedProfileStudent}
+          onClose={() => setSelectedProfileStudent(null)}
+        />
       )}
     </div>
   );
