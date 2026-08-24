@@ -76,11 +76,13 @@ export const getRoomOccupancy = async (req, res) => {
     ]);
 
     const standardTimeSlots = [
-      "09:00 - 11:00",
-      "11:00 - 13:00",
+      "06:00 - 08:00",
+      "08:00 - 10:00",
+      "10:00 - 12:00",
       "14:00 - 16:00",
       "16:00 - 18:00",
       "18:00 - 20:00",
+      "20:00 - 22:00",
     ];
 
     const standardDayPairs = [
