@@ -33,12 +33,14 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const [targetUserId, setTargetUserId] = useState(201);
   const [passwordInput, setPasswordInput] = useState("");
 
-  const currentDate = new Date().toLocaleDateString("uz-UZ", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const getFormattedDate = () => {
+    const d = new Date();
+    const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
+    const days = ["Yak", "Dush", "Sesh", "Chor", "Pay", "Juma", "Shan"];
+    return `${d.getDate()}-${months[d.getMonth()]}, ${d.getFullYear()} (${days[d.getDay()]})`;
+  };
+
+  const formattedDate = getFormattedDate();
 
   const openAuthModal = (role) => {
     setTargetRole(role);
@@ -81,85 +83,112 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   return (
     <header className="crm-header">
       <div className="crm-header-content">
-        <div className="header-left-flex">
-          <button
-            className="mobile-hamburger-btn"
-            onClick={onToggleMobileMenu}
-            aria-label="Menuni ochish"
-          >
-            <HiBars3 />
-          </button>
+        <div className="crm-header-main-row">
+          <div className="header-left-flex">
+            <button
+              className="mobile-hamburger-btn"
+              onClick={onToggleMobileMenu}
+              aria-label="Menuni ochish"
+            >
+              <HiBars3 />
+            </button>
 
-          <div className="crm-user-profile mobile-profile-left">
-            <div className="user-avatar-wrap">
-              <span className="user-avatar-emoji">
-                {currentRole === "admin" && <FaCrown />}
-                {currentRole === "teacher" && <FaChalkboardUser />}
-                {currentRole === "student" && <FaGraduationCap />}
-              </span>
-            </div>
-            <div className="user-info-text">
-              <div className="header-greeting-row">
-                <span className="user-display-name">
-                  Xush kelibsiz, {firstName}
-                </span>
-                <span className="waving-hand-wrap">
-                  <MdWavingHand className="waving-hand-icon" />
+            <div className="crm-user-profile">
+              <div className="user-avatar-wrap">
+                <span className="user-avatar-emoji">
+                  {currentRole === "admin" && <FaCrown />}
+                  {currentRole === "teacher" && <FaChalkboardUser />}
+                  {currentRole === "student" && <FaGraduationCap />}
                 </span>
               </div>
-              <span className="header-date-text">
-                <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 3 }} />
-                {currentDate}
-              </span>
+              <div className="user-info-text">
+                <div className="header-greeting-row">
+                  <span className="user-display-name">
+                    Xush kelibsiz, {firstName}
+                  </span>
+                  <span className="waving-hand-wrap">
+                    <MdWavingHand className="waving-hand-icon" />
+                  </span>
+                </div>
+                <span className="header-date-text">
+                  <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                  {formattedDate}
+                </span>
+              </div>
             </div>
+          </div>
+
+          <div className="header-right-actions">
+            <button
+              className="cmd-trigger-btn"
+              onClick={onOpenCmdPalette}
+              title="Tezkor qidiruv modali (Ctrl + K)"
+            >
+              <HiMagnifyingGlass />
+              <span className="cmd-text-label">Tezkor Qidiruv</span>
+              <code className="cmd-kbd">Ctrl + K</code>
+            </button>
+
+            <div className="role-switcher-container desktop-only-roles">
+              <div className="role-buttons">
+                <button
+                  className={`role-btn ${currentRole === "admin" ? "active" : ""}`}
+                  onClick={() => openAuthModal("admin")}
+                  title="Admin sifatida kiring"
+                >
+                  <FaCrown /> <span>Admin</span>
+                </button>
+                <button
+                  className={`role-btn ${currentRole === "teacher" ? "active" : ""}`}
+                  onClick={() => openAuthModal("teacher")}
+                  title="O'qituvchi sifatida kiring"
+                >
+                  <FaChalkboardUser /> <span>O'qituvchi</span>
+                </button>
+                <button
+                  className={`role-btn ${currentRole === "student" ? "active" : ""}`}
+                  onClick={() => openAuthModal("student")}
+                  title="O'quvchi sifatida kiring"
+                >
+                  <FaGraduationCap /> <span>O'quvchi</span>
+                </button>
+              </div>
+            </div>
+
+            <button
+              className="crm-logout-btn"
+              onClick={handleLogout}
+              title="Tizimdan chiqish"
+            >
+              <HiOutlineArrowRightOnRectangle className="logout-icon" />
+              <span className="logout-text">Chiqish</span>
+            </button>
           </div>
         </div>
 
-        <div className="header-right-actions">
-          <button
-            className="cmd-trigger-btn"
-            onClick={onOpenCmdPalette}
-            title="Tezkor qidiruv modali (Ctrl + K)"
-          >
-            <HiMagnifyingGlass />
-            <span className="cmd-text-label">Tezkor Qidiruv</span>
-            <code className="cmd-kbd">Ctrl + K</code>
-          </button>
-
-          <div className="role-switcher-container">
+        <div className="header-mobile-roles-row">
+          <div className="role-switcher-container mobile-role-container">
             <div className="role-buttons">
               <button
                 className={`role-btn ${currentRole === "admin" ? "active" : ""}`}
                 onClick={() => openAuthModal("admin")}
-                title="Admin sifatida kiring"
               >
                 <FaCrown /> <span>Admin</span>
               </button>
               <button
                 className={`role-btn ${currentRole === "teacher" ? "active" : ""}`}
                 onClick={() => openAuthModal("teacher")}
-                title="O'qituvchi sifatida kiring"
               >
                 <FaChalkboardUser /> <span>O'qituvchi</span>
               </button>
               <button
                 className={`role-btn ${currentRole === "student" ? "active" : ""}`}
                 onClick={() => openAuthModal("student")}
-                title="O'quvchi sifatida kiring"
               >
                 <FaGraduationCap /> <span>O'quvchi</span>
               </button>
             </div>
           </div>
-
-          <button
-            className="crm-logout-btn"
-            onClick={handleLogout}
-            title="Tizimdan chiqish"
-          >
-            <HiOutlineArrowRightOnRectangle className="logout-icon" />
-            <span className="logout-text">Chiqish</span>
-          </button>
         </div>
       </div>
 
