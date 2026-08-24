@@ -803,35 +803,19 @@ const Attendance = () => {
             </>
           ) : (
             <>
-              <div className="attendance-control-panel">
-                <div className="flex items-center gap-3 w-full">
-                  <label className="font-bold text-sm text-dark whitespace-nowrap">Dars Mavzusi / Imtihon Nomi:</label>
-                  <input
-                    type="text"
-                    className="form-input flex-1"
-                    placeholder="masalan: React Router v6 & Redux Toolkit Oraliq Imtihoni..."
-                    value={lessonTopic}
-                    onChange={(e) => setLessonTopic(e.target.value)}
-                  />
-                </div>
-              </div>
-
               <div className="card table-card mb-6">
                 <div className="card-header-flex px-6 pt-6 flex justify-between items-center">
                   <h3 className="section-title mb-0">
                     <HiOutlineTrophy className="title-icon-indigo" />
-                    {currentGroupObj?.name} — O'quvchilar Baholari & Uy Vazifalari
+                    {currentGroupObj?.name} — O'quvchilar Baholari
                   </h3>
-                  <span className="text-muted text-sm">
-                    Mavzu: <strong>{lessonTopic}</strong>
-                  </span>
                 </div>
 
                 <div className="dash-table-wrap">
                   <table className="dash-table">
                     <thead>
                       <tr>
-                        <th>9 Xonali ID</th>
+                        <th>#</th>
                         <th>O'quvchi F.I.SH</th>
                         <th>Baho</th>
                         <th className="text-center">360° Dosye</th>
@@ -845,7 +829,7 @@ const Attendance = () => {
                           </td>
                         </tr>
                       ) : (
-                        activeGroupStudents.map((student) => {
+                        activeGroupStudents.map((student, idx) => {
                           const grRec = gradesMap[student.id] || {
                             score: 10,
                             homeworkDone: true,
@@ -854,9 +838,7 @@ const Attendance = () => {
 
                           return (
                             <tr key={student.id}>
-                              <td>
-                                <span className="id-pill">#{format9DigitId(student.id, "student")}</span>
-                              </td>
+                              <td>{idx + 1}</td>
                               <td>
                                 <Link
                                   to={`/students/${format9DigitId(student.id, "student")}`}
