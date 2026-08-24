@@ -833,17 +833,14 @@ const Attendance = () => {
                       <tr>
                         <th>9 Xonali ID</th>
                         <th>O'quvchi F.I.SH</th>
-                        <th>Baho (1-10 Ball)</th>
-                        <th>Baholash Darajasi</th>
-                        <th>Uy Vazifasi</th>
-                        <th>Ustoz Izohi</th>
+                        <th>Baho</th>
                         <th className="text-center">360° Dosye</th>
                       </tr>
                     </thead>
                     <tbody>
                       {activeGroupStudents.length === 0 ? (
                         <tr>
-                          <td colSpan="7" className="text-center py-6 text-muted">
+                          <td colSpan="4" className="text-center py-6 text-muted">
                             Ushbu guruhga hali o'quvchilar biriktirilmagan
                           </td>
                         </tr>
@@ -854,7 +851,6 @@ const Attendance = () => {
                             homeworkDone: true,
                             comment: "Faol",
                           };
-                          const letterGrade = getLetterGrade(grRec.score);
 
                           return (
                             <tr key={student.id}>
@@ -886,33 +882,6 @@ const Attendance = () => {
                                   <option value="2">🔴 2 Ball (Qoniqarsiz)</option>
                                   <option value="1">🔴 1 Ball (Qoniqarsiz)</option>
                                 </select>
-                              </td>
-                              <td>
-                                <span className={`grade-badge-pill ${letterGrade.class}`}>
-                                  {letterGrade.label}
-                                </span>
-                              </td>
-                              <td>
-                                <button
-                                  type="button"
-                                  className={`hw-toggle-btn ${grRec.homeworkDone ? "hw-submitted" : "hw-missing"}`}
-                                  onClick={() => handleHomeworkToggle(student.id)}
-                                >
-                                  {grRec.homeworkDone ? (
-                                    <><HiOutlineCheck /> ✅ Topshirdi</>
-                                  ) : (
-                                    <><HiOutlineXMark /> ❌ Topshirmadi</>
-                                  )}
-                                </button>
-                              </td>
-                              <td>
-                                <input
-                                  type="text"
-                                  className="form-input form-input-sm"
-                                  placeholder="Izoh yozish..."
-                                  value={grRec.comment}
-                                  onChange={(e) => handleGradeCommentChange(student.id, e.target.value)}
-                                />
                               </td>
                               <td className="text-center">
                                 <button
