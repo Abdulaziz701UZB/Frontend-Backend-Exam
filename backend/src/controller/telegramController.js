@@ -62,3 +62,11 @@ export const sendTelegramTestMessage = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const handleTelegramWebhook = async (req, res) => {
+  try {
+    res.status(200).json({ ok: true, message: "Webhook qabul qilindi" });
+  } catch (err) {
+    res.status(200).json({ ok: false, error: err.message });
+  }
+};

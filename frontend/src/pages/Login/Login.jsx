@@ -4,11 +4,10 @@ import { useEduAuth } from "../../context/EduAuthContext";
 import {
   HiBolt,
   HiLockClosed,
-  HiOutlineEnvelope,
+  HiOutlineDevicePhoneMobile,
   HiEye,
   HiEyeSlash,
   HiArrowRightOnRectangle,
-  HiSparkles,
   HiExclamationCircle,
   HiShieldCheck
 } from "react-icons/hi2";
@@ -16,9 +15,9 @@ import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, authError, setAuthError } = useEduAuth();
+  const { login, authError } = useEduAuth();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,18 +26,12 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     setTimeout(() => {
-      const success = login(email, password);
+      const success = login(identifier, password);
       setIsLoading(false);
       if (success) {
         navigate("/");
       }
     }, 350);
-  };
-
-  const fillDemoCredentials = () => {
-    setEmail("admin@educontrol.uz");
-    setPassword("10102013");
-    setAuthError("");
   };
 
   return (
@@ -50,7 +43,7 @@ const Login = () => {
           </div>
           <h1 className="login-system-title">EduControl CRM</h1>
           <p className="login-system-subtitle">
-            Tizimga kirish uchun Email va parolingizni kiriting
+            Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting
           </p>
         </div>
 
@@ -64,16 +57,16 @@ const Login = () => {
         <form onSubmit={handleLoginSubmit} className="login-form">
           <div className="login-form-group">
             <label className="login-form-label">
-              <HiOutlineEnvelope style={{ verticalAlign: 'middle', marginRight: 4 }} />
-              Elektron pochta (Email):
+              <HiOutlineDevicePhoneMobile style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              Telefon raqami yoki Email:
             </label>
             <div className="login-input-wrap">
               <input
-                type="email"
+                type="text"
                 className="login-form-input"
-                placeholder="Elektron pochtangizni kiriting..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="+998 90 123 45 67 yoki email..."
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
                 autoFocus
               />
@@ -81,20 +74,10 @@ const Login = () => {
           </div>
 
           <div className="login-form-group">
-            <div className="login-label-row">
-              <label className="login-form-label">
-                <HiLockClosed style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                Tizim paroli:
-              </label>
-              <button
-                type="button"
-                className="login-quick-fill-btn"
-                onClick={fillDemoCredentials}
-              >
-                <HiSparkles style={{ verticalAlign: 'middle', marginRight: 2 }} />
-                Avto-to'ldirish
-              </button>
-            </div>
+            <label className="login-form-label">
+              <HiLockClosed style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              Tizim paroli:
+            </label>
             <div className="login-password-input-wrap">
               <input
                 type={showPassword ? "text" : "password"}

@@ -27,8 +27,8 @@ export const EduAuthProvider = ({ children }) => {
     return parseInt(localStorage.getItem("educontrol_user_id")) || 201;
   });
 
-  const [userEmail, setUserEmail] = useState(() => {
-    return localStorage.getItem("educontrol_user_email") || "admin@educontrol.uz";
+  const [userLoginIdentifier, setUserLoginIdentifier] = useState(() => {
+    return localStorage.getItem("educontrol_user_identifier") || "+998 90 599 06 00";
   });
 
   const [authError, setAuthError] = useState("");
@@ -65,11 +65,11 @@ export const EduAuthProvider = ({ children }) => {
 
   const user = getUserObject(currentRole, selectedUserId);
 
-  const login = (email, password, roleHint = "admin") => {
+  const login = (identifier, password, roleHint = "admin") => {
     setAuthError("");
 
-    if (!email || !email.trim()) {
-      setAuthError("Iltimos, elektron pochta (Email) manzilini kiriting!");
+    if (!identifier || !identifier.trim()) {
+      setAuthError("Iltimos, telefon raqamingiz yoki elektron pochtangizni kiriting!");
       return false;
     }
 
@@ -79,13 +79,13 @@ export const EduAuthProvider = ({ children }) => {
     }
 
     let determinedRole = roleHint;
-    const lowerEmail = email.toLowerCase().trim();
+    const lower = identifier.toLowerCase().trim();
 
-    if (lowerEmail.includes("teacher") || lowerEmail.includes("ustoz") || lowerEmail.includes("oqituvchi")) {
+    if (lower.includes("teacher") || lower.includes("ustoz") || lower.includes("oqituvchi")) {
       determinedRole = "teacher";
-    } else if (lowerEmail.includes("student") || lowerEmail.includes("oquvchi") || lowerEmail.includes("talaba")) {
+    } else if (lower.includes("student") || lower.includes("oquvchi") || lower.includes("talaba")) {
       determinedRole = "student";
-    } else if (lowerEmail.includes("admin")) {
+    } else if (lower.includes("admin")) {
       determinedRole = "admin";
     }
 
@@ -101,12 +101,12 @@ export const EduAuthProvider = ({ children }) => {
     setIsAuthenticated(true);
     setCurrentRole(determinedRole);
     setSelectedUserId(targetUserId);
-    setUserEmail(email.trim());
+    setUserLoginIdentifier(identifier.trim());
 
     localStorage.setItem("educontrol_is_authenticated", "true");
     localStorage.setItem("educontrol_role", determinedRole);
     localStorage.setItem("educontrol_user_id", targetUserId.toString());
-    localStorage.setItem("educontrol_user_email", email.trim());
+    localStorage.setItem("educontrol_user_identifier", identifier.trim());
     return true;
   };
 
@@ -115,7 +115,7 @@ export const EduAuthProvider = ({ children }) => {
     localStorage.removeItem("educontrol_is_authenticated");
     localStorage.removeItem("educontrol_role");
     localStorage.removeItem("educontrol_user_id");
-    localStorage.removeItem("educontrol_user_email");
+    localStorage.removeItem("educontrol_user_identifier");
   };
 
   const switchRoleWithPassword = (newRole, password, targetUserId) => {
@@ -151,7 +151,7 @@ export const EduAuthProvider = ({ children }) => {
     <EduAuthContext.Provider
       value={{
         isAuthenticated,
-        userEmail,
+        userLoginIdentifier,
         login,
         logout,
         currentRole,
