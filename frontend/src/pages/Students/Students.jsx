@@ -396,10 +396,10 @@ const Students = () => {
         <div>
           <h1 className="page-title">
             <FaUserGraduate className="title-icon-indigo" />
-            2. O'quvchilar Boshqaruvi
+            O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            Barcha o'quvchilar ro'yxati, to'lov balanslari, 9 xonali identifikatorlar, Telegram bot integratsiyasi va 360° dosye
+            Barcha o'quvchilar ro'yxati, to'lov balanslari, 9 xonali identifikatorlar, Telegram bot integratsiyasi va to'liq o'quvchi profili
           </p>
         </div>
 
@@ -503,7 +503,7 @@ const Students = () => {
               <thead>
                 <tr>
                   <th>9 Xonali ID</th>
-                  <th>F.I.SH (Dosye ko'rish uchun bosing)</th>
+                  <th>F.I.SH (Profilni ko'rish uchun bosing)</th>
                   <th>Telefon Raqami</th>
                   <th>Guruhi</th>
                   <th>To'lov Holati</th>
@@ -540,7 +540,7 @@ const Students = () => {
                             <span className="student-name-text">
                               {s.fullName}
                             </span>
-                            <span className="student-status-tag">360° dosye /students/{format9DigitId(s.id, "student")}</span>
+                            <span className="student-status-tag">Profil: /students/{format9DigitId(s.id, "student")}</span>
                           </div>
                         </div>
                       </td>
@@ -640,7 +640,7 @@ const Students = () => {
               <div>
                 <h2>
                   <FaUserGraduate className="title-icon-indigo" />
-                  {selectedDossierStudent.fullName} — 360° O'quvchi Dosyesi
+                  {selectedDossierStudent.fullName} — O'quvchi Profili
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
                   O'quvchi 9 Xonali ID: <strong>#{format9DigitId(selectedDossierStudent.id, "student")}</strong> | Guruhi: <strong>{selectedDossierStudent.groupName}</strong>

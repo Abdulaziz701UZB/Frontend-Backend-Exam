@@ -538,7 +538,7 @@ const Attendance = () => {
                         <th className="text-center">Davomat Holati</th>
                         <th>Sabab Tasniflagichi</th>
                         <th className="text-center">Telegram Bot</th>
-                        <th className="text-center">360° Dosye</th>
+                        <th className="text-center">Profil Ko'rish</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -705,7 +705,7 @@ const Attendance = () => {
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
                                 >
-                                  <FaUserGraduate /> 360° Dosye
+                                  <FaUserGraduate /> Profil Ko'rish
                                 </button>
                               </td>
                             </tr>
@@ -818,7 +818,7 @@ const Attendance = () => {
                         <th>#</th>
                         <th>O'quvchi F.I.SH</th>
                         <th>Baho</th>
-                        <th className="text-center">360° Dosye</th>
+                        <th className="text-center">Profil Ko'rish</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -871,7 +871,7 @@ const Attendance = () => {
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
                                 >
-                                  <FaUserGraduate /> 360° Dosye
+                                  <FaUserGraduate /> Profil Ko'rish
                                 </button>
                               </td>
                             </tr>

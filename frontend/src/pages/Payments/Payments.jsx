@@ -355,7 +355,7 @@ const Payments = () => {
                   <th>Guruhi</th>
                   <th>Qarz Miqdori</th>
                   <th>Holati</th>
-                  <th>Dosyeni Ochish</th>
+                  <th>Profilni Ko'rish</th>
                 </tr>
               </thead>
               <tbody>
@@ -396,7 +396,7 @@ const Payments = () => {
                           className="btn btn-primary btn-sm"
                           onClick={() => navigate(`/students/${format9DigitId(s.id, "student")}`)}
                         >
-                          <FaUserGraduate /> 360° Dosye
+                          <FaUserGraduate /> Profil Ko'rish
                         </button>
                       </td>
                     </tr>
