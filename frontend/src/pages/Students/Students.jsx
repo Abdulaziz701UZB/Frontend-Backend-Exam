@@ -2,22 +2,23 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
-import { studentsApi, groupsApi } from "../../services/api";
+import { studentsApi, groupsApi, teachersApi } from "../../services/api";
 import {
+  HiOutlineUsers,
   HiOutlinePlus,
   HiMagnifyingGlass,
   HiOutlinePencilSquare,
   HiOutlineTrash,
   HiXMark,
   HiOutlinePhone,
+  HiOutlineArrowsRightLeft,
   HiOutlineCheckCircle,
   HiOutlineExclamationTriangle,
-  HiOutlineUser,
-  HiOutlineArrowsRightLeft,
   HiOutlineAcademicCap,
-  HiOutlineSparkles
+  HiOutlineUser,
+  HiOutlineArrowPath
 } from "react-icons/hi2";
-import { FaUserGraduate } from "react-icons/fa6";
+import { FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Students.css";
 
 const Students = () => {
@@ -27,10 +28,22 @@ const Students = () => {
 
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGroupFilter, setSelectedGroupFilter] = useState("All");
+  const [searchInputs, setSearchInputs] = useState({
+    name: "",
+    group: "All",
+    phone: "",
+    teacher: "All",
+  });
+
+  const [appliedFilters, setAppliedFilters] = useState({
+    name: "",
+    group: "All",
+    phone: "",
+    teacher: "All",
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -53,12 +66,14 @@ const Students = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [studentsData, groupsData] = await Promise.all([
+      const [studentsData, groupsData, teachersData] = await Promise.all([
         studentsApi.getAll(),
         groupsApi.getAll(),
+        teachersApi.getAll(),
       ]);
       setStudents(studentsData);
       setGroups(groupsData);
+      setTeachers(teachersData);
     } catch (err) {
       toast.error("O'quvchilar ro'yxatini yuklashda xatolik: " + err.message);
     } finally {
@@ -158,6 +173,24 @@ const Students = () => {
     setSearchParams({});
   };
 
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    setAppliedFilters({ ...searchInputs });
+    toast.success("Qidiruv natijalari yangilandi");
+  };
+
+  const handleResetFilters = () => {
+    const emptyState = {
+      name: "",
+      group: "All",
+      phone: "",
+      teacher: "All",
+    };
+    setSearchInputs(emptyState);
+    setAppliedFilters(emptyState);
+    toast.success("Barcha qidiruv filtrlari tozalandi");
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const groupObj = groups.find((g) => g.id === formData.groupId) || groups[0];
@@ -179,13 +212,16 @@ const Students = () => {
         await studentsApi.update(editingStudent.id, payload);
         toast.success("O'quvchi ma'lumotlari yangilandi!");
       } else {
-        await studentsApi.create(payload);
-        toast.success("Yangi o'quvchi muvaffaqiyatli qo'shildi!");
+        await studentsApi.create({
+          id: `S-${Math.floor(100 + Math.random() * 900)}`,
+          ...payload,
+        });
+        toast.success("Yangi o'quvchi ro'yxatdan o'tkazildi!");
       }
       await loadData();
-      setIsModalOpen(false);
+      closeModals();
     } catch (err) {
-      toast.error("Xatolik: " + (err.response?.data?.error || err.message));
+      toast.error("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -193,34 +229,34 @@ const Students = () => {
     e.preventDefault();
     if (!transferringStudent || !targetGroupId) return;
 
-    const targetGroupObj = groups.find((g) => g.id === targetGroupId);
-    const targetGroupName = targetGroupObj
-      ? `${targetGroupObj.name} (${targetGroupObj.courseName})`
-      : targetGroupId;
+    const oldGroupId = transferringStudent.groupId;
+    const oldGroupName = transferringStudent.groupName;
+    const targetGroup = groups.find((g) => g.id === targetGroupId);
 
     try {
-      await studentsApi.transfer(transferringStudent.id, {
-        newGroupId: targetGroupId,
-        newGroupName: targetGroupName,
-        transferReason: transferReason,
-      });
-      toast.success(`${transferringStudent.fullName} yangi guruhga (${targetGroupName}) muvaffaqiyatli o'tkazildi!`);
-      setIsTransferModalOpen(false);
+      await studentsApi.transferGroup(
+        transferringStudent.id,
+        targetGroupId,
+        transferReason,
+        oldGroupId,
+        oldGroupName,
+      );
+
+      toast.success(
+        `${transferringStudent.fullName} muvaffaqiyatli "${targetGroup?.name || targetGroupId}" guruhiga o'tkazildi!`,
+      );
       await loadData();
+      closeModals();
     } catch (err) {
-      toast.error("Guruhni o'zgartirishda xatolik: " + (err.response?.data?.error || err.message));
+      toast.error("O'tkazishda xatolik: " + (err.response?.data?.error || err.message));
     }
   };
 
   const handleDeleteStudent = async (studentId) => {
-    if (
-      window.confirm(
-        "Haqiqatan ham ushbu o'quvchini guruhdan chiqarmoqchisiz/arxivlamoqchisiz?",
-      )
-    ) {
+    if (window.confirm("Haqiqatan ham ushbu o'quvchini o'chirmoqchisiz?")) {
       try {
         await studentsApi.delete(studentId);
-        toast.success("O'quvchi muvaffaqiyatli o'chirildi!");
+        toast.success("O'quvchi tizimdan o'chirildi!");
         await loadData();
       } catch (err) {
         toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
@@ -229,17 +265,31 @@ const Students = () => {
   };
 
   const filteredStudents = students.filter((s) => {
-    if (selectedGroupFilter !== "All" && s.groupId !== selectedGroupFilter)
-      return false;
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
-      return (
-        (s.fullName || "").toLowerCase().includes(q) ||
-        (s.phone || "").includes(q) ||
-        (s.groupName || "").toLowerCase().includes(q)
-      );
-    }
-    return true;
+    const groupObj = groups.find((g) => g.id === s.groupId);
+    const teacherObj = teachers.find((t) => t.id === groupObj?.teacherId) || { name: groupObj?.teacherName || "" };
+
+    const nameMatch = appliedFilters.name.trim()
+      ? (s.fullName || "").toLowerCase().includes(appliedFilters.name.toLowerCase().trim())
+      : true;
+
+    const groupMatch = appliedFilters.group && appliedFilters.group !== "All"
+      ? (s.groupId === appliedFilters.group || (s.groupName || "").toLowerCase().includes(appliedFilters.group.toLowerCase().trim()))
+      : true;
+
+    const phoneMatch = appliedFilters.phone.trim()
+      ? (() => {
+          const rawQuery = appliedFilters.phone.replace(/\D/g, "");
+          const rawPhone = (s.phone || "").replace(/\D/g, "");
+          const rawParent = (s.parentPhone || "").replace(/\D/g, "");
+          return rawPhone.includes(rawQuery) || rawParent.includes(rawQuery) || (s.phone || "").includes(appliedFilters.phone);
+        })()
+      : true;
+
+    const teacherMatch = appliedFilters.teacher && appliedFilters.teacher !== "All"
+      ? (teacherObj.name || "").toLowerCase().includes(appliedFilters.teacher.toLowerCase().trim()) || (groupObj?.teacherName || "").toLowerCase().includes(appliedFilters.teacher.toLowerCase().trim())
+      : true;
+
+    return nameMatch && groupMatch && phoneMatch && teacherMatch;
   });
 
   const formatMoney = (amount) => {
@@ -252,7 +302,7 @@ const Students = () => {
         <div>
           <h1 className="page-title">
             <FaUserGraduate className="title-icon-indigo" />
-            O'quvchilar Boshqaruvi
+            2. O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
             Barcha o'quvchilar ro'yxati, to'lov balanslari va guruhlar o'rtasida o'tkazish (Transfer)
@@ -266,35 +316,83 @@ const Students = () => {
         )}
       </div>
 
-      <div className="card filter-card">
-        <div className="filter-controls-row">
-          <div className="search-box">
-            <HiMagnifyingGlass className="search-icon" />
+      <div className="student-search-card">
+        <form onSubmit={handleSearchSubmit} className="student-filter-toolbar">
+          <div className="filter-input-wrap">
+            <HiOutlineUser className="filter-input-icon" />
             <input
               type="text"
-              className="search-input"
-              placeholder="O'quvchi ismi, telefon yoki guruh bo'yicha qidirish..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              className="filter-input-field"
+              placeholder="1. Ism bo'yicha qidirish..."
+              value={searchInputs.name}
+              onChange={(e) =>
+                setSearchInputs({ ...searchInputs, name: e.target.value })
+              }
             />
           </div>
 
-          <div className="group-filter-wrap">
-            <label className="filter-label">Guruh:</label>
+          <div className="filter-input-wrap">
+            <HiOutlineAcademicCap className="filter-input-icon" />
             <select
-              className="form-select"
-              value={selectedGroupFilter}
-              onChange={(e) => setSelectedGroupFilter(e.target.value)}
+              className="filter-select-field"
+              value={searchInputs.group}
+              onChange={(e) =>
+                setSearchInputs({ ...searchInputs, group: e.target.value })
+              }
             >
-              <option value="All">Barcha Guruhlar</option>
+              <option value="All">2. Barcha Guruhlar</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name}
+                  {g.name} ({g.courseName})
                 </option>
               ))}
             </select>
           </div>
-        </div>
+
+          <div className="filter-input-wrap">
+            <HiOutlinePhone className="filter-input-icon" />
+            <input
+              type="text"
+              className="filter-input-field"
+              placeholder="3. Oxirgi 4 ta raqam / Tel..."
+              value={searchInputs.phone}
+              onChange={(e) =>
+                setSearchInputs({ ...searchInputs, phone: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="filter-input-wrap">
+            <FaChalkboardUser className="filter-input-icon" />
+            <select
+              className="filter-select-field"
+              value={searchInputs.teacher}
+              onChange={(e) =>
+                setSearchInputs({ ...searchInputs, teacher: e.target.value })
+              }
+            >
+              <option value="All">4. Barcha O'qituvchilar</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.name}>
+                  {t.name} ({t.subject})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button type="submit" className="btn btn-primary btn-search-trigger">
+            <HiMagnifyingGlass /> Qidirish
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary btn-reset-trigger"
+            onClick={handleResetFilters}
+            title="Filtrlarni tozalash"
+          >
+            <HiOutlineArrowPath /> Tozalash
+          </button>
+        </form>
       </div>
 
       <div className="card table-card">
@@ -324,8 +422,8 @@ const Students = () => {
               <tbody>
                 {filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center text-muted">
-                      Hech qanday o'quvchi topilmadi
+                    <td colSpan="7" className="text-center text-muted py-6">
+                      Kiritilgan mezonlar bo'yicha hech qanday o'quvchi topilmadi
                     </td>
                   </tr>
                 ) : (
@@ -395,7 +493,7 @@ const Students = () => {
                               type="button"
                               className="btn btn-secondary btn-sm"
                               onClick={() => openTransferModal(s)}
-                              title="Guruhni O'zgartirish (Transfer #18)"
+                              title="Guruhni O'zgartirish (Transfer)"
                             >
                               <HiOutlineArrowsRightLeft />
                             </button>
@@ -537,6 +635,7 @@ const Students = () => {
                   <input
                     type="text"
                     className="form-input"
+                    placeholder="+998 90 123 45 67"
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
@@ -552,6 +651,7 @@ const Students = () => {
                   <input
                     type="text"
                     className="form-input"
+                    placeholder="+998 90 987 65 43"
                     value={formData.parentPhone}
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
@@ -560,7 +660,7 @@ const Students = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Biriktirilgan Guruh:</label>
+                  <label className="form-label">Tegishli Guruh:</label>
                   <select
                     className="form-select"
                     value={formData.groupId}
@@ -584,16 +684,19 @@ const Students = () => {
                     className="form-select"
                     value={formData.paymentStatus}
                     onChange={(e) =>
-                      setFormData({ ...formData, paymentStatus: e.target.value })
+                      setFormData({
+                        ...formData,
+                        paymentStatus: e.target.value,
+                      })
                     }
                   >
-                    <option value="Paid">To'langan (Paid)</option>
-                    <option value="Overdue">Qarzdorlik bor (Overdue)</option>
+                    <option value="Paid">To'langan (Qarzsiz)</option>
+                    <option value="Overdue">Qarzdorlik Mavjud</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Balans (so'm):</label>
+                  <label className="form-label">Balans / Qarz (so'm):</label>
                   <input
                     type="number"
                     className="form-input"
@@ -605,30 +708,16 @@ const Students = () => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">O'qish Holati (Status):</label>
-                <select
-                  className="form-select"
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                >
-                  <option value="Active">Faol O'qimoqda</option>
-                  <option value="Inactive">Muzlatilgan / Bitirgan</option>
-                </select>
-              </div>
-
-              <div className="modal-actions-flex">
+              <div className="admin-modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeModals}
                 >
                   Bekor Qilish
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  <HiOutlineCheckCircle /> Saqlash
+                  {editingStudent ? "Saqlash" : "Ro'yxatdan O'tkazish"}
                 </button>
               </div>
             </form>

@@ -7,26 +7,92 @@
   overflow: hidden;
 }
 
-.filter-controls-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+.student-search-card {
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
 }
 
-.group-filter-wrap {
-  display: flex;
-  align-items: center;
+.student-filter-toolbar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
   gap: 12px;
+  align-items: center;
 }
 
-.filter-select {
-  width: auto !important;
-  min-width: 240px;
+.filter-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
-.mb-0 {
-  margin-bottom: 0 !important;
+.filter-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.filter-input-field {
+  width: 100%;
+  height: 42px;
+  padding: 8px 14px 8px 38px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.filter-input-field:focus {
+  background: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.15);
+}
+
+.filter-select-field {
+  width: 100%;
+  height: 42px;
+  padding: 8px 14px 8px 38px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  outline: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select-field:focus {
+  background: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.15);
+}
+
+.btn-search-trigger {
+  height: 42px;
+  padding: 0 20px;
+  font-weight: 700;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.btn-reset-trigger {
+  height: 42px;
+  padding: 0 16px;
+  font-size: 13.5px;
+  white-space: nowrap;
 }
 
 .student-name-cell {
@@ -144,23 +210,36 @@
   border-top: 1px solid #e2e8f0;
 }
 
-@media (max-width: 992px) {
-  .filter-controls-row {
-    flex-direction: column;
-    align-items: stretch;
+@media (max-width: 1200px) {
+  .student-filter-toolbar {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
-  .group-filter-wrap {
-    width: 100%;
+  .btn-search-trigger,
+  .btn-reset-trigger {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .student-filter-toolbar {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .group-filter-wrap select {
-    flex: 1;
+  .btn-search-trigger,
+  .btn-reset-trigger {
+    grid-column: span 1;
   }
 }
 
 @media (max-width: 640px) {
-  .search-box {
+  .student-filter-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-search-trigger,
+  .btn-reset-trigger {
+    grid-column: span 1;
     width: 100%;
   }
 
