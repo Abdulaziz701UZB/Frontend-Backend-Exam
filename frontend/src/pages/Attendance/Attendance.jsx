@@ -185,7 +185,7 @@ const Attendance = () => {
       };
     });
     setAttendanceMap(updated);
-    toast.success("⚡ Guruhdagi barcha o'quvchilar 'Keldi' deb belgilandi!");
+    toast.success("Barcha o'quvchilar 'Keldi' deb belgilandi!");
   };
 
   const handleGradeChange = (studentId, score) => {
@@ -511,7 +511,7 @@ const Attendance = () => {
                       className="btn btn-mark-all btn-sm"
                       onClick={handleMarkAllPresent}
                     >
-                      <HiOutlineSparkles /> ⚡ Barchasini "Keldi" Qilish
+                      <HiOutlineCheck className="inline-icon-xs" /> Barchasi Keldi
                     </button>
                   )}
                 </div>
