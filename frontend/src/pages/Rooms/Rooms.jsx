@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { roomsApi } from "../../services/api";
+import { format9DigitId } from "../../utils/idFormatter";
 import {
   HiOutlineBuildingOffice2,
   HiOutlinePlus,
@@ -18,9 +20,21 @@ import {
 } from "react-icons/hi2";
 import "./Rooms.css";
 
+const STANDARD_TIME_SLOTS = [
+  "06:00 - 08:00",
+  "08:00 - 10:00",
+  "10:00 - 12:00",
+  "14:00 - 16:00",
+  "16:00 - 18:00",
+  "18:00 - 20:00",
+  "20:00 - 22:00"
+];
+
 const Rooms = () => {
   const { canManageGroups } = useEduAuth();
   const toast = useToast();
+  const { id: urlParamId } = useParams();
+  const navigate = useNavigate();
 
   const [rooms, setRooms] = useState([]);
   const [occupancyData, setOccupancyData] = useState([]);
@@ -58,6 +72,19 @@ const Rooms = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (urlParamId && occupancyData.length > 0) {
+      const match = occupancyData.find(
+        (o) =>
+          String(o.room.id) === String(urlParamId) ||
+          format9DigitId(o.room.id, "room") === String(urlParamId)
+      );
+      if (match) {
+        setSelectedTimetableRoom(match);
+      }
+    }
+  }, [urlParamId, occupancyData]);
+
   const openCreateModal = () => {
     setEditingRoom(null);
     setFormData({
@@ -82,6 +109,18 @@ const Rooms = () => {
     setIsModalOpen(true);
   };
 
+  const openTimetable = (item) => {
+    setSelectedTimetableRoom(item);
+    navigate(`/rooms/${format9DigitId(item.room.id, "room")}`);
+  };
+
+  const closeTimetable = () => {
+    setSelectedTimetableRoom(null);
+    if (urlParamId) {
+      navigate("/rooms");
+    }
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -98,7 +137,7 @@ const Rooms = () => {
         toast.success(`"${formData.name}" muvaffaqiyatli yangilandi!`);
       } else {
         await roomsApi.create({
-          id: `R-${Math.floor(100 + Math.random() * 900)}`,
+          id: `R-${Math.floor(100000000 + Math.random() * 900000000)}`,
           ...payload,
         });
         toast.success(`"${formData.name}" muvaffaqiyatli yaratildi!`);
@@ -127,7 +166,6 @@ const Rooms = () => {
   const avgOccupancy = occupancyData.length > 0
     ? Math.round(occupancyData.reduce((acc, o) => acc + (o.occupancyRate || 0), 0) / occupancyData.length)
     : 0;
-  const totalFreeSlots = occupancyData.reduce((acc, o) => acc + (o.freeSlotsCount || 0), 0);
 
   return (
     <div className="rooms-page">
@@ -138,7 +176,7 @@ const Rooms = () => {
             9. Xonalar & Bandlik Matritsasi
           </h1>
           <p className="page-subtitle">
-            O'quv xonalari, texnik jihozlar va haftalik dars jadvali to'qnashuvlari nazorati
+            O'quv xonalari, 06:00 - 22:00 vaqt oraliqlari va haftalik dars jadvali bandligi nazorati
           </p>
         </div>
         {canManageGroups && (
@@ -198,7 +236,7 @@ const Rooms = () => {
               Xonalar Haftalik Dars Jadvali & Bandlik Holati
             </h3>
             <p className="text-muted text-sm m-0">
-              Har bir xonaning guruhlar bilan band qilingan soatlari va bo'sh vaqtlari
+              06:00 dan 22:00 gacha bo'lgan barcha 7 ta vaqt oraliqlari bo'yicha xonalar bandligi
             </p>
           </div>
         </div>
@@ -251,7 +289,7 @@ const Rooms = () => {
                 <div className="room-card-actions">
                   <button
                     className="btn btn-secondary btn-sm"
-                    onClick={() => setSelectedTimetableRoom(item)}
+                    onClick={() => openTimetable(item)}
                   >
                     <HiOutlineClock /> Dars Jadvali
                   </button>
@@ -283,7 +321,7 @@ const Rooms = () => {
           <table className="dash-table">
             <thead>
               <tr>
-                <th>Xona ID</th>
+                <th>9 Xonali ID</th>
                 <th>Xona Nomi</th>
                 <th>Sig'imi</th>
                 <th>Kompyuterlar</th>
@@ -299,7 +337,7 @@ const Rooms = () => {
                 return (
                   <tr key={r.id}>
                     <td>
-                      <span className="id-pill">{r.id}</span>
+                      <span className="id-pill">#{format9DigitId(r.id, "room")}</span>
                     </td>
                     <td>
                       <strong className="student-name-text">{r.name}</strong>
@@ -349,7 +387,7 @@ const Rooms = () => {
       </div>
 
       {selectedTimetableRoom && (
-        <div className="modal-overlay" onClick={() => setSelectedTimetableRoom(null)}>
+        <div className="modal-overlay" onClick={closeTimetable}>
           <div
             className="modal-content card timetable-modal-card"
             onClick={(e) => e.stopPropagation()}
@@ -361,12 +399,12 @@ const Rooms = () => {
                   {selectedTimetableRoom.room.name} — Haftalik Dars Jadvali
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
-                  Sig'imi: {selectedTimetableRoom.room.capacity} kishi | {selectedTimetableRoom.occupancyRate}% Band
+                  Xona 9 Xonali ID: <strong>#{format9DigitId(selectedTimetableRoom.room.id, "room")}</strong> | Sig'imi: {selectedTimetableRoom.room.capacity} kishi | {selectedTimetableRoom.occupancyRate}% Band
                 </p>
               </div>
               <button
                 className="close-modal-btn"
-                onClick={() => setSelectedTimetableRoom(null)}
+                onClick={closeTimetable}
                 aria-label="Yopish"
               >
                 <HiXMark />
@@ -376,21 +414,26 @@ const Rooms = () => {
             <div className="timetable-grid">
               <div className="timetable-days-block">
                 <h5 className="days-block-title">
-                  <HiOutlineCalendarDays /> Dushanba - Chorshanba - Juma (Toq kunlar)
+                  <HiOutlineCalendarDays /> Dushanba - Chorshanba - Juma
                 </h5>
                 <div className="slots-row-grid">
-                  {selectedTimetableRoom.scheduleMatrix
-                    .filter((s) => s.days.includes("Dushanba"))
-                    .map((s, idx) => (
+                  {STANDARD_TIME_SLOTS.map((timeSlot) => {
+                    const occ = (selectedTimetableRoom.assignedGroups || []).find(
+                      (g) => (g.scheduleDays || "").includes("Dushanba") && (g.scheduleTime || "").trim() === timeSlot
+                    ) || (selectedTimetableRoom.scheduleMatrix || []).find(
+                      (s) => s.days.includes("Dushanba") && s.time === timeSlot && s.isOccupied
+                    );
+
+                    return (
                       <div
-                        key={idx}
-                        className={`time-slot-card ${s.isOccupied ? "slot-occupied" : "slot-free"}`}
+                        key={timeSlot}
+                        className={`time-slot-card ${occ ? "slot-occupied" : "slot-free"}`}
                       >
-                        <span className="slot-time-text">{s.time}</span>
-                        {s.isOccupied ? (
+                        <span className="slot-time-text">{timeSlot}</span>
+                        {occ ? (
                           <>
-                            <strong>{s.groupName}</strong>
-                            <span>{s.teacherName}</span>
+                            <strong>{occ.name || occ.groupName}</strong>
+                            <span>{occ.teacherName}</span>
                           </>
                         ) : (
                           <strong className="text-emerald">
@@ -398,27 +441,33 @@ const Rooms = () => {
                           </strong>
                         )}
                       </div>
-                    ))}
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="timetable-days-block">
                 <h5 className="days-block-title">
-                  <HiOutlineCalendarDays /> Seshanba - Payshanba - Shanba (Juft kunlar)
+                  <HiOutlineCalendarDays /> Seshanba - Payshanba - Shanba
                 </h5>
                 <div className="slots-row-grid">
-                  {selectedTimetableRoom.scheduleMatrix
-                    .filter((s) => s.days.includes("Seshanba"))
-                    .map((s, idx) => (
+                  {STANDARD_TIME_SLOTS.map((timeSlot) => {
+                    const occ = (selectedTimetableRoom.assignedGroups || []).find(
+                      (g) => (g.scheduleDays || "").includes("Seshanba") && (g.scheduleTime || "").trim() === timeSlot
+                    ) || (selectedTimetableRoom.scheduleMatrix || []).find(
+                      (s) => s.days.includes("Seshanba") && s.time === timeSlot && s.isOccupied
+                    );
+
+                    return (
                       <div
-                        key={idx}
-                        className={`time-slot-card ${s.isOccupied ? "slot-occupied" : "slot-free"}`}
+                        key={timeSlot}
+                        className={`time-slot-card ${occ ? "slot-occupied" : "slot-free"}`}
                       >
-                        <span className="slot-time-text">{s.time}</span>
-                        {s.isOccupied ? (
+                        <span className="slot-time-text">{timeSlot}</span>
+                        {occ ? (
                           <>
-                            <strong>{s.groupName}</strong>
-                            <span>{s.teacherName}</span>
+                            <strong>{occ.name || occ.groupName}</strong>
+                            <span>{occ.teacherName}</span>
                           </>
                         ) : (
                           <strong className="text-emerald">
@@ -426,7 +475,8 @@ const Rooms = () => {
                           </strong>
                         )}
                       </div>
-                    ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -435,7 +485,7 @@ const Rooms = () => {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setSelectedTimetableRoom(null)}
+                onClick={closeTimetable}
               >
                 Yopish
               </button>
@@ -452,49 +502,49 @@ const Rooms = () => {
                 {editingRoom ? "Xonani Tahrirlash" : "Yangi Xona Qo'shish"}
               </h2>
               <button
-                className="close-modal-btn"
+                type="button"
+                className="modal-close-btn"
                 onClick={() => setIsModalOpen(false)}
                 aria-label="Yopish"
               >
                 <HiXMark />
               </button>
             </div>
-            <form onSubmit={handleFormSubmit} className="admin-modal-form">
+
+            <form onSubmit={handleFormSubmit}>
               <div className="form-group">
-                <label className="form-label">Xona Nomi</label>
+                <label className="form-label">Xona Nomi:</label>
                 <input
                   type="text"
                   className="form-input"
-                  required
-                  placeholder="masalan: 201-xona (Kompyuter zali)"
+                  placeholder="masalan: 301-xona (Frontend Lab)"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
+                  required
                 />
               </div>
+
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">Maksimal Sig'imi (o'quvchi)</label>
+                  <label className="form-label">Maksimal Sig'im (o'quvchi):</label>
                   <input
                     type="number"
                     className="form-input"
-                    required
-                    min="5"
-                    max="100"
                     value={formData.capacity}
                     onChange={(e) =>
                       setFormData({ ...formData, capacity: e.target.value })
                     }
+                    required
                   />
                 </div>
+
                 <div className="form-group">
-                  <label className="form-label">Kompyuterlar Soni</label>
+                  <label className="form-label">Kompyuterlar Soni:</label>
                   <input
                     type="number"
                     className="form-input"
-                    required
-                    min="0"
                     value={formData.computersCount}
                     onChange={(e) =>
                       setFormData({
@@ -505,29 +555,48 @@ const Rooms = () => {
                   />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Proektor / Ekran Holati</label>
-                <select
-                  className="form-select"
-                  value={formData.projector}
-                  onChange={(e) =>
-                    setFormData({ ...formData, projector: e.target.value })
-                  }
-                >
-                  <option value="Mavjud">Mavjud (Interaktiv doska / TV)</option>
-                  <option value="Mavjud emas">Mavjud emas</option>
-                </select>
+
+              <div className="admin-form-grid">
+                <div className="form-group">
+                  <label className="form-label">Proektor / Ekran:</label>
+                  <select
+                    className="form-select"
+                    value={formData.projector}
+                    onChange={(e) =>
+                      setFormData({ ...formData, projector: e.target.value })
+                    }
+                  >
+                    <option value="Mavjud">Mavjud</option>
+                    <option value="Mavjud (Smart TV)">Mavjud (Smart TV)</option>
+                    <option value="Mavjud emas">Mavjud emas</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Holati:</label>
+                  <select
+                    className="form-select"
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                  >
+                    <option value="Active">Faol (Ishlamoqda)</option>
+                    <option value="Maintenance">Ta'mirda</option>
+                  </select>
+                </div>
               </div>
+
               <div className="admin-modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Bekor qilish
+                  Bekor Qilish
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingRoom ? "Saqlash" : "Xonani Yaratish"}
+                  {editingRoom ? "Saqlash" : "Yaratish"}
                 </button>
               </div>
             </form>
