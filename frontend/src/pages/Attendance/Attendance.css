@@ -465,6 +465,26 @@
   background: #be123c;
 }
 
+.grade-select-box {
+  min-width: 170px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.grade-select-box:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
 .grade-score-input {
   width: 75px;
   height: 38px;

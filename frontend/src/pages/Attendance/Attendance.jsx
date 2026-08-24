@@ -870,14 +870,22 @@ const Attendance = () => {
                                 </Link>
                               </td>
                               <td>
-                                <input
-                                  type="number"
-                                  className="grade-score-input"
-                                  min="1"
-                                  max="10"
+                                <select
+                                  className="form-select form-select-sm grade-select-box"
                                   value={grRec.score}
                                   onChange={(e) => handleGradeChange(student.id, e.target.value)}
-                                />
+                                >
+                                  <option value="10">🌟 10 Ball (A'lo)</option>
+                                  <option value="9">🟢 9 Ball (Juda yaxshi)</option>
+                                  <option value="8">🔵 8 Ball (Yaxshi)</option>
+                                  <option value="7">🟡 7 Ball (Qoniqarli)</option>
+                                  <option value="6">🟠 6 Ball (O'rtacha)</option>
+                                  <option value="5">🟠 5 Ball (O'rtacha)</option>
+                                  <option value="4">🔴 4 Ball (Qoniqarsiz)</option>
+                                  <option value="3">🔴 3 Ball (Qoniqarsiz)</option>
+                                  <option value="2">🔴 2 Ball (Qoniqarsiz)</option>
+                                  <option value="1">🔴 1 Ball (Qoniqarsiz)</option>
+                                </select>
                               </td>
                               <td>
                                 <span className={`grade-badge-pill ${letterGrade.class}`}>
