@@ -36,17 +36,17 @@
 }
 
 .login-logo-badge {
-  width: 110px;
-  height: 110px;
+  width: 140px;
+  height: 140px;
   background: #ffffff;
-  border-radius: 28px;
+  border-radius: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 16px 36px rgba(79, 70, 229, 0.16), 0 4px 14px rgba(0, 0, 0, 0.06);
-  border: 2px solid #e2e8f0;
-  margin-bottom: 20px;
-  padding: 6px;
+  box-shadow: 0 20px 45px rgba(79, 70, 229, 0.2), 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 2.5px solid #e2e8f0;
+  margin-bottom: 22px;
+  padding: 4px;
   overflow: hidden;
 }
 
@@ -59,7 +59,7 @@
 }
 
 .login-system-title {
-  font-size: 30px;
+  font-size: 34px;
   font-weight: 900;
   color: #0f172a;
   margin: 0 0 6px;

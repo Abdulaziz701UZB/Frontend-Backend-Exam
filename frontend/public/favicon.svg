@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <rect width="100" height="100" rx="16" fill="#ffffff"/>
-  <text x="6" y="44" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#6b21a8" letter-spacing="-1">V</text>
-  <text x="36" y="44" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#0284c7" letter-spacing="-1">E</text>
-  <text x="66" y="44" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#ea580c" letter-spacing="-1">L</text>
-  <text x="6" y="90" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#1d4ed8" letter-spacing="-1">N</text>
-  <text x="36" y="90" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#15803d" letter-spacing="-1">E</text>
-  <text x="66" y="90" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#dc2626" letter-spacing="-1">X</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <rect width="100" height="100" fill="#ffffff"/>
+  <text x="2" y="48" font-family="'Plus Jakarta Sans', -apple-system, Arial, sans-serif" font-weight="900" font-size="52" fill="#6b21a8" letter-spacing="-2">V</text>
+  <text x="34" y="48" font-family="'Plus Jakarta Sans', -apple-system, Arial, sans-serif" font-weight="900" font-size="52" fill="#0284c7" letter-spacing="-2">E</text>
+  <text x="68" y="48" font-family="'Plus Jakarta Sans', -apple-system, Arial, sans-serif" font-weight="900" font-size="52" fill="#ea580c" letter-spacing="-2">L</text>
+  <text x="2" y="98" font-family="'Plus Jakarta Sans', -apple-system, Arial, sans-serif" font-weight="900" font-size="52" fill="#1d4ed8" letter-spacing="-2">N</text>
+  <text x="35" y="98" font-family="'Plus Jakarta Sans', -apple-system, Arial, sans-serif" font-weight="900" font-size="52" fill="#15803d" letter-spacing="-2">E</text>
+  <text x="68" y="98" font-family="'Plus Jakarta Sans', -apple-system, Arial, sans-serif" font-weight="900" font-size="52" fill="#dc2626" letter-spacing="-2">X</text>
 </svg>
