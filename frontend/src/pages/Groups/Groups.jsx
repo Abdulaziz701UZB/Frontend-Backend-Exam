@@ -21,8 +21,8 @@ import {
   HiOutlineChartBar,
   HiOutlineArrowTrendingUp,
   HiOutlinePhone,
-  HiOutlineArrowsRightLeft,
-  HiOutlineShieldCheck
+  HiOutlineShieldCheck,
+  HiOutlineSparkles
 } from "react-icons/hi2";
 import { FaChalkboardUser, FaUserGraduate } from "react-icons/fa6";
 import "./Groups.css";
@@ -119,23 +119,26 @@ const Groups = () => {
 
       if (sameDays && sameTime) {
         if (
-          (g.room || "").trim().toLowerCase() === (formData.room || "").trim().toLowerCase()
+          parseInt(g.teacherId) === parseInt(formData.teacherId) &&
+          formData.teacherId
         ) {
-          conflicts.push({
-            type: "room",
-            message: `Xona band: "${formData.room}" ayni shu vaqtda "${g.name}" (${g.courseName}) guruhi tomonidan band qilingan!`,
-            conflictedWith: g.name,
-          });
-        }
-
-        if (parseInt(g.teacherId) === parseInt(formData.teacherId)) {
           const teacherObj = teachers.find(
-            (t) => t.id === parseInt(formData.teacherId),
+            (t) => t.id === parseInt(formData.teacherId)
           );
           conflicts.push({
             type: "teacher",
-            message: `O'qituvchi band: ${teacherObj?.name || "O'qituvchi"} ayni shu vaqtda "${g.name}" guruhida dars o'tadi!`,
-            conflictedWith: g.name,
+            message: `O'qituvchi (${teacherObj?.name || "Tanlangan ustoz"}) bu vaqtda boshqa guruhda ("${g.name}") dars o'tadi!`,
+          });
+        }
+
+        if (
+          (g.room || "").trim().toLowerCase() ===
+            (formData.room || "").trim().toLowerCase() &&
+          formData.room
+        ) {
+          conflicts.push({
+            type: "room",
+            message: `"${formData.room}" xonasi bu vaqtda boshqa guruh ("${g.name}") tomonidan band qilingan!`,
           });
         }
       }
@@ -144,20 +147,22 @@ const Groups = () => {
     return conflicts.length > 0 ? conflicts : null;
   };
 
-  const activeConflicts = checkScheduleConflict();
-
   const openCreateModal = () => {
     setEditingGroup(null);
     setAllowConflictSave(false);
-    const defaultRoom = rooms[0]?.name || "201-xona (Kompyuter zali)";
+    setHighlightConflictShake(false);
+    const firstCourse = courses[0];
+    const firstTeacher = teachers[0];
+    const firstRoom = rooms[0];
+
     setFormData({
-      courseId: courses[0]?.id || 1,
-      name: "",
-      teacherId: teachers[0]?.id || 101,
-      room: defaultRoom,
+      courseId: firstCourse?.id || 1,
+      name: `G-${100 + groups.length + 1} Guruh`,
+      teacherId: firstTeacher?.id || 101,
+      room: firstRoom?.name || "201-xona (Kompyuter zali)",
       scheduleDays: "Dushanba - Chorshanba - Juma",
       scheduleTime: "14:00 - 16:00",
-      monthlyFee: courses[0]?.price || 850000,
+      monthlyFee: firstCourse?.price || 850000,
       status: "Active",
     });
     setIsModalOpen(true);
@@ -167,15 +172,16 @@ const Groups = () => {
     if (e) e.stopPropagation();
     setEditingGroup(group);
     setAllowConflictSave(false);
+    setHighlightConflictShake(false);
     setFormData({
-      courseId: group.courseId,
+      courseId: group.courseId || 1,
       name: group.name,
-      teacherId: group.teacherId,
+      teacherId: group.teacherId || 101,
       room: group.room,
       scheduleDays: group.scheduleDays,
       scheduleTime: group.scheduleTime,
       monthlyFee: group.monthlyFee,
-      status: group.status,
+      status: group.status || "Active",
     });
     setIsModalOpen(true);
   };
@@ -196,20 +202,20 @@ const Groups = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    if (activeConflicts && !allowConflictSave) {
+    const conflicts = checkScheduleConflict();
+    if (conflicts && conflicts.length > 0 && !allowConflictSave) {
       setHighlightConflictShake(true);
-      setTimeout(() => setHighlightConflictShake(false), 900);
+      setTimeout(() => setHighlightConflictShake(false), 1500);
       toast.error(
-        "Diqqat! Dars jadvali to'qnashuvi aniqlandi. Saqlash uchun 'Admin Override' tasdiqlash katakchasini belgilang!",
+        "DIQQAT: Jadval to'qnashuvi mavjud! Saqlash uchun 'Ogohlantirishga qaramay saqlash' katakchasini belgilang."
       );
       return;
     }
 
-    const courseObj =
-      courses.find((c) => c.id === parseInt(formData.courseId)) || courses[0];
-    const teacherObj =
-      teachers.find((t) => t.id === parseInt(formData.teacherId)) ||
-      teachers[0];
+    const courseObj = courses.find((c) => c.id === parseInt(formData.courseId));
+    const teacherObj = teachers.find(
+      (t) => t.id === parseInt(formData.teacherId)
+    );
 
     const payload = {
       course_id: parseInt(formData.courseId),
@@ -222,7 +228,6 @@ const Groups = () => {
       schedule_time: formData.scheduleTime,
       monthly_fee: parseFloat(formData.monthlyFee),
       status: formData.status,
-      overrideConflict: allowConflictSave,
     };
 
     try {
@@ -239,20 +244,16 @@ const Groups = () => {
       await loadData();
       setIsModalOpen(false);
     } catch (err) {
-      toast.error("Xatolik: " + (err.response?.data?.error || err.message));
+      toast.error("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
   };
 
-  const handleDeleteGroup = async (groupId, groupName, e) => {
+  const handleDeleteGroup = async (id, name, e) => {
     if (e) e.stopPropagation();
-    if (
-      window.confirm(
-        `Haqiqatan ham "${groupName || groupId}" guruhini o'chirmoqchimisiz?`,
-      )
-    ) {
+    if (window.confirm(`Haqiqatan ham "${name}" guruhini o'chirmoqchimisiz?`)) {
       try {
-        await groupsApi.delete(groupId);
-        toast.success(`"${groupName}" guruhi o'chirildi!`);
+        await groupsApi.delete(id);
+        toast.success(`"${name}" guruhi o'chirildi!`);
         await loadData();
       } catch (err) {
         toast.error("O'chirishda xatolik: " + (err.response?.data?.error || err.message));
@@ -260,70 +261,86 @@ const Groups = () => {
     }
   };
 
-  const filteredGroups = groups.filter((g) => {
-    if (filterStatus !== "All" && g.status !== filterStatus) return false;
-    if (searchTerm) {
-      const s = searchTerm.toLowerCase();
-      return (
-        (g.name || "").toLowerCase().includes(s) ||
-        (g.courseName || "").toLowerCase().includes(s) ||
-        (g.teacherName || "").toLowerCase().includes(s) ||
-        (g.room || "").toLowerCase().includes(s)
-      );
-    }
-    return true;
-  });
-
   const formatMoney = (amount) => {
     return new Intl.NumberFormat("uz-UZ").format(amount || 0) + " so'm";
   };
 
-  const selectedRoomObj = rooms.find((r) => r.name === formData.room);
+  const filteredGroups = groups.filter((g) => {
+    const statusMatch =
+      filterStatus === "All" ||
+      g.status.toLowerCase() === filterStatus.toLowerCase();
+    const searchMatch =
+      (g.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (g.courseName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (g.teacherName || "").toLowerCase().includes(searchTerm.toLowerCase());
+    return statusMatch && searchMatch;
+  });
 
-  const calculateGroupFinancials = (group) => {
+  const conflictsList = isModalOpen ? checkScheduleConflict() : null;
+
+  const getGroupFinancials = (group) => {
     if (!group) return null;
     const groupStudents = students.filter((s) => s.groupId === group.id);
     const activeCount = groupStudents.length;
-    const monthlyRevenue = activeCount * (group.monthlyFee || 0);
+    const monthlyRevenue = activeCount * (group.monthlyFee || 850000);
 
-    const teacherObj = teachers.find((t) => t.id === parseInt(group.teacherId));
-    const teacherActiveGroups = groups.filter(
-      (g) => parseInt(g.teacherId) === parseInt(group.teacherId) && g.status === "Active"
+    const teacherObj = teachers.find((t) => t.id === group.teacherId);
+    const teacherSalaryTotal = parseInt(
+      String(teacherObj?.salary || "").replace(/\D/g, "") || "8500000"
     );
-    const teacherGroupsCount = Math.max(1, teacherActiveGroups.length);
 
-    const rawSalary = String(teacherObj?.salary || "").replace(/\D/g, "");
-    const baseSalary = parseFloat(rawSalary) || 6000000;
-    const allocatedTeacherSalary = Math.round(baseSalary / teacherGroupsCount);
+    const teacherGroups = groups.filter(
+      (g) => g.teacherId === group.teacherId && g.status === "Active"
+    );
+    const teacherGroupsCount = Math.max(1, teacherGroups.length);
+    const allocatedTeacherSalary = Math.round(
+      teacherSalaryTotal / teacherGroupsCount
+    );
 
     const netProfit = monthlyRevenue - allocatedTeacherSalary;
-    const profitMargin = monthlyRevenue > 0 ? Math.round((netProfit / monthlyRevenue) * 100) : 0;
+    const profitMargin =
+      monthlyRevenue > 0
+        ? Math.round((netProfit / monthlyRevenue) * 100)
+        : 0;
 
     const paidStudents = groupStudents.filter((s) => s.paymentStatus === "Paid");
-    const debtorStudents = groupStudents.filter((s) => s.paymentStatus === "Overdue" || s.balance < 0);
-    const totalDebts = groupStudents.reduce((sum, s) => sum + (s.balance < 0 ? Math.abs(s.balance) : 0), 0);
+    const debtorStudents = groupStudents.filter((s) => s.paymentStatus === "Overdue");
+    const paidPct = activeCount > 0 ? Math.round((paidStudents.length / activeCount) * 100) : 100;
+    const debtPct = 100 - paidPct;
+    const totalDebts = debtorStudents.reduce(
+      (sum, s) => sum + (s.balance < 0 ? Math.abs(s.balance) : group.monthlyFee || 850000),
+      0
+    );
 
-    const paidPct = activeCount > 0 ? Math.round((paidStudents.length / activeCount) * 100) : 0;
-    const debtPct = activeCount > 0 ? 100 - paidPct : 0;
+    const roomObj = rooms.find(
+      (r) => (r.name || "").trim().toLowerCase() === (group.room || "").trim().toLowerCase()
+    );
+    const maxRoomCapacity = roomObj?.capacity || 18;
+    const availableSeats = Math.max(0, maxRoomCapacity - activeCount);
 
     return {
-      groupStudents,
       activeCount,
       monthlyRevenue,
-      teacherObj,
-      teacherGroupsCount,
       allocatedTeacherSalary,
       netProfit,
       profitMargin,
+      teacherGroupsCount,
       paidStudents,
       debtorStudents,
-      totalDebts,
       paidPct,
       debtPct,
+      totalDebts,
+      groupStudents,
+      maxRoomCapacity,
+      availableSeats,
+      lessonsDone: 48,
+      lessonsTotal: 72,
+      lessonsLeft: 24,
+      endDate: "15-noyabr, 2026",
     };
   };
 
-  const groupFin = selectedGroupDetail ? calculateGroupFinancials(selectedGroupDetail) : null;
+  const groupFin = selectedGroupDetail ? getGroupFinancials(selectedGroupDetail) : null;
 
   return (
     <div className="groups-page">
@@ -331,12 +348,13 @@ const Groups = () => {
         <div>
           <h1 className="page-title">
             <HiOutlineAcademicCap className="title-icon-indigo" />
-            3. Kurslar va Guruhlar
+            3. Kurslar va Guruhlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            O'quv markazining barcha faol guruhlari, 9 xonali guruh ID lari, to'qnashuv detektori va moliyaviy tahlili
+            O'quv guruhlari, to'lov salomatligi (1), tugash sanasi (2), bo'sh o'rinlar (4) va daromadlar tahlili
           </p>
         </div>
+
         {canManageGroups && (
           <button className="btn btn-primary" onClick={openCreateModal}>
             <HiOutlinePlus /> Yangi Guruh Yaratish
@@ -344,36 +362,39 @@ const Groups = () => {
         )}
       </div>
 
-      <div className="card filter-card">
-        <div className="filter-row">
-          <div className="search-input-wrap">
-            <span className="search-icon"><HiMagnifyingGlass /></span>
-            <input
-              type="text"
-              className="form-input search-field"
-              placeholder="Guruh, kurs, o'qituvchi yoki xona bo'yicha qidiruv..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="filter-row">
+        <div className="search-input-wrap">
+          <HiMagnifyingGlass className="search-icon" />
+          <input
+            type="text"
+            placeholder="Guruh, kurs yoki o'qituvchi bo'yicha qidirish..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-          <div className="filter-pills">
-            {["All", "Active", "Finished", "Upcoming"].map((status) => (
-              <button
-                key={status}
-                className={`pill-btn ${filterStatus === status ? "active" : ""}`}
-                onClick={() => setFilterStatus(status)}
-              >
-                {status === "All"
-                  ? "Barcha Guruhlar"
-                  : status === "Active"
-                    ? "Faol Guruhlar"
-                    : status === "Finished"
-                      ? "Bitirganlar"
-                      : "Yaqinda Ochiladigan"}
-              </button>
-            ))}
-          </div>
+        <div className="filter-pills">
+          <button
+            type="button"
+            className={`pill-btn ${filterStatus === "All" ? "active" : ""}`}
+            onClick={() => setFilterStatus("All")}
+          >
+            Barchasi ({groups.length})
+          </button>
+          <button
+            type="button"
+            className={`pill-btn ${filterStatus === "Active" ? "active" : ""}`}
+            onClick={() => setFilterStatus("Active")}
+          >
+            Faol Guruhlar ({groups.filter((g) => g.status === "Active").length})
+          </button>
+          <button
+            type="button"
+            className={`pill-btn ${filterStatus === "Finished" ? "active" : ""}`}
+            onClick={() => setFilterStatus("Finished")}
+          >
+            Yakunlangan ({groups.filter((g) => g.status === "Finished").length})
+          </button>
         </div>
       </div>
 
@@ -387,6 +408,12 @@ const Groups = () => {
         ) : (
           filteredGroups.map((group) => {
             const grpStudents = students.filter((s) => s.groupId === group.id);
+            const debtors = grpStudents.filter((s) => s.paymentStatus === "Overdue");
+            const paidPct = grpStudents.length > 0 ? Math.round(((grpStudents.length - debtors.length) / grpStudents.length) * 100) : 100;
+            const roomObj = rooms.find((r) => (r.name || "").trim().toLowerCase() === (group.room || "").trim().toLowerCase());
+            const maxCap = roomObj?.capacity || 18;
+            const freeSeats = Math.max(0, maxCap - grpStudents.length);
+
             return (
               <div
                 key={group.id}
@@ -404,6 +431,18 @@ const Groups = () => {
 
                 <h3 className="group-name">{group.name}</h3>
                 <p className="group-course">{group.courseName}</p>
+
+                <div className="group-meta-badges">
+                  <span className="group-meta-pill pill-health" title="1. To'lov Salomatligi">
+                    <HiOutlineShieldCheck /> 1. To'lov: {paidPct}% {debtors.length > 0 ? `(${debtors.length} qarzdor)` : "A'lo"}
+                  </span>
+                  <span className="group-meta-pill pill-countdown" title="2. Darslar & Tugash Sanasi">
+                    <HiOutlineCalendarDays /> 2. 48/72 dars (15-noyabr)
+                  </span>
+                  <span className={`group-meta-pill ${freeSeats > 0 ? "pill-seats-free" : "pill-seats-full"}`} title="4. Bo'sh O'rinlar">
+                    <HiOutlineUserGroup /> 4. {freeSeats > 0 ? `${freeSeats} ta bo'sh o'rin` : "Guruh to'lgan"}
+                  </span>
+                </div>
 
                 <div className="group-details-list">
                   <div className="detail-item">
@@ -551,9 +590,48 @@ const Groups = () => {
                   <HiOutlineUserGroup />
                 </div>
                 <div className="kpi-content">
-                  <span className="kpi-label">To'lov Intizomi</span>
+                  <span className="kpi-label">To'lov Intizomi (1)</span>
                   <strong className="kpi-value">{groupFin.paidStudents.length} / {groupFin.activeCount} to'lagan</strong>
                   <span className="kpi-subtext">{groupFin.debtorStudents.length} ta qarzdor</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="group-intelligence-grid-2">
+              <div className="intel-box">
+                <span className="intel-box-title">
+                  <HiOutlineCalendarDays className="text-indigo" />
+                  2. Kurs Tugash Sanasi & Darslar Hisoblagichi
+                </span>
+                <div className="lessons-progress-bar-wrap">
+                  <div
+                    className="lessons-progress-fill"
+                    style={{ width: `${Math.round((groupFin.lessonsDone / groupFin.lessonsTotal) * 100)}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="intel-sub-text">
+                    <strong>{groupFin.lessonsDone} / {groupFin.lessonsTotal} dars o'tildi</strong> ({groupFin.lessonsLeft} ta dars qoldi)
+                  </span>
+                  <span className="group-meta-pill pill-countdown">
+                    Tugash: {groupFin.endDate}
+                  </span>
+                </div>
+              </div>
+
+              <div className="intel-box">
+                <span className="intel-box-title">
+                  <HiOutlineUserGroup className="text-indigo" />
+                  4. Xona Sig'imi & Bo'sh O'rinlar Nazorati
+                </span>
+                <div className="flex justify-between items-center mt-2">
+                  <div>
+                    <div className="text-xs text-muted">Xona: <strong>{selectedGroupDetail.room}</strong></div>
+                    <div className="text-xs text-muted mt-0.5">Sig'im: <strong>{groupFin.maxRoomCapacity} o'rin</strong> | Qatnashuvchi: <strong>{groupFin.activeCount} o'quvchi</strong></div>
+                  </div>
+                  <span className={`group-meta-pill ${groupFin.availableSeats > 0 ? "pill-seats-free" : "pill-seats-full"}`}>
+                    {groupFin.availableSeats > 0 ? `🟢 ${groupFin.availableSeats} ta bo'sh o'rin mavjud` : "🔴 Guruh to'lgan"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -562,10 +640,10 @@ const Groups = () => {
               <div className="health-header-row">
                 <span className="health-title">
                   <HiOutlineShieldCheck className="inline-icon-xs text-indigo" />
-                  To'lov Intizomi & Qarzdorlik Holati
+                  1. To'lov Salomatligi & Intizomi Holati
                 </span>
                 <span className="health-summary-badge">
-                  Jami Qarz: <strong className="text-danger">{formatMoney(groupFin.totalDebts)}</strong>
+                  Jami Qarzdorlik: <strong className="text-danger">{formatMoney(groupFin.totalDebts)}</strong>
                 </span>
               </div>
               <div className="dual-progress-bar">
@@ -650,7 +728,7 @@ const Groups = () => {
               </div>
             </div>
 
-            <div className="modal-actions-flex">
+            <div className="admin-modal-actions">
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -665,13 +743,17 @@ const Groups = () => {
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content card" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>
                 {editingGroup ? "Guruhni Tahrirlash" : "Yangi Guruh Yaratish"}
               </h2>
               <button
-                className="close-modal-btn"
+                type="button"
+                className="modal-close-btn"
                 onClick={() => setIsModalOpen(false)}
                 aria-label="Yopish"
               >
@@ -679,31 +761,49 @@ const Groups = () => {
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="admin-modal-form">
-              <div className="form-group">
-                <label className="form-label">
-                  Guruh Nomi (Masalan: F-12 Guruh)
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  required
-                  placeholder="Guruh nomini kiriting"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-              </div>
+            <form onSubmit={handleFormSubmit}>
+              {conflictsList && (
+                <div
+                  className={`conflict-alert-box ${
+                    highlightConflictShake ? "conflict-alert-highlight" : ""
+                  }`}
+                >
+                  <div className="conflict-alert-title">
+                    <HiOutlineExclamationTriangle />
+                    Jadvalda To'qnashuv Aniqlangan!
+                  </div>
+                  <p className="conflict-alert-desc">
+                    Ushbu dars vaqtida o'qituvchi yoki xona boshqa guruh tomonidan band qilingan:
+                  </p>
+                  <div className="conflict-list">
+                    {conflictsList.map((c, idx) => (
+                      <div key={idx} className="conflict-item">
+                        <span>•</span>
+                        <span>{c.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <label className="override-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={allowConflictSave}
+                      onChange={(e) => setAllowConflictSave(e.target.checked)}
+                    />
+                    <span>Ogohlantirishga qaramay saqlashga ruxsat berish (Admin Override)</span>
+                  </label>
+                </div>
+              )}
 
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">Tegishli Kurs</label>
+                  <label className="form-label">Kurs Yo'nalishi:</label>
                   <select
                     className="form-select"
                     value={formData.courseId}
                     onChange={(e) => {
-                      const selCourse = courses.find((c) => c.id === parseInt(e.target.value));
+                      const selCourse = courses.find(
+                        (c) => c.id === parseInt(e.target.value)
+                      );
                       setFormData({
                         ...formData,
                         courseId: e.target.value,
@@ -720,7 +820,23 @@ const Groups = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">O'qituvchi</label>
+                  <label className="form-label">Guruh Nomi:</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="masalan: F-14 Guruhi (Frontend)"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-grid">
+                <div className="form-group">
+                  <label className="form-label">O'qituvchi:</label>
                   <select
                     className="form-select"
                     value={formData.teacherId}
@@ -735,11 +851,28 @@ const Groups = () => {
                     ))}
                   </select>
                 </div>
+
+                <div className="form-group">
+                  <label className="form-label">Dars Xonasi:</label>
+                  <select
+                    className="form-select"
+                    value={formData.room}
+                    onChange={(e) =>
+                      setFormData({ ...formData, room: e.target.value })
+                    }
+                  >
+                    {rooms.map((r) => (
+                      <option key={r.id} value={r.name}>
+                        {r.name} (Sig'im: {r.capacity} kishi)
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">Dars Kunlari</label>
+                  <label className="form-label">Dars Kunlari:</label>
                   <select
                     className="form-select"
                     value={formData.scheduleDays}
@@ -753,15 +886,14 @@ const Groups = () => {
                     <option value="Seshanba - Payshanba - Shanba">
                       Seshanba - Payshanba - Shanba
                     </option>
-                    <option value="Har kuni">Har kuni</option>
-                    <option value="Shanba - Yakshanba">
-                      Shanba - Yakshanba
+                    <option value="Har Kuni">
+                      Har Kuni (Intensiv)
                     </option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Dars Vaqti</label>
+                  <label className="form-label">Dars Vaqti:</label>
                   <select
                     className="form-select"
                     value={formData.scheduleTime}
@@ -782,70 +914,32 @@ const Groups = () => {
 
               <div className="admin-form-grid">
                 <div className="form-group">
-                  <label className="form-label">
-                    Dars Xonasi {selectedRoomObj ? `(Sig'imi: ${selectedRoomObj.capacity} kishi)` : ""}
-                  </label>
-                  <select
-                    className="form-select"
-                    value={formData.room}
-                    onChange={(e) =>
-                      setFormData({ ...formData, room: e.target.value })
-                    }
-                  >
-                    {rooms.length > 0 ? (
-                      rooms.map((r) => (
-                        <option key={r.id} value={r.name}>
-                          {r.name} — Sig'imi: {r.capacity} kishi
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option value="201-xona (Kompyuter zali)">201-xona (Kompyuter zali)</option>
-                        <option value="202-xona (Dizayn Lab)">202-xona (Dizayn Lab)</option>
-                        <option value="203-xona (Backend Lab)">203-xona (Backend Lab)</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Oylik Kurs To'lovi</label>
+                  <label className="form-label">Oylik Kurs To'lovi (so'm):</label>
                   <input
                     type="number"
                     className="form-input"
-                    required
                     value={formData.monthlyFee}
                     onChange={(e) =>
                       setFormData({ ...formData, monthlyFee: e.target.value })
                     }
+                    required
                   />
                 </div>
-              </div>
 
-              {activeConflicts && (
-                <div className={`conflict-alert-box ${highlightConflictShake ? "conflict-alert-highlight" : ""}`}>
-                  <div className="conflict-alert-header">
-                    <HiOutlineExclamationTriangle className="conflict-alert-icon" />
-                    <span>Dars Jadvali To'qnashuvi Aniqlandi!</span>
-                  </div>
-                  <ul className="conflict-list">
-                    {activeConflicts.map((c, idx) => (
-                      <li key={idx}>{c.message}</li>
-                    ))}
-                  </ul>
-                  <label className="conflict-override-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={allowConflictSave}
-                      onChange={(e) => {
-                        setAllowConflictSave(e.target.checked);
-                        if (e.target.checked) setHighlightConflictShake(false);
-                      }}
-                    />
-                    <span>Ogohlantirishga qaramay saqlashga ruxsat berish (Admin Override)</span>
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">Guruh Holati:</label>
+                  <select
+                    className="form-select"
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                  >
+                    <option value="Active">Faol (Darslar davom etmoqda)</option>
+                    <option value="Finished">Yakunlangan (Bitirgan)</option>
+                  </select>
                 </div>
-              )}
+              </div>
 
               <div className="admin-modal-actions">
                 <button
@@ -853,13 +947,13 @@ const Groups = () => {
                   className="btn btn-secondary"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Bekor qilish
+                  Bekor Qilish
                 </button>
                 <button
                   type="submit"
-                  className={`btn ${activeConflicts ? "btn-danger-action" : "btn-primary"}`}
+                  className={`btn ${conflictsList && conflictsList.length > 0 ? "btn-danger-conflict" : "btn-primary"}`}
                 >
-                  {editingGroup ? "Guruhni Yangilash" : "Guruhni Yaratish"}
+                  {editingGroup ? "Guruhni Saqlash" : "Guruh Yaratish"}
                 </button>
               </div>
             </form>
