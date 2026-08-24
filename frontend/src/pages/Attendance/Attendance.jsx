@@ -16,9 +16,12 @@ import {
   HiOutlineChartBar,
   HiOutlineSparkles,
   HiOutlineExclamationTriangle,
-  HiOutlinePaperAirplane
+  HiOutlineTrophy,
+  HiOutlineStar,
+  HiOutlinePaperAirplane,
+  HiOutlineCheckBadge
 } from "react-icons/hi2";
-import { FaTelegram, FaUserGraduate } from "react-icons/fa6";
+import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Attendance.css";
 
 const EXCUSED_REASONS = [
@@ -27,11 +30,6 @@ const EXCUSED_REASONS = [
   { id: "competition", label: "Musobaqa / Olimpiada", tag: "Musobaqa" },
   { id: "technical", label: "Texnik / Transport sababi", tag: "Texnik" },
   { id: "other_excused", label: "Boshqa Uzrli Sabab", tag: "Uzrli" },
-];
-
-const ABSENCE_REASONS = [
-  ...EXCUSED_REASONS,
-  { id: "unexcused", label: "Sababsiz Dars Qoldirdi", tag: "Sababsiz" },
 ];
 
 const Attendance = () => {
@@ -44,11 +42,15 @@ const Attendance = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [activeTabMode, setActiveTabMode] = useState("attendance");
   const [selectedGroup, setSelectedGroup] = useState("G-101");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
+  const [lessonTopic, setLessonTopic] = useState("React Router & Custom Hooks");
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const [gradesMap, setGradesMap] = useState({});
 
   const loadInitialData = async () => {
     try {
@@ -85,7 +87,8 @@ const Attendance = () => {
 
   useEffect(() => {
     const map = {};
-    activeGroupStudents.forEach((s) => {
+    const gMap = {};
+    activeGroupStudents.forEach((s, idx) => {
       const rec = attendanceRecords.find(
         (r) =>
           r.groupId === selectedGroup &&
@@ -103,8 +106,15 @@ const Attendance = () => {
               ? "unexcused"
               : ""),
       };
+
+      gMap[s.id] = {
+        score: 85 + (idx % 14),
+        homeworkDone: true,
+        comment: "Faol qatnashdi",
+      };
     });
     setAttendanceMap(map);
+    setGradesMap(gMap);
   }, [selectedGroup, selectedDate, attendanceRecords, activeGroupStudents.length]);
 
   const handleStatusChange = (studentId, status) => {
@@ -160,18 +170,57 @@ const Attendance = () => {
       };
     });
     setAttendanceMap(updated);
-    toast.success("2. ⚡ Guruhdagi barcha o'quvchilar 'Keldi' deb belgilandi!");
+    toast.success("⚡ Guruhdagi barcha o'quvchilar 'Keldi' deb belgilandi!");
+  };
+
+  const handleGradeChange = (studentId, score) => {
+    const numScore = Math.min(100, Math.max(0, parseInt(score) || 0));
+    setGradesMap((prev) => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        score: numScore,
+      },
+    }));
+  };
+
+  const handleHomeworkToggle = (studentId) => {
+    setGradesMap((prev) => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        homeworkDone: !prev[studentId]?.homeworkDone,
+      },
+    }));
+  };
+
+  const handleGradeCommentChange = (studentId, comment) => {
+    setGradesMap((prev) => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        comment,
+      },
+    }));
+  };
+
+  const getLetterGrade = (score) => {
+    if (score >= 90) return { label: "A+ A'lo", class: "grade-a-plus" };
+    if (score >= 80) return { label: "A Yaxshi", class: "grade-a" };
+    if (score >= 70) return { label: "B Qoniqarli", class: "grade-b" };
+    if (score >= 60) return { label: "C O'rtacha", class: "grade-c" };
+    return { label: "D Qoniqarsiz", class: "grade-d" };
   };
 
   const sendTelegramAbsenceAlert = (student) => {
     toast.success(
-      `1. 📲 "${student.fullName}" ota-onasining Telegram botiga dars qoldirganligi haqida xabarnoma yuborildi!`
+      `📲 "${student.fullName}" ota-onasining Telegram botiga dars qoldirganligi haqida xabarnoma yuborildi!`
     );
   };
 
   const sendDropoutWarning = (student) => {
     toast.error(
-      `3. 🚨 DIQQAT: "${student.fullName}" ketma-ket 3+ dars qoldirdi! Ota-onasining Telegram botiga shoshilinch ogohlantirish yuborildi!`
+      `🚨 DIQQAT: "${student.fullName}" ketma-ket 3+ dars qoldirdi! Ota-onasining Telegram botiga shoshilinch xavf xabari yuborildi!`
     );
   };
 
@@ -231,13 +280,17 @@ const Attendance = () => {
       setTimeout(() => setSavedSuccess(false), 4000);
       toast.success(
         absentees.length > 0
-          ? `Davomat saqlandi! 1. Kelmagan ${absentees.length} nafar o'quvchining ota-onasiga Telegram bot xabari yuborildi.`
+          ? `Davomat saqlandi! Kelmagan ${absentees.length} nafar o'quvchining ota-onasiga Telegram bot xabari yuborildi.`
           : "Davomat muvaffaqiyatli saqlandi!"
       );
     } catch (err) {
       console.error("Save attendance error:", err.message);
       toast.error("Davomatni saqlashda xatolik yuz berdi");
     }
+  };
+
+  const handleSaveGrades = () => {
+    toast.success(`⭐ "${currentGroupObj?.name}" guruhining barcha baholari saqlandi va Telegram botga yuborildi!`);
   };
 
   const totalMarkedDays = [
@@ -303,356 +356,528 @@ const Attendance = () => {
         <div>
           <h1 className="page-title">
             <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
-            4. Davomat Jurnali & Darslar Nazorati
+            4. Davomat va Baholar Jurnali
           </h1>
           <p className="page-subtitle">
-            Guruhlar davomati, Telegram bot xabarnomalari (1), tezkor 1-click belgilash (2), 3+ dars qoldirish xavfi (3) va 360° dosye (12)
+            Guruhlar bo'yicha kunlik dars davomati (✅ Keldi / ❌ Kelmadi), baholar & imtihonlar jurnali hamda Telegram bot xabarnomalari
           </p>
         </div>
 
         {canMarkAttendance && (
-          <button className="btn btn-primary" onClick={handleSaveAttendance}>
-            <HiOutlineDocumentCheck /> Davomatni Saqlash & Botga Yuborish
-          </button>
+          activeTabMode === "attendance" ? (
+            <button className="btn btn-primary" onClick={handleSaveAttendance}>
+              <HiOutlineDocumentCheck /> Davomatni Saqlash & Botga Yuborish
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={handleSaveGrades}>
+              <HiOutlineStar /> Baholarni Saqlash & Botga Yuborish
+            </button>
+          )
         )}
       </div>
 
-      <div className="card filter-card mb-4">
-        <div className="attendance-control-row">
-          <div className="form-group mb-0">
-            <label className="form-label">Guruhni Tanlang:</label>
-            <select
-              className="form-select"
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-            >
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name} ({g.courseName}) - {g.teacherName}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div className="mode-tabs-bar">
+        <button
+          type="button"
+          className={`mode-tab-btn ${activeTabMode === "attendance" ? "active" : ""}`}
+          onClick={() => setActiveTabMode("attendance")}
+        >
+          <HiOutlineClipboardDocumentCheck /> 1. Davomat Jurnali (✅ Keldi / ❌ Kelmadi)
+        </button>
+        <button
+          type="button"
+          className={`mode-tab-btn ${activeTabMode === "grades" ? "active" : ""}`}
+          onClick={() => setActiveTabMode("grades")}
+        >
+          <HiOutlineTrophy /> 2. Baholar & Imtihonlar Jurnali
+        </button>
+      </div>
 
-          <div className="form-group mb-0">
-            <label className="form-label">Dars Sanasi:</label>
-            <input
-              type="date"
-              className="form-input"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-          </div>
+      <div className="groups-selection-section">
+        <div className="section-label-row">
+          <span className="section-label-title">
+            <HiOutlineUserGroup className="text-indigo" />
+            Guruhni Tanlang (Ochish uchun guruh kartochkasini bosing):
+          </span>
+          <span className="text-xs text-muted">
+            Jami: <strong>{groups.length} ta guruh</strong>
+          </span>
+        </div>
 
-          <div className="group-info-pill">
-            <span>
-              <HiOutlineMapPin className="inline-icon-xs" />
-              Xona: <strong>{currentGroupObj?.room}</strong>
-            </span>
-            <span>
-              <HiOutlineClock className="inline-icon-xs" />
-              Vaqt: <strong>{currentGroupObj?.scheduleTime}</strong>
-            </span>
-          </div>
+        <div className="group-cards-horizontal-grid">
+          {groups.map((g) => {
+            const grpStudents = students.filter((s) => s.groupId === g.id);
+            const isSelected = g.id === selectedGroup;
+
+            return (
+              <div
+                key={g.id}
+                className={`group-select-card ${isSelected ? "active-group-card" : ""}`}
+                onClick={() => setSelectedGroup(g.id)}
+              >
+                <h4 className="group-card-name">{g.name}</h4>
+                <span className="group-card-course">{g.courseName}</span>
+
+                <div className="group-card-meta-list">
+                  <div className="group-card-meta-item">
+                    <FaChalkboardUser /> Ustoz: <strong>{g.teacherName}</strong>
+                  </div>
+                  <div className="group-card-meta-item">
+                    <HiOutlineClock /> Vaqt: <strong>{g.scheduleTime}</strong>
+                  </div>
+                  <div className="group-card-meta-item">
+                    <HiOutlineMapPin /> Xona: <strong>{g.room}</strong>
+                  </div>
+                  <div className="group-card-meta-item text-indigo">
+                    <HiOutlineUserGroup /> O'quvchilar: <strong>{grpStudents.length} nafar</strong>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {savedSuccess && (
         <div className="alert alert-success mb-4">
-          <HiOutlineCheck className="inline-icon-xs" /> Davomat muvaffaqiyatli saqlandi va Telegram botga yuborildi!
+          <HiOutlineCheck className="inline-icon-xs" /> Muvaffaqiyatli saqlandi va Telegram botga yuborildi!
         </div>
       )}
 
-      <div className="card table-card mb-6">
-        <div className="card-header-flex px-6 pt-6 flex justify-between items-center">
-          <h3 className="section-title mb-0">
-            <HiOutlineUserGroup className="title-icon-indigo" />
-            {currentGroupObj?.name} O'quvchilari ({activeGroupStudents.length} ta)
-          </h3>
+      {activeTabMode === "attendance" ? (
+        <>
+          <div className="attendance-control-panel">
+            <div className="attendance-date-box">
+              <label>Dars Sanasi:</label>
+              <input
+                type="date"
+                className="form-input form-input-sm"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </div>
 
-          {canMarkAttendance && (
-            <button
-              type="button"
-              className="btn btn-mark-all btn-sm"
-              onClick={handleMarkAllPresent}
-            >
-              <HiOutlineSparkles /> 2. ⚡ Barchasini "Keldi" Qilish
-            </button>
-          )}
-        </div>
+            <div className="attendance-actions-right">
+              {canMarkAttendance && (
+                <button
+                  type="button"
+                  className="btn btn-mark-all btn-sm"
+                  onClick={handleMarkAllPresent}
+                >
+                  <HiOutlineSparkles /> ⚡ Barchasini "Keldi" Qilish
+                </button>
+              )}
+            </div>
+          </div>
 
-        <div className="dash-table-wrap">
-          <table className="dash-table">
-            <thead>
-              <tr>
-                <th>9 Xonali ID (12)</th>
-                <th>O'quvchi F.I.SH (12)</th>
-                <th>Telefon Raqami</th>
-                <th className="text-center">Davomat Holati</th>
-                <th>Sabab Tasniflagichi</th>
-                <th className="text-center">Telegram Bot & Xavf (1, 3)</th>
-                <th className="text-center">360° Dosye (12)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activeGroupStudents.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-6 text-muted">
-                    Ushbu guruhga hali o'quvchilar biriktirilmagan
-                  </td>
-                </tr>
-              ) : (
-                activeGroupStudents.map((student) => {
-                  const currentRec = attendanceMap[student.id] || {
-                    status: "Present",
-                    note: "",
-                    reasonCategory: "",
-                  };
-                  const isExcused = currentRec.status === "Excused";
-                  const isAbsent = currentRec.status === "Absent";
-                  const consecutiveAbsences = getStudentConsecutiveAbsences(student.id);
-                  const isHighRisk = consecutiveAbsences >= 3;
+          <div className="card table-card mb-6">
+            <div className="card-header-flex px-6 pt-6 flex justify-between items-center">
+              <h3 className="section-title mb-0">
+                <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
+                {currentGroupObj?.name} — Davomat Ro'yxati ({activeGroupStudents.length} ta o'quvchi)
+              </h3>
+              <span className="text-muted text-sm">
+                Sana: <strong>{selectedDate}</strong>
+              </span>
+            </div>
 
-                  return (
-                    <tr key={student.id}>
-                      <td>
-                        <span className="id-pill">#{format9DigitId(student.id, "student")}</span>
-                      </td>
-                      <td>
-                        <div>
-                          <Link
-                            to={`/students/${format9DigitId(student.id, "student")}`}
-                            className="student-name-text font-bold hover-indigo"
-                          >
-                            {student.fullName}
-                          </Link>
-                          {isHighRisk && (
-                            <div className="mt-1">
-                              <span className="consecutive-danger-pill">
-                                <HiOutlineExclamationTriangle /> 3. 🚨 {consecutiveAbsences} dars qoldirgan!
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="text-muted">{student.phone}</td>
-                      <td className="text-center">
-                        <div className="attendance-toggle-group">
-                          <button
-                            type="button"
-                            className={`att-btn att-present ${currentRec.status === "Present" ? "active" : ""}`}
-                            onClick={() =>
-                              canMarkAttendance &&
-                              handleStatusChange(student.id, "Present")
-                            }
-                            disabled={!canMarkAttendance}
-                          >
-                            <HiOutlineCheck /> Keldi
-                          </button>
-                          <button
-                            type="button"
-                            className={`att-btn att-absent ${currentRec.status === "Absent" ? "active" : ""}`}
-                            onClick={() =>
-                              canMarkAttendance &&
-                              handleStatusChange(student.id, "Absent")
-                            }
-                            disabled={!canMarkAttendance}
-                          >
-                            <HiOutlineXMark /> Kelmadi
-                          </button>
-                          <button
-                            type="button"
-                            className={`att-btn att-excused ${currentRec.status === "Excused" ? "active" : ""}`}
-                            onClick={() =>
-                              canMarkAttendance &&
-                              handleStatusChange(student.id, "Excused")
-                            }
-                            disabled={!canMarkAttendance}
-                          >
-                            <HiOutlineExclamationCircle /> Sababli
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        {isExcused ? (
-                          <div className="reason-categorizer-box">
-                            <select
-                              className="form-select form-select-sm reason-select"
-                              value={currentRec.reasonCategory || "medical"}
-                              disabled={!canMarkAttendance}
-                              onChange={(e) => {
-                                const selectedObj = EXCUSED_REASONS.find(
-                                  (r) => r.id === e.target.value,
-                                );
-                                if (selectedObj)
-                                  handleReasonSelect(student.id, selectedObj);
-                              }}
-                            >
-                              {EXCUSED_REASONS.map((r) => (
-                                <option key={r.id} value={r.id}>
-                                  {r.label}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              type="text"
-                              className="form-input form-input-sm reason-custom-note"
-                              placeholder="Sabab tafsilotlari..."
-                              value={currentRec.note}
-                              disabled={!canMarkAttendance}
-                              onChange={(e) =>
-                                handleNoteChange(student.id, e.target.value)
-                              }
-                            />
-                          </div>
-                        ) : isAbsent ? (
-                          <div className="reason-categorizer-box">
-                            <span className="attendance-absent-pill">
-                              <HiOutlineXMark /> Sababsiz qoldirdi
-                            </span>
-                            <input
-                              type="text"
-                              className="form-input form-input-sm reason-custom-note"
-                              placeholder="Izoh (masalan: Telefoni o'chiq)..."
-                              value={currentRec.note}
-                              disabled={!canMarkAttendance}
-                              onChange={(e) =>
-                                handleNoteChange(student.id, e.target.value)
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-emerald font-bold text-sm">
-                            <HiOutlineCheck className="inline-icon-xs" /> Darsda qatnashmoqda
-                          </span>
-                        )}
-                      </td>
-                      <td className="text-center">
-                        {isHighRisk ? (
-                          <button
-                            type="button"
-                            className="btn-dropout-warning"
-                            onClick={() => sendDropoutWarning(student)}
-                            title="3. 3+ dars qoldirgan xavf xabarini Telegram botga yuborish"
-                          >
-                            <FaTelegram /> 3. 🚨 Botga Xavf Xabari
-                          </button>
-                        ) : isAbsent || isExcused ? (
-                          <button
-                            type="button"
-                            className="btn-telegram-action"
-                            onClick={() => sendTelegramAbsenceAlert(student)}
-                            title="1. Ota-onaga Telegram botdan darsga kelmaganligi haqida xabar yuborish"
-                          >
-                            <FaTelegram /> 1. Botga Xabar
-                          </button>
-                        ) : (
-                          <span className="text-muted text-xs">
-                            <FaTelegram className="text-indigo inline-icon-xs" /> Bot sinxron
-                          </span>
-                        )}
-                      </td>
-                      <td className="text-center">
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
-                        >
-                          <FaUserGraduate /> 360° Dosye
-                        </button>
+            <div className="dash-table-wrap">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>9 Xonali ID</th>
+                    <th>O'quvchi F.I.SH</th>
+                    <th>Telefon</th>
+                    <th className="text-center">Davomat Holati (✅ ❌ ⚠️)</th>
+                    <th>Sabab Tasniflagichi</th>
+                    <th className="text-center">Telegram Bot</th>
+                    <th className="text-center">360° Dosye</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeGroupStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-6 text-muted">
+                        Ushbu guruhga hali o'quvchilar biriktirilmagan
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  ) : (
+                    activeGroupStudents.map((student) => {
+                      const currentRec = attendanceMap[student.id] || {
+                        status: "Present",
+                        note: "",
+                        reasonCategory: "",
+                      };
+                      const isExcused = currentRec.status === "Excused";
+                      const isAbsent = currentRec.status === "Absent";
+                      const consecutiveAbsences = getStudentConsecutiveAbsences(student.id);
+                      const isHighRisk = consecutiveAbsences >= 3;
 
-      <div className="grid-2-col">
-        <div className="card">
-          <h3 className="section-title mb-4">
-            <HiOutlineChartBar className="title-icon-indigo" />
-            Umumiy Davomat Statistikasi ({currentGroupObj?.name})
-          </h3>
-          <div className="stats-list">
-            <div className="stat-row">
-              <span>Jami Dars Kunlari:</span>
-              <strong>{totalMarkedDays} kun</strong>
-            </div>
-            <div className="stat-row">
-              <span>Jami Dars Qoldirishlar:</span>
-              <strong>{totalAbsences} marta</strong>
-            </div>
-            <div className="stat-row highlight">
-              <span>Guruh Davomat Ko'rsatkichi:</span>
-              <strong>
-                {totalMarkedDays > 0 && activeGroupStudents.length > 0
-                  ? Math.round(
-                      (1 -
-                        totalAbsences /
-                          (totalMarkedDays * activeGroupStudents.length)) *
-                        100,
-                    )
-                  : 100}
-                %
-              </strong>
+                      return (
+                        <tr key={student.id}>
+                          <td>
+                            <span className="id-pill">#{format9DigitId(student.id, "student")}</span>
+                          </td>
+                          <td>
+                            <div>
+                              <Link
+                                to={`/students/${format9DigitId(student.id, "student")}`}
+                                className="student-name-text font-bold hover-indigo"
+                              >
+                                {student.fullName}
+                              </Link>
+                              {isHighRisk && (
+                                <div className="mt-1">
+                                  <span className="consecutive-danger-pill">
+                                    <HiOutlineExclamationTriangle /> 🚨 {consecutiveAbsences} dars qoldirgan!
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="text-muted">{student.phone}</td>
+                          <td className="text-center">
+                            <div className="attendance-toggle-group">
+                              <button
+                                type="button"
+                                className={`att-btn att-present ${currentRec.status === "Present" ? "active" : ""}`}
+                                onClick={() =>
+                                  canMarkAttendance &&
+                                  handleStatusChange(student.id, "Present")
+                                }
+                                disabled={!canMarkAttendance}
+                              >
+                                <HiOutlineCheck /> Keldi
+                              </button>
+                              <button
+                                type="button"
+                                className={`att-btn att-absent ${currentRec.status === "Absent" ? "active" : ""}`}
+                                onClick={() =>
+                                  canMarkAttendance &&
+                                  handleStatusChange(student.id, "Absent")
+                                }
+                                disabled={!canMarkAttendance}
+                              >
+                                <HiOutlineXMark /> Kelmadi
+                              </button>
+                              <button
+                                type="button"
+                                className={`att-btn att-excused ${currentRec.status === "Excused" ? "active" : ""}`}
+                                onClick={() =>
+                                  canMarkAttendance &&
+                                  handleStatusChange(student.id, "Excused")
+                                }
+                                disabled={!canMarkAttendance}
+                              >
+                                <HiOutlineExclamationCircle /> Sababli
+                              </button>
+                            </div>
+                          </td>
+                          <td>
+                            {isExcused ? (
+                              <div className="reason-categorizer-box">
+                                <select
+                                  className="form-select form-select-sm reason-select"
+                                  value={currentRec.reasonCategory || "medical"}
+                                  disabled={!canMarkAttendance}
+                                  onChange={(e) => {
+                                    const selectedObj = EXCUSED_REASONS.find(
+                                      (r) => r.id === e.target.value,
+                                    );
+                                    if (selectedObj)
+                                      handleReasonSelect(student.id, selectedObj);
+                                  }}
+                                >
+                                  {EXCUSED_REASONS.map((r) => (
+                                    <option key={r.id} value={r.id}>
+                                      {r.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="text"
+                                  className="form-input form-input-sm reason-custom-note"
+                                  placeholder="Sabab tafsilotlari..."
+                                  value={currentRec.note}
+                                  disabled={!canMarkAttendance}
+                                  onChange={(e) =>
+                                    handleNoteChange(student.id, e.target.value)
+                                  }
+                                />
+                              </div>
+                            ) : isAbsent ? (
+                              <div className="reason-categorizer-box">
+                                <span className="attendance-absent-pill">
+                                  <HiOutlineXMark /> Sababsiz qoldirdi
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-input form-input-sm reason-custom-note"
+                                  placeholder="Izoh (masalan: Telefoni o'chiq)..."
+                                  value={currentRec.note}
+                                  disabled={!canMarkAttendance}
+                                  onChange={(e) =>
+                                    handleNoteChange(student.id, e.target.value)
+                                  }
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-emerald font-bold text-sm">
+                                <HiOutlineCheck className="inline-icon-xs" /> Darsda qatnashmoqda
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-center">
+                            {isHighRisk ? (
+                              <button
+                                type="button"
+                                className="btn-dropout-warning"
+                                onClick={() => sendDropoutWarning(student)}
+                                title="3+ dars qoldirgan xavf xabarini Telegram botga yuborish"
+                              >
+                                <FaTelegram /> 🚨 Botga Xavf
+                              </button>
+                            ) : isAbsent || isExcused ? (
+                              <button
+                                type="button"
+                                className="btn-telegram-action"
+                                onClick={() => sendTelegramAbsenceAlert(student)}
+                                title="Ota-onaga Telegram botdan darsga kelmaganligi haqida xabar yuborish"
+                              >
+                                <FaTelegram /> Botga Xabar
+                              </button>
+                            ) : (
+                              <span className="text-muted text-xs">
+                                <FaTelegram className="text-indigo inline-icon-xs" /> Sinxron
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-center">
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
+                            >
+                              <FaUserGraduate /> 360° Dosye
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
 
-        <div className="card">
-          <h3 className="section-title mb-4">
-            <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
-            Dars Qoldirish Sabablari Taqsimoti
-          </h3>
-          <div className="reason-breakdown-list">
-            <div className="reason-stat-item">
-              <span className="reason-tag">
-                <span className="tag-dot dot-medical"></span>
-                Salomatlik / Kasallik (Uzrli)
-              </span>
-              <span className="reason-count">{reasonStats.medical}</span>
+          <div className="grid-2-col">
+            <div className="card">
+              <h3 className="section-title mb-4">
+                <HiOutlineChartBar className="title-icon-indigo" />
+                Umumiy Davomat Statistikasi ({currentGroupObj?.name})
+              </h3>
+              <div className="stats-list">
+                <div className="stat-row">
+                  <span>Jami Dars Kunlari:</span>
+                  <strong>{totalMarkedDays} kun</strong>
+                </div>
+                <div className="stat-row">
+                  <span>Jami Dars Qoldirishlar:</span>
+                  <strong>{totalAbsences} marta</strong>
+                </div>
+                <div className="stat-row highlight">
+                  <span>Guruh Davomat Ko'rsatkichi:</span>
+                  <strong>
+                    {totalMarkedDays > 0 && activeGroupStudents.length > 0
+                      ? Math.round(
+                          (1 -
+                            totalAbsences /
+                              (totalMarkedDays * activeGroupStudents.length)) *
+                            100,
+                        )
+                      : 100}
+                    %
+                  </strong>
+                </div>
+              </div>
             </div>
-            <div className="reason-stat-item">
-              <span className="reason-tag">
-                <span className="tag-dot dot-family"></span>
-                Oilaviy Sabab (Ruxsat olingan)
-              </span>
-              <span className="reason-count">{reasonStats.family}</span>
-            </div>
-            <div className="reason-stat-item">
-              <span className="reason-tag">
-                <span className="tag-dot dot-competition"></span>
-                Musobaqa / Olimpiada
-              </span>
-              <span className="reason-count">{reasonStats.competition}</span>
-            </div>
-            <div className="reason-stat-item">
-              <span className="reason-tag">
-                <span className="tag-dot dot-technical"></span>
-                Texnik / Transport sababi
-              </span>
-              <span className="reason-count">{reasonStats.technical}</span>
-            </div>
-            <div className="reason-stat-item">
-              <span className="reason-tag">
-                <span className="tag-dot dot-other_excused"></span>
-                Boshqa Uzrli Sabab
-              </span>
-              <span className="reason-count">{reasonStats.other_excused}</span>
-            </div>
-            <div className="reason-stat-item">
-              <span className="reason-tag">
-                <span className="tag-dot dot-unexcused"></span>
-                Sababsiz Dars Qoldirish
-              </span>
-              <span className="reason-count">{reasonStats.unexcused}</span>
+
+            <div className="card">
+              <h3 className="section-title mb-4">
+                <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
+                Dars Qoldirish Sabablari Taqsimoti
+              </h3>
+              <div className="reason-breakdown-list">
+                <div className="reason-stat-item">
+                  <span className="reason-tag">
+                    <span className="tag-dot dot-medical"></span>
+                    Salomatlik / Kasallik (Uzrli)
+                  </span>
+                  <span className="reason-count">{reasonStats.medical}</span>
+                </div>
+                <div className="reason-stat-item">
+                  <span className="reason-tag">
+                    <span className="tag-dot dot-family"></span>
+                    Oilaviy Sabab (Ruxsat olingan)
+                  </span>
+                  <span className="reason-count">{reasonStats.family}</span>
+                </div>
+                <div className="reason-stat-item">
+                  <span className="reason-tag">
+                    <span className="tag-dot dot-competition"></span>
+                    Musobaqa / Olimpiada
+                  </span>
+                  <span className="reason-count">{reasonStats.competition}</span>
+                </div>
+                <div className="reason-stat-item">
+                  <span className="reason-tag">
+                    <span className="tag-dot dot-technical"></span>
+                    Texnik / Transport sababi
+                  </span>
+                  <span className="reason-count">{reasonStats.technical}</span>
+                </div>
+                <div className="reason-stat-item">
+                  <span className="reason-tag">
+                    <span className="tag-dot dot-other_excused"></span>
+                    Boshqa Uzrli Sabab
+                  </span>
+                  <span className="reason-count">{reasonStats.other_excused}</span>
+                </div>
+                <div className="reason-stat-item">
+                  <span className="reason-tag">
+                    <span className="tag-dot dot-unexcused"></span>
+                    Sababsiz Dars Qoldirish
+                  </span>
+                  <span className="reason-count">{reasonStats.unexcused}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      ) : (
+        <>
+          <div className="attendance-control-panel">
+            <div className="flex items-center gap-3 w-full">
+              <label className="font-bold text-sm text-dark whitespace-nowrap">Dars Mavzusi / Imtihon Nomi:</label>
+              <input
+                type="text"
+                className="form-input flex-1"
+                placeholder="masalan: React Router v6 & Redux Toolkit Oraliq Imtihoni..."
+                value={lessonTopic}
+                onChange={(e) => setLessonTopic(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="card table-card mb-6">
+            <div className="card-header-flex px-6 pt-6 flex justify-between items-center">
+              <h3 className="section-title mb-0">
+                <HiOutlineTrophy className="title-icon-indigo" />
+                {currentGroupObj?.name} — O'quvchilar Baholari & Uy Vazifalari
+              </h3>
+              <span className="text-muted text-sm">
+                Mavzu: <strong>{lessonTopic}</strong>
+              </span>
+            </div>
+
+            <div className="dash-table-wrap">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>9 Xonali ID</th>
+                    <th>O'quvchi F.I.SH</th>
+                    <th>Baho (0-100 Ball)</th>
+                    <th>Daraja</th>
+                    <th>Uy Vazifasi</th>
+                    <th>Ustoz Izohi</th>
+                    <th className="text-center">360° Dosye</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeGroupStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-6 text-muted">
+                        Ushbu guruhga hali o'quvchilar biriktirilmagan
+                      </td>
+                    </tr>
+                  ) : (
+                    activeGroupStudents.map((student) => {
+                      const grRec = gradesMap[student.id] || {
+                        score: 85,
+                        homeworkDone: true,
+                        comment: "Faol",
+                      };
+                      const letterGrade = getLetterGrade(grRec.score);
+
+                      return (
+                        <tr key={student.id}>
+                          <td>
+                            <span className="id-pill">#{format9DigitId(student.id, "student")}</span>
+                          </td>
+                          <td>
+                            <Link
+                              to={`/students/${format9DigitId(student.id, "student")}`}
+                              className="student-name-text font-bold hover-indigo"
+                            >
+                              {student.fullName}
+                            </Link>
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className="grade-score-input"
+                              min="0"
+                              max="100"
+                              value={grRec.score}
+                              onChange={(e) => handleGradeChange(student.id, e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <span className={`grade-badge-pill ${letterGrade.class}`}>
+                              {letterGrade.label}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className={`hw-toggle-btn ${grRec.homeworkDone ? "hw-submitted" : "hw-missing"}`}
+                              onClick={() => handleHomeworkToggle(student.id)}
+                            >
+                              {grRec.homeworkDone ? (
+                                <><HiOutlineCheck /> ✅ Topshirdi</>
+                              ) : (
+                                <><HiOutlineXMark /> ❌ Topshirmadi</>
+                              )}
+                            </button>
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="form-input form-input-sm"
+                              placeholder="Izoh yozish..."
+                              value={grRec.comment}
+                              onChange={(e) => handleGradeCommentChange(student.id, e.target.value)}
+                            />
+                          </td>
+                          <td className="text-center">
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
+                            >
+                              <FaUserGraduate /> 360° Dosye
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
