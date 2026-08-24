@@ -219,10 +219,10 @@ const Students = () => {
     setIsModalOpen(false);
     setIsTransferModalOpen(false);
     setSelectedDossierStudent(null);
+    setEditingStudent(null);
+    setTransferringStudent(null);
     setSearchParams({});
-    if (urlParamId) {
-      navigate("/students");
-    }
+    navigate("/students", { replace: true });
   };
 
   const handleSearchSubmit = (e) => {
@@ -268,8 +268,11 @@ const Students = () => {
         await studentsApi.create(payload);
         toast.success("Yangi o'quvchi ro'yxatdan o'tkazildi!");
       }
+      setIsModalOpen(false);
+      setEditingStudent(null);
+      setSearchParams({});
+      navigate("/students", { replace: true });
       await loadData();
-      closeModals();
     } catch (err) {
       toast.error("Xatolik yuz berdi: " + (err.response?.data?.error || err.message));
     }
@@ -295,8 +298,11 @@ const Students = () => {
       toast.success(
         `${transferringStudent.fullName} muvaffaqiyatli "${targetGroup?.name || targetGroupId}" guruhiga o'tkazildi!`,
       );
+      setIsTransferModalOpen(false);
+      setTransferringStudent(null);
+      setSearchParams({});
+      navigate("/students", { replace: true });
       await loadData();
-      closeModals();
     } catch (err) {
       toast.error("O'tkazishda xatolik: " + (err.response?.data?.error || err.message));
     }
