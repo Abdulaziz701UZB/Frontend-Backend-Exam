@@ -25,49 +25,141 @@
 .group-cards-horizontal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 18px;
+  gap: 20px;
 }
 
 .group-select-card {
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 18px 20px;
+  border-radius: 20px;
+  padding: 20px 22px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 8px;
   position: relative;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.group-select-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4.5px;
 }
 
 .group-select-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Color Scheme 0: Indigo */
+.color-scheme-0 {
+  background: linear-gradient(145deg, #ffffff 0%, #f5f3ff 100%);
+  border: 1.5px solid #e0e7ff;
+}
+.color-scheme-0::before { background: linear-gradient(90deg, #6366f1, #4f46e5); }
+.color-scheme-0 .group-card-course { color: #4f46e5; }
+.color-scheme-0 .group-badge-accent { background: #e0e7ff; color: #4338ca; }
+.color-scheme-0:hover {
   border-color: #6366f1;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 12px 28px rgba(99, 102, 241, 0.2);
 }
 
-.group-open-indicator {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #4f46e5;
-  background: #eef2ff;
-  padding: 4px 10px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
+/* Color Scheme 1: Emerald */
+.color-scheme-1 {
+  background: linear-gradient(145deg, #ffffff 0%, #ecfdf5 100%);
+  border: 1.5px solid #d1fae5;
+}
+.color-scheme-1::before { background: linear-gradient(90deg, #10b981, #059669); }
+.color-scheme-1 .group-card-course { color: #059669; }
+.color-scheme-1 .group-badge-accent { background: #d1fae5; color: #065f46; }
+.color-scheme-1:hover {
+  border-color: #10b981;
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.2);
 }
 
-.group-select-card:hover .group-open-indicator {
-  background: #4f46e5;
-  color: #ffffff;
+/* Color Scheme 2: Amber */
+.color-scheme-2 {
+  background: linear-gradient(145deg, #ffffff 0%, #fffbeb 100%);
+  border: 1.5px solid #fef3c7;
+}
+.color-scheme-2::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.color-scheme-2 .group-card-course { color: #d97706; }
+.color-scheme-2 .group-badge-accent { background: #fef3c7; color: #92400e; }
+.color-scheme-2:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.2);
+}
+
+/* Color Scheme 3: Sky Blue / Cyan */
+.color-scheme-3 {
+  background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+  border: 1.5px solid #e0f2fe;
+}
+.color-scheme-3::before { background: linear-gradient(90deg, #0284c7, #0369a1); }
+.color-scheme-3 .group-card-course { color: #0284c7; }
+.color-scheme-3 .group-badge-accent { background: #e0f2fe; color: #075985; }
+.color-scheme-3:hover {
+  border-color: #0284c7;
+  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.2);
+}
+
+/* Color Scheme 4: Rose / Pink */
+.color-scheme-4 {
+  background: linear-gradient(145deg, #ffffff 0%, #fff1f2 100%);
+  border: 1.5px solid #ffe4e6;
+}
+.color-scheme-4::before { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+.color-scheme-4 .group-card-course { color: #e11d48; }
+.color-scheme-4 .group-badge-accent { background: #ffe4e6; color: #9f1239; }
+.color-scheme-4:hover {
+  border-color: #f43f5e;
+  box-shadow: 0 12px 28px rgba(244, 63, 94, 0.2);
+}
+
+/* Color Scheme 5: Purple / Violet */
+.color-scheme-5 {
+  background: linear-gradient(145deg, #ffffff 0%, #faf5ff 100%);
+  border: 1.5px solid #f3e8ff;
+}
+.color-scheme-5::before { background: linear-gradient(90deg, #a855f7, #9333ea); }
+.color-scheme-5 .group-card-course { color: #9333ea; }
+.color-scheme-5 .group-badge-accent { background: #f3e8ff; color: #6b21a8; }
+.color-scheme-5:hover {
+  border-color: #a855f7;
+  box-shadow: 0 12px 28px rgba(168, 85, 247, 0.2);
+}
+
+/* Color Scheme 6: Teal */
+.color-scheme-6 {
+  background: linear-gradient(145deg, #ffffff 0%, #f0fdfa 100%);
+  border: 1.5px solid #ccfbf1;
+}
+.color-scheme-6::before { background: linear-gradient(90deg, #14b8a6, #0d9488); }
+.color-scheme-6 .group-card-course { color: #0d9488; }
+.color-scheme-6 .group-badge-accent { background: #ccfbf1; color: #115e59; }
+.color-scheme-6:hover {
+  border-color: #14b8a6;
+  box-shadow: 0 12px 28px rgba(20, 184, 166, 0.2);
+}
+
+/* Color Scheme 7: Coral Flame */
+.color-scheme-7 {
+  background: linear-gradient(145deg, #ffffff 0%, #fff7ed 100%);
+  border: 1.5px solid #ffedd5;
+}
+.color-scheme-7::before { background: linear-gradient(90deg, #ea580c, #c2410c); }
+.color-scheme-7 .group-card-course { color: #ea580c; }
+.color-scheme-7 .group-badge-accent { background: #ffedd5; color: #9a3412; }
+.color-scheme-7:hover {
+  border-color: #ea580c;
+  box-shadow: 0 12px 28px rgba(234, 88, 12, 0.2);
 }
 
 .group-card-name {
-  font-size: 17px;
+  font-size: 17.5px;
   font-weight: 850;
   color: #0f172a;
   margin: 0;
@@ -75,8 +167,7 @@
 
 .group-card-course {
   font-size: 13px;
-  font-weight: 600;
-  color: #6366f1;
+  font-weight: 700;
   margin: 0 0 6px;
 }
 
@@ -85,8 +176,8 @@
   flex-direction: column;
   gap: 6px;
   font-size: 12px;
-  color: #64748b;
-  border-top: 1px solid #f1f5f9;
+  color: #475569;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding-top: 10px;
 }
 

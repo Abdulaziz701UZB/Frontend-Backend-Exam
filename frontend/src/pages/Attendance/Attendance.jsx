@@ -387,13 +387,13 @@ const Attendance = () => {
           </div>
 
           <div className="group-cards-horizontal-grid">
-            {groups.map((g) => {
+            {groups.map((g, idx) => {
               const grpStudents = students.filter((s) => s.groupId === g.id);
 
               return (
                 <div
                   key={g.id}
-                  className="group-select-card"
+                  className={`group-select-card color-scheme-${idx % 8}`}
                   onClick={() => setSelectedGroup(g.id)}
                 >
                   <h4 className="group-card-name">{g.name}</h4>
