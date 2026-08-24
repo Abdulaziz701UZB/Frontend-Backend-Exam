@@ -458,14 +458,14 @@ const Groups = () => {
                     }
                   >
                     <option value="Dushanba - Chorshanba - Juma">
-                      Dushanba - Chorshanba - Juma (Toq kunlar)
+                      Dushanba - Chorshanba - Juma
                     </option>
                     <option value="Seshanba - Payshanba - Shanba">
-                      Seshanba - Payshanba - Shanba (Juft kunlar)
+                      Seshanba - Payshanba - Shanba
                     </option>
-                    <option value="Har kuni">Har kuni (Intensiv)</option>
+                    <option value="Har kuni">Har kuni</option>
                     <option value="Shanba - Yakshanba">
-                      Shanba - Yakshanba (Weekend)
+                      Shanba - Yakshanba
                     </option>
                   </select>
                 </div>
