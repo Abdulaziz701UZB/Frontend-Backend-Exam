@@ -3,22 +3,19 @@ import { useEduAuth } from "../../context/EduAuthContext";
 import { 
   HiOutlineSquares2X2, 
   HiOutlineAcademicCap, 
-  HiOutlineUserGroup, 
   HiOutlineClipboardDocumentCheck, 
-  HiOutlineCreditCard, 
+  HiOutlineBanknotes, 
   HiOutlineUsers, 
-  HiOutlineTrophy, 
   HiOutlineBookOpen, 
   HiOutlineDocumentText, 
   HiOutlineBuildingOffice2, 
-  HiOutlinePhoneArrowUpRight,
+  HiOutlineUserPlus,
   HiOutlineStar,
   HiOutlineSparkles,
-  HiBolt,
   HiXMark,
   HiOutlineArrowRightOnRectangle
 } from "react-icons/hi2";
-import { FaCrown, FaChalkboardUser, FaGraduationCap, FaTelegram } from "react-icons/fa6";
+import { FaCrown, FaChalkboardUser, FaGraduationCap, FaUserGraduate } from "react-icons/fa6";
 import "./Sidebar.css";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -38,10 +35,10 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside className={`crm-sidebar ${isOpen ? "mobile-open" : ""}`}>
         <div className="sidebar-brand">
           <div className="brand-logo-wrap">
-            <HiBolt className="brand-logo-icon" />
+            <span className="logo-spark">✨</span>
           </div>
           <div className="brand-text">
-            <h2 className="brand-title">EduControl</h2>
+            <span className="brand-title">EduControl</span>
             <span className="brand-subtitle">LC-UP CRM v3.0</span>
           </div>
           <button className="mobile-sidebar-close" onClick={onClose} aria-label="Menuni yopish">
@@ -192,17 +189,6 @@ const Sidebar = ({ isOpen, onClose }) => {
           >
             <span className="link-icon"><HiOutlineDocumentText /></span>
             <span className="link-text">12. Sinov Darslari</span>
-          </NavLink>
-
-          <NavLink
-            to="/telegram-bot"
-            className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""}`
-            }
-            onClick={onClose}
-          >
-            <span className="link-icon text-blue"><FaTelegram /></span>
-            <span className="link-text">13. Telegram Bot & WebApp</span>
           </NavLink>
         </nav>
 

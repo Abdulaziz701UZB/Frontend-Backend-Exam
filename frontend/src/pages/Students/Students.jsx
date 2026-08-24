@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { studentsApi, groupsApi } from "../../services/api";
@@ -22,6 +23,7 @@ import "./Students.css";
 const Students = () => {
   const { canManageStudents } = useEduAuth();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [students, setStudents] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -68,6 +70,49 @@ const Students = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const action = searchParams.get("action");
+    const studentId = searchParams.get("studentId") || searchParams.get("id");
+
+    if ((action === "create" || action === "add") && !isModalOpen) {
+      setEditingStudent(null);
+      setFormData({
+        fullName: "",
+        phone: "+998 90 599 06 00",
+        parentPhone: "+998 90 599 06 00",
+        groupId: groups[0]?.id || "G-101",
+        paymentStatus: "Paid",
+        balance: 0,
+        status: "Active",
+      });
+      setIsModalOpen(true);
+    } else if (action === "transfer" && studentId && students.length > 0 && !isTransferModalOpen) {
+      const s = students.find((item) => String(item.id) === String(studentId));
+      if (s) {
+        setTransferringStudent(s);
+        const availableGroups = groups.filter((g) => g.id !== s.groupId);
+        setTargetGroupId(availableGroups[0]?.id || "");
+        setTransferReason("O'quvchi / ota-ona istagi");
+        setIsTransferModalOpen(true);
+      }
+    } else if (action === "edit" && studentId && students.length > 0 && !isModalOpen) {
+      const s = students.find((item) => String(item.id) === String(studentId));
+      if (s) {
+        setEditingStudent(s);
+        setFormData({
+          fullName: s.fullName,
+          phone: s.phone,
+          parentPhone: s.parentPhone,
+          groupId: s.groupId,
+          paymentStatus: s.paymentStatus,
+          balance: s.balance,
+          status: s.status,
+        });
+        setIsModalOpen(true);
+      }
+    }
+  }, [searchParams, students, groups]);
+
   const openCreateModal = () => {
     setEditingStudent(null);
     setFormData({
@@ -79,6 +124,7 @@ const Students = () => {
       balance: 0,
       status: "Active",
     });
+    setSearchParams({ action: "create" });
     setIsModalOpen(true);
   };
 
@@ -93,6 +139,7 @@ const Students = () => {
       balance: student.balance,
       status: student.status,
     });
+    setSearchParams({ action: "edit", id: student.id });
     setIsModalOpen(true);
   };
 
@@ -101,7 +148,14 @@ const Students = () => {
     const availableGroups = groups.filter((g) => g.id !== student.groupId);
     setTargetGroupId(availableGroups[0]?.id || "");
     setTransferReason("O'quvchi / ota-ona istagi");
+    setSearchParams({ action: "transfer", studentId: student.id });
     setIsTransferModalOpen(true);
+  };
+
+  const closeModals = () => {
+    setIsModalOpen(false);
+    setIsTransferModalOpen(false);
+    setSearchParams({});
   };
 
   const handleFormSubmit = async (e) => {
@@ -374,7 +428,7 @@ const Students = () => {
       </div>
 
       {isTransferModalOpen && transferringStudent && (
-        <div className="modal-overlay" onClick={() => setIsTransferModalOpen(false)}>
+        <div className="modal-overlay" onClick={closeModals}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
@@ -384,7 +438,7 @@ const Students = () => {
               <button
                 type="button"
                 className="modal-close-btn"
-                onClick={() => setIsTransferModalOpen(false)}
+                onClick={closeModals}
                 aria-label="Yopish"
               >
                 <HiXMark />
@@ -429,7 +483,7 @@ const Students = () => {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setIsTransferModalOpen(false)}
+                  onClick={closeModals}
                 >
                   Bekor Qilish
                 </button>
@@ -443,7 +497,7 @@ const Students = () => {
       )}
 
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+        <div className="modal-overlay" onClick={closeModals}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
@@ -455,7 +509,8 @@ const Students = () => {
               <button
                 type="button"
                 className="modal-close-btn"
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModals}
+                aria-label="Yopish"
               >
                 <HiXMark />
               </button>
