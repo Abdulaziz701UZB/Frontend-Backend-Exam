@@ -17,20 +17,21 @@ const Login = () => {
   const navigate = useNavigate();
   const { login, authError } = useEduAuth();
 
-  const [identifier, setIdentifier] = useState("+998 ");
+  const [phoneDigits, setPhoneDigits] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
 
-  const formatUzPhone = (val) => {
-    let digits = val.replace(/\D/g, "");
+  const format9DigitsOnly = (input) => {
+    let digits = input.replace(/\D/g, "");
     if (digits.startsWith("998")) {
       digits = digits.slice(3);
     }
     digits = digits.slice(0, 9);
 
-    let res = "+998";
-    if (digits.length > 0) res += " " + digits.slice(0, 2);
+    let res = "";
+    if (digits.length > 0) res += digits.slice(0, 2);
     if (digits.length > 2) res += " " + digits.slice(2, 5);
     if (digits.length > 5) res += " " + digits.slice(5, 7);
     if (digits.length > 7) res += " " + digits.slice(7, 9);
@@ -38,27 +39,33 @@ const Login = () => {
   };
 
   const handlePhoneChange = (e) => {
-    const formatted = formatUzPhone(e.target.value);
-    setIdentifier(formatted);
-  };
-
-  const handlePhoneFocus = () => {
-    if (!identifier || identifier.trim() === "") {
-      setIdentifier("+998 ");
-    }
+    setLocalError("");
+    const formatted = format9DigitsOnly(e.target.value);
+    setPhoneDigits(formatted);
   };
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
+    setLocalError("");
+
+    const cleanDigits = phoneDigits.replace(/\D/g, "");
+    if (cleanDigits.length < 9) {
+      setLocalError("Iltimos, 9 xonali telefon raqamingizni to'liq kiriting! (masalan: 90 123 45 67)");
+      return;
+    }
+
+    const fullPhone = `+998 ${phoneDigits.trim()}`;
     setIsLoading(true);
     setTimeout(() => {
-      const success = login(identifier, password);
+      const success = login(fullPhone, password);
       setIsLoading(false);
       if (success) {
         navigate("/");
       }
     }, 350);
   };
+
+  const activeErrorMessage = localError || authError;
 
   return (
     <div className="login-page-wrapper">
@@ -73,10 +80,10 @@ const Login = () => {
           </p>
         </div>
 
-        {authError && (
+        {activeErrorMessage && (
           <div className="login-alert-error">
             <HiExclamationCircle className="alert-icon" />
-            <span>{authError}</span>
+            <span>{activeErrorMessage}</span>
           </div>
         )}
 
@@ -86,15 +93,15 @@ const Login = () => {
               <HiOutlineDevicePhoneMobile className="inline-icon-xs" />
               Telefon raqami:
             </label>
-            <div className="login-input-wrap">
+            <div className="login-phone-input-group">
+              <span className="phone-prefix-badge">+998</span>
               <input
                 type="tel"
-                className="login-form-input"
-                placeholder="+998 90 123 45 67"
-                value={identifier}
+                className="login-phone-input-field"
+                placeholder="90 123 45 67"
+                value={phoneDigits}
                 onChange={handlePhoneChange}
-                onFocus={handlePhoneFocus}
-                maxLength={17}
+                maxLength={12}
                 required
                 autoFocus
               />
@@ -112,7 +119,10 @@ const Login = () => {
                 className="login-form-input"
                 placeholder="Parolingizni kiriting"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setLocalError("");
+                  setPassword(e.target.value);
+                }}
                 required
               />
               <button
