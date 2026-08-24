@@ -13,14 +13,76 @@ import {
   HiSun,
   HiMoon,
   HiXMark,
-  HiArrowTopRightOnSquare
+  HiArrowTopRightOnSquare,
+  HiLanguage
 } from "react-icons/hi2";
 import { FaTelegram } from "react-icons/fa6";
 import "./Login.css";
 
+const TRANSLATIONS = {
+  uz: {
+    subtitle: "Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting",
+    phoneLabel: "Telefon raqami:",
+    passwordLabel: "Tizim paroli:",
+    contactAdmin: "Admin bilan bog'lanish (@Abdulaziz7o1)",
+    universalPassword: "Universal parol:",
+    or: "yoki",
+    signIn: "Tizimga Kirish",
+    checking: "Tekshirilmoqda...",
+    qrBtn: "QR Kod orqali kirish (Admin Bot)",
+    qrTitle: "Admin Bot QR Kod orqali Kirish",
+    qrStep1: "1. Telegram ilovasida @VelnexAdminBot ni oching.",
+    qrStep2: "2. Botdagi /login buyrug'ini yuboring yoki kamerangiz bilan QR kodni skanerlang.",
+    openBot: "Admin Botni Telegramda Ochish",
+    lightMode: "Yorug'",
+    darkMode: "Tungi",
+    lengthError: "Iltimos, 9 xonali telefon raqamingizni to'liq kiriting!"
+  },
+  ru: {
+    subtitle: "Введите номер телефона и пароль для входа в систему",
+    phoneLabel: "Номер телефона:",
+    passwordLabel: "Пароль системы:",
+    contactAdmin: "Связаться с админом (@Abdulaziz7o1)",
+    universalPassword: "Универсальный пароль:",
+    or: "или",
+    signIn: "Войти в систему",
+    checking: "Проверка...",
+    qrBtn: "Вход по QR-коду (Admin Bot)",
+    qrTitle: "Вход через Telegram Admin Bot по QR-коду",
+    qrStep1: "1. Откройте @VelnexAdminBot в Telegram.",
+    qrStep2: "2. Отправьте /login или отсканируйте QR-код камерой.",
+    openBot: "Открыть Admin Bot в Telegram",
+    lightMode: "Светлая",
+    darkMode: "Тёмная",
+    lengthError: "Пожалуйста, введите полный 9-значный номер телефона!"
+  },
+  en: {
+    subtitle: "Enter your phone number and password to log in",
+    phoneLabel: "Phone number:",
+    passwordLabel: "System password:",
+    contactAdmin: "Contact Admin (@Abdulaziz7o1)",
+    universalPassword: "Universal password:",
+    or: "or",
+    signIn: "Sign In",
+    checking: "Checking...",
+    qrBtn: "QR Code Login (Admin Bot)",
+    qrTitle: "Admin Bot QR Code Login",
+    qrStep1: "1. Open @VelnexAdminBot in Telegram.",
+    qrStep2: "2. Send /login command or scan QR code with camera.",
+    openBot: "Open Admin Bot in Telegram",
+    lightMode: "Light",
+    darkMode: "Dark",
+    lengthError: "Please enter your full 9-digit phone number!"
+  }
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { login, authError } = useEduAuth();
+
+  const [lang, setLang] = useState(() => {
+    return localStorage.getItem("velnex_lang") || "uz";
+  });
 
   const [phoneDigits, setPhoneDigits] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +103,13 @@ const Login = () => {
       localStorage.setItem("velnex_theme", "light");
     }
   }, [isDarkTheme]);
+
+  const handleLangChange = (selectedLang) => {
+    setLang(selectedLang);
+    localStorage.setItem("velnex_lang", selectedLang);
+  };
+
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.uz;
 
   const toggleTheme = () => {
     setIsDarkTheme((prev) => !prev);
@@ -73,7 +142,7 @@ const Login = () => {
 
     const cleanDigits = phoneDigits.replace(/\D/g, "");
     if (cleanDigits.length < 9) {
-      setLocalError("Iltimos, 9 xonali telefon raqamingizni to'liq kiriting!");
+      setLocalError(t.lengthError);
       return;
     }
 
@@ -92,15 +161,42 @@ const Login = () => {
 
   return (
     <div className="login-page-wrapper">
-      <button
-        type="button"
-        className="login-floating-theme-btn"
-        onClick={toggleTheme}
-        title={isDarkTheme ? "Yorug' rejimga o'tish" : "Tungi rejimga o'tish"}
-      >
-        {isDarkTheme ? <HiSun className="theme-icon sun" /> : <HiMoon className="theme-icon moon" />}
-        <span>{isDarkTheme ? "Yorug' Rejim" : "Tungi Rejim"}</span>
-      </button>
+      <div className="login-top-controls">
+        <div className="login-lang-switch-group">
+          <HiLanguage className="lang-icon" />
+          <button
+            type="button"
+            className={`login-lang-btn ${lang === "uz" ? "active" : ""}`}
+            onClick={() => handleLangChange("uz")}
+          >
+            UZ
+          </button>
+          <button
+            type="button"
+            className={`login-lang-btn ${lang === "ru" ? "active" : ""}`}
+            onClick={() => handleLangChange("ru")}
+          >
+            RU
+          </button>
+          <button
+            type="button"
+            className={`login-lang-btn ${lang === "en" ? "active" : ""}`}
+            onClick={() => handleLangChange("en")}
+          >
+            EN
+          </button>
+        </div>
+
+        <button
+          type="button"
+          className="login-floating-theme-btn"
+          onClick={toggleTheme}
+          title={isDarkTheme ? t.lightMode : t.darkMode}
+        >
+          {isDarkTheme ? <HiSun className="theme-icon sun" /> : <HiMoon className="theme-icon moon" />}
+          <span>{isDarkTheme ? t.lightMode : t.darkMode}</span>
+        </button>
+      </div>
 
       <div className="login-card-container">
         <div className="login-brand-header">
@@ -109,7 +205,7 @@ const Login = () => {
           </div>
           <h1 className="login-system-title">VELNEX</h1>
           <p className="login-system-subtitle">
-            Tizimga kirish uchun telefon raqamingiz va parolingizni kiriting
+            {t.subtitle}
           </p>
         </div>
 
@@ -124,7 +220,7 @@ const Login = () => {
           <div className="login-form-group">
             <label className="login-form-label">
               <HiOutlineDevicePhoneMobile className="inline-icon-xs" />
-              Telefon raqami:
+              {t.phoneLabel}
             </label>
             <div className="login-phone-input-group">
               <span className="phone-prefix-badge">+998</span>
@@ -144,7 +240,7 @@ const Login = () => {
           <div className="login-form-group">
             <label className="login-form-label">
               <HiLockClosed className="inline-icon-xs" />
-              Tizim paroli:
+              {t.passwordLabel}
             </label>
             <div className="login-password-input-wrap">
               <input
@@ -175,17 +271,17 @@ const Login = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="login-contact-admin-link"
-              title="Admin bilan Telegram orqali bog'lanish"
+              title="Telegram"
             >
               <FaTelegram className="tg-link-icon" />
-              <span>Admin bilan bog'lanish (@Abdulaziz7o1)</span>
+              <span>{t.contactAdmin}</span>
               <HiArrowTopRightOnSquare className="tg-arrow-icon" />
             </a>
           </div>
 
           <div className="login-credentials-hint">
             <HiShieldCheck className="hint-icon" />
-            <span>Universal parol: <strong>10102013</strong> yoki <strong>1010201300</strong></span>
+            <span>{t.universalPassword} <strong>10102013</strong> {t.or} <strong>1010201300</strong></span>
           </div>
 
           <button
@@ -194,11 +290,11 @@ const Login = () => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <span>Tekshirilmoqda...</span>
+              <span>{t.checking}</span>
             ) : (
               <>
                 <HiArrowRightOnRectangle />
-                <span>Tizimga Kirish</span>
+                <span>{t.signIn}</span>
               </>
             )}
           </button>
@@ -209,7 +305,7 @@ const Login = () => {
             onClick={() => setShowQrModal(true)}
           >
             <HiQrCode className="qr-btn-icon" />
-            <span>QR Kod orqali kirish (Admin Bot)</span>
+            <span>{t.qrBtn}</span>
           </button>
         </form>
 
@@ -224,12 +320,12 @@ const Login = () => {
             <div className="login-qr-modal-header">
               <div className="qr-header-title-wrap">
                 <HiQrCode className="qr-header-icon" />
-                <h3>Admin Bot QR Kod orqali Kirish</h3>
+                <h3>{t.qrTitle}</h3>
               </div>
               <button
                 className="login-qr-close-btn"
                 onClick={() => setShowQrModal(false)}
-                aria-label="Yopish"
+                aria-label="Close"
               >
                 <HiXMark />
               </button>
@@ -277,10 +373,10 @@ const Login = () => {
 
               <div className="qr-instructions">
                 <p className="qr-step-text">
-                  1. Telegram ilovasida <strong>@VelnexAdminBot</strong> ni oching.
+                  {t.qrStep1}
                 </p>
                 <p className="qr-step-text">
-                  2. Botdagi <strong>/login</strong> buyrug'ini yuboring yoki kamerangiz bilan QR kodni skanerlang.
+                  {t.qrStep2}
                 </p>
               </div>
 
@@ -292,7 +388,7 @@ const Login = () => {
                   className="btn-open-telegram-bot"
                 >
                   <FaTelegram className="tg-modal-icon" />
-                  <span>Admin Botni Telegramda Ochish</span>
+                  <span>{t.openBot}</span>
                 </a>
               </div>
             </div>

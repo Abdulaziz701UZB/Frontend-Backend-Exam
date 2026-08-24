@@ -317,24 +317,70 @@
   opacity: 0.7;
 }
 
-.login-floating-theme-btn {
+.login-top-controls {
   position: absolute;
   top: 24px;
   right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+}
+
+.login-lang-switch-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  padding: 4px 6px;
+  border-radius: 100px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.login-lang-switch-group .lang-icon {
+  font-size: 16px;
+  color: #64748b;
+  margin-left: 4px;
+  margin-right: 2px;
+}
+
+.login-lang-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-lang-btn:hover {
+  color: #0f172a;
+}
+
+.login-lang-btn.active {
+  background: #4f46e5;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.login-floating-theme-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 14px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 100px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #334155;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   transition: all 0.25s ease;
-  z-index: 10;
 }
 
 .login-floating-theme-btn:hover {
@@ -344,12 +390,12 @@
 }
 
 .login-floating-theme-btn .theme-icon.sun {
-  font-size: 18px;
+  font-size: 16px;
   color: #f59e0b;
 }
 
 .login-floating-theme-btn .theme-icon.moon {
-  font-size: 18px;
+  font-size: 16px;
   color: #6366f1;
 }
 
@@ -591,6 +637,29 @@ body.dark-theme .login-system-title {
 
 body.dark-theme .login-system-subtitle {
   color: #94a3b8;
+}
+
+body.dark-theme .login-lang-switch-group {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .login-lang-switch-group .lang-icon {
+  color: #94a3b8;
+}
+
+body.dark-theme .login-lang-btn {
+  color: #94a3b8;
+}
+
+body.dark-theme .login-lang-btn:hover {
+  color: #f8fafc;
+}
+
+body.dark-theme .login-lang-btn.active {
+  background: #6366f1;
+  color: #ffffff;
 }
 
 body.dark-theme .login-floating-theme-btn {
