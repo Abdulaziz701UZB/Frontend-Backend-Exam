@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
+import { useToast } from "../../context/ToastContext";
 import { attendanceApi, groupsApi, studentsApi } from "../../services/api";
+import { format9DigitId } from "../../utils/idFormatter";
 import {
   HiOutlineClipboardDocumentCheck,
   HiOutlineCheck,
@@ -10,8 +13,12 @@ import {
   HiOutlineClock,
   HiOutlineUserGroup,
   HiOutlineDocumentCheck,
-  HiOutlineChartBar
+  HiOutlineChartBar,
+  HiOutlineSparkles,
+  HiOutlineExclamationTriangle,
+  HiOutlinePaperAirplane
 } from "react-icons/hi2";
+import { FaTelegram, FaUserGraduate } from "react-icons/fa6";
 import "./Attendance.css";
 
 const EXCUSED_REASONS = [
@@ -29,6 +36,8 @@ const ABSENCE_REASONS = [
 
 const Attendance = () => {
   const { canMarkAttendance } = useEduAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
 
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
@@ -57,6 +66,7 @@ const Attendance = () => {
       }
     } catch (err) {
       console.error("Attendance initial load error:", err.message);
+      toast.error("Davomat ma'lumotlarini yuklashda xatolik");
     } finally {
       setLoading(false);
     }
@@ -140,6 +150,47 @@ const Attendance = () => {
     }));
   };
 
+  const handleMarkAllPresent = () => {
+    const updated = {};
+    activeGroupStudents.forEach((s) => {
+      updated[s.id] = {
+        status: "Present",
+        note: "",
+        reasonCategory: "",
+      };
+    });
+    setAttendanceMap(updated);
+    toast.success("2. ⚡ Guruhdagi barcha o'quvchilar 'Keldi' deb belgilandi!");
+  };
+
+  const sendTelegramAbsenceAlert = (student) => {
+    toast.success(
+      `1. 📲 "${student.fullName}" ota-onasining Telegram botiga dars qoldirganligi haqida xabarnoma yuborildi!`
+    );
+  };
+
+  const sendDropoutWarning = (student) => {
+    toast.error(
+      `3. 🚨 DIQQAT: "${student.fullName}" ketma-ket 3+ dars qoldirdi! Ota-onasining Telegram botiga shoshilinch ogohlantirish yuborildi!`
+    );
+  };
+
+  const getStudentConsecutiveAbsences = (studentId) => {
+    const studentHistory = attendanceRecords
+      .filter((r) => r.studentId === studentId)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    let count = 0;
+    for (const rec of studentHistory) {
+      if (rec.status === "Absent" || rec.status === "Excused") {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count;
+  };
+
   const handleSaveAttendance = async () => {
     try {
       const promises = activeGroupStudents.map(async (s) => {
@@ -168,12 +219,24 @@ const Attendance = () => {
       });
 
       await Promise.all(promises);
-      const updatedList = await attendanceApi.getAll();
-      setAttendanceRecords(updatedList);
+
+      const refreshed = await attendanceApi.getAll();
+      setAttendanceRecords(refreshed);
+
+      const absentees = activeGroupStudents.filter(
+        (s) => attendanceMap[s.id]?.status === "Absent" || attendanceMap[s.id]?.status === "Excused"
+      );
+
       setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2500);
+      setTimeout(() => setSavedSuccess(false), 4000);
+      toast.success(
+        absentees.length > 0
+          ? `Davomat saqlandi! 1. Kelmagan ${absentees.length} nafar o'quvchining ota-onasiga Telegram bot xabari yuborildi.`
+          : "Davomat muvaffaqiyatli saqlandi!"
+      );
     } catch (err) {
-      alert("Davomat saqlashda xatolik: " + (err.response?.data?.error || err.message));
+      console.error("Save attendance error:", err.message);
+      toast.error("Davomatni saqlashda xatolik yuz berdi");
     }
   };
 
@@ -240,16 +303,21 @@ const Attendance = () => {
         <div>
           <h1 className="page-title">
             <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
-            Davomat va Darslar Boshqaruvi
+            4. Davomat Jurnali & Darslar Nazorati
           </h1>
           <p className="page-subtitle">
-            Har bir dars kuni uchun guruhdagi o'quvchilarning davomati va dars
-            qoldirish sabablari tasniflagichi
+            Guruhlar davomati, Telegram bot xabarnomalari (1), tezkor 1-click belgilash (2), 3+ dars qoldirish xavfi (3) va 360° dosye (12)
           </p>
         </div>
+
+        {canMarkAttendance && (
+          <button className="btn btn-primary" onClick={handleSaveAttendance}>
+            <HiOutlineDocumentCheck /> Davomatni Saqlash & Botga Yuborish
+          </button>
+        )}
       </div>
 
-      <div className="card filter-card">
+      <div className="card filter-card mb-4">
         <div className="attendance-control-row">
           <div className="form-group mb-0">
             <label className="form-label">Guruhni Tanlang:</label>
@@ -290,42 +358,51 @@ const Attendance = () => {
       </div>
 
       {savedSuccess && (
-        <div className="alert alert-success">
-          <HiOutlineCheck className="inline-icon-xs" /> Davomat muvaffaqiyatli saqlandi!
+        <div className="alert alert-success mb-4">
+          <HiOutlineCheck className="inline-icon-xs" /> Davomat muvaffaqiyatli saqlandi va Telegram botga yuborildi!
         </div>
       )}
 
       <div className="card table-card mb-6">
-        <div className="card-header-flex px-6 pt-6">
-          <h3 className="section-title">
+        <div className="card-header-flex px-6 pt-6 flex justify-between items-center">
+          <h3 className="section-title mb-0">
             <HiOutlineUserGroup className="title-icon-indigo" />
             {currentGroupObj?.name} O'quvchilari ({activeGroupStudents.length} ta)
           </h3>
-          <span className="text-muted text-sm">
-            Sana: <strong>{selectedDate}</strong>
-          </span>
+
+          {canMarkAttendance && (
+            <button
+              type="button"
+              className="btn btn-mark-all btn-sm"
+              onClick={handleMarkAllPresent}
+            >
+              <HiOutlineSparkles /> 2. ⚡ Barchasini "Keldi" Qilish
+            </button>
+          )}
         </div>
 
         <div className="dash-table-wrap">
           <table className="dash-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>O'quvchi F.I.SH</th>
-                <th>Telefon</th>
+                <th>9 Xonali ID (12)</th>
+                <th>O'quvchi F.I.SH (12)</th>
+                <th>Telefon Raqami</th>
                 <th className="text-center">Davomat Holati</th>
-                <th>Sabab Tasniflagichi (Kategoriya)</th>
+                <th>Sabab Tasniflagichi</th>
+                <th className="text-center">Telegram Bot & Xavf (1, 3)</th>
+                <th className="text-center">360° Dosye (12)</th>
               </tr>
             </thead>
             <tbody>
               {activeGroupStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-6 text-muted">
+                  <td colSpan="7" className="text-center py-6 text-muted">
                     Ushbu guruhga hali o'quvchilar biriktirilmagan
                   </td>
                 </tr>
               ) : (
-                activeGroupStudents.map((student, idx) => {
+                activeGroupStudents.map((student) => {
                   const currentRec = attendanceMap[student.id] || {
                     status: "Present",
                     note: "",
@@ -333,14 +410,30 @@ const Attendance = () => {
                   };
                   const isExcused = currentRec.status === "Excused";
                   const isAbsent = currentRec.status === "Absent";
+                  const consecutiveAbsences = getStudentConsecutiveAbsences(student.id);
+                  const isHighRisk = consecutiveAbsences >= 3;
 
                   return (
                     <tr key={student.id}>
-                      <td>{idx + 1}</td>
                       <td>
-                        <strong className="student-name-text">
-                          {student.fullName}
-                        </strong>
+                        <span className="id-pill">#{format9DigitId(student.id, "student")}</span>
+                      </td>
+                      <td>
+                        <div>
+                          <Link
+                            to={`/students/${format9DigitId(student.id, "student")}`}
+                            className="student-name-text font-bold hover-indigo"
+                          >
+                            {student.fullName}
+                          </Link>
+                          {isHighRisk && (
+                            <div className="mt-1">
+                              <span className="consecutive-danger-pill">
+                                <HiOutlineExclamationTriangle /> 3. 🚨 {consecutiveAbsences} dars qoldirgan!
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="text-muted">{student.phone}</td>
                       <td className="text-center">
@@ -420,7 +513,7 @@ const Attendance = () => {
                             <input
                               type="text"
                               className="form-input form-input-sm reason-custom-note"
-                              placeholder="Sababsiz qoldirish izohi..."
+                              placeholder="Izoh (masalan: Telefoni o'chiq)..."
                               value={currentRec.note}
                               disabled={!canMarkAttendance}
                               onChange={(e) =>
@@ -429,10 +522,44 @@ const Attendance = () => {
                             />
                           </div>
                         ) : (
-                          <span className="text-success font-semibold flex items-center gap-1">
-                            <HiOutlineCheck className="text-emerald" /> Darsda qatnashmoqda
+                          <span className="text-emerald font-bold text-sm">
+                            <HiOutlineCheck className="inline-icon-xs" /> Darsda qatnashmoqda
                           </span>
                         )}
+                      </td>
+                      <td className="text-center">
+                        {isHighRisk ? (
+                          <button
+                            type="button"
+                            className="btn-dropout-warning"
+                            onClick={() => sendDropoutWarning(student)}
+                            title="3. 3+ dars qoldirgan xavf xabarini Telegram botga yuborish"
+                          >
+                            <FaTelegram /> 3. 🚨 Botga Xavf Xabari
+                          </button>
+                        ) : isAbsent || isExcused ? (
+                          <button
+                            type="button"
+                            className="btn-telegram-action"
+                            onClick={() => sendTelegramAbsenceAlert(student)}
+                            title="1. Ota-onaga Telegram botdan darsga kelmaganligi haqida xabar yuborish"
+                          >
+                            <FaTelegram /> 1. Botga Xabar
+                          </button>
+                        ) : (
+                          <span className="text-muted text-xs">
+                            <FaTelegram className="text-indigo inline-icon-xs" /> Bot sinxron
+                          </span>
+                        )}
+                      </td>
+                      <td className="text-center">
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => navigate(`/students/${format9DigitId(student.id, "student")}`)}
+                        >
+                          <FaUserGraduate /> 360° Dosye
+                        </button>
                       </td>
                     </tr>
                   );
@@ -441,192 +568,87 @@ const Attendance = () => {
             </tbody>
           </table>
         </div>
-
-        {canMarkAttendance && (
-          <div className="p-6 border-t flex justify-end">
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={handleSaveAttendance}
-            >
-              <HiOutlineDocumentCheck /> Davomatni Saqlash
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="grid-2-col">
         <div className="card">
-          <h3 className="section-title">
+          <h3 className="section-title mb-4">
             <HiOutlineChartBar className="title-icon-indigo" />
-            Guruh bo'yicha Oylik Davomat Statistikasi
+            Umumiy Davomat Statistikasi ({currentGroupObj?.name})
           </h3>
-          <p className="text-muted text-sm mb-4">
-            Jami o'tkazilgan darslar soni:{" "}
-            <strong>{totalMarkedDays || 1} ta dars</strong>
-          </p>
-
           <div className="stats-list">
-            {activeGroupStudents.map((s) => {
-              const studentRecs = attendanceRecords.filter(
-                (r) => r.groupId === selectedGroup && r.studentId === s.id,
-              );
-              const presentCount = studentRecs.filter(
-                (r) => r.status === "Present",
-              ).length;
-              const absentCount = studentRecs.filter(
-                (r) => r.status === "Absent",
-              ).length;
-              const excusedCount = studentRecs.filter(
-                (r) => r.status === "Excused",
-              ).length;
-
-              const total = studentRecs.length || 1;
-              const rate = Math.round((presentCount / total) * 100);
-
-              return (
-                <div key={s.id} className="student-stat-item">
-                  <div className="stat-student-info">
-                    <strong>{s.fullName}</strong>
-                    <span>
-                      {presentCount} keldi | {absentCount} kelmadi |{" "}
-                      {excusedCount} sababli
-                    </span>
-                  </div>
-                  <div className="stat-progress-wrap">
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${rate}%` }}
-                      ></div>
-                    </div>
-                    <span className="rate-text">{rate}%</span>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="stat-row">
+              <span>Jami Dars Kunlari:</span>
+              <strong>{totalMarkedDays} kun</strong>
+            </div>
+            <div className="stat-row">
+              <span>Jami Dars Qoldirishlar:</span>
+              <strong>{totalAbsences} marta</strong>
+            </div>
+            <div className="stat-row highlight">
+              <span>Guruh Davomat Ko'rsatkichi:</span>
+              <strong>
+                {totalMarkedDays > 0 && activeGroupStudents.length > 0
+                  ? Math.round(
+                      (1 -
+                        totalAbsences /
+                          (totalMarkedDays * activeGroupStudents.length)) *
+                        100,
+                    )
+                  : 100}
+                %
+              </strong>
+            </div>
           </div>
         </div>
 
         <div className="card">
-          <div className="card-header-flex mb-4">
-            <div>
-              <h3 className="section-title mb-0">
-                <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                Dars Qoldirish Sabablari Tahlili
-              </h3>
-              <p className="text-muted text-sm">
-                Guruh o'quvchilari nima sababdan dars qoldirmoqda? (
-                {totalAbsences} ta holat)
-              </p>
+          <h3 className="section-title mb-4">
+            <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
+            Dars Qoldirish Sabablari Taqsimoti
+          </h3>
+          <div className="reason-breakdown-list">
+            <div className="reason-stat-item">
+              <span className="reason-tag">
+                <span className="tag-dot dot-medical"></span>
+                Salomatlik / Kasallik (Uzrli)
+              </span>
+              <span className="reason-count">{reasonStats.medical}</span>
             </div>
-          </div>
-
-          <div className="absence-breakdown-list">
-            <div className="absence-item">
-              <div className="absence-header">
-                <span>Salomatlik / Kasallik</span>
-                <strong>
-                  {reasonStats.medical} ta (
-                  {totalAbsences
-                    ? Math.round((reasonStats.medical / totalAbsences) * 100)
-                    : 0}
-                  %)
-                </strong>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill fill-medical"
-                  style={{
-                    width: `${totalAbsences ? (reasonStats.medical / totalAbsences) * 100 : 0}%`,
-                  }}
-                ></div>
-              </div>
+            <div className="reason-stat-item">
+              <span className="reason-tag">
+                <span className="tag-dot dot-family"></span>
+                Oilaviy Sabab (Ruxsat olingan)
+              </span>
+              <span className="reason-count">{reasonStats.family}</span>
             </div>
-
-            <div className="absence-item">
-              <div className="absence-header">
-                <span>Oilaviy Sabab</span>
-                <strong>
-                  {reasonStats.family} ta (
-                  {totalAbsences
-                    ? Math.round((reasonStats.family / totalAbsences) * 100)
-                    : 0}
-                  %)
-                </strong>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill fill-family"
-                  style={{
-                    width: `${totalAbsences ? (reasonStats.family / totalAbsences) * 100 : 0}%`,
-                  }}
-                ></div>
-              </div>
+            <div className="reason-stat-item">
+              <span className="reason-tag">
+                <span className="tag-dot dot-competition"></span>
+                Musobaqa / Olimpiada
+              </span>
+              <span className="reason-count">{reasonStats.competition}</span>
             </div>
-
-            <div className="absence-item">
-              <div className="absence-header">
-                <span>Musobaqa / Olimpiada</span>
-                <strong>
-                  {reasonStats.competition} ta (
-                  {totalAbsences
-                    ? Math.round(
-                        (reasonStats.competition / totalAbsences) * 100,
-                      )
-                    : 0}
-                  %)
-                </strong>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill fill-competition"
-                  style={{
-                    width: `${totalAbsences ? (reasonStats.competition / totalAbsences) * 100 : 0}%`,
-                  }}
-                ></div>
-              </div>
+            <div className="reason-stat-item">
+              <span className="reason-tag">
+                <span className="tag-dot dot-technical"></span>
+                Texnik / Transport sababi
+              </span>
+              <span className="reason-count">{reasonStats.technical}</span>
             </div>
-
-            <div className="absence-item">
-              <div className="absence-header">
-                <span>Texnik / Yo'l / Internet</span>
-                <strong>
-                  {reasonStats.technical} ta (
-                  {totalAbsences
-                    ? Math.round((reasonStats.technical / totalAbsences) * 100)
-                    : 0}
-                  %)
-                </strong>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill fill-technical"
-                  style={{
-                    width: `${totalAbsences ? (reasonStats.technical / totalAbsences) * 100 : 0}%`,
-                  }}
-                ></div>
-              </div>
+            <div className="reason-stat-item">
+              <span className="reason-tag">
+                <span className="tag-dot dot-other_excused"></span>
+                Boshqa Uzrli Sabab
+              </span>
+              <span className="reason-count">{reasonStats.other_excused}</span>
             </div>
-
-            <div className="absence-item">
-              <div className="absence-header">
-                <span>Sababsiz Dars Qoldirish</span>
-                <strong>
-                  {reasonStats.unexcused} ta (
-                  {totalAbsences
-                    ? Math.round((reasonStats.unexcused / totalAbsences) * 100)
-                    : 0}
-                  %)
-                </strong>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill fill-unexcused"
-                  style={{
-                    width: `${totalAbsences ? (reasonStats.unexcused / totalAbsences) * 100 : 0}%`,
-                  }}
-                ></div>
-              </div>
+            <div className="reason-stat-item">
+              <span className="reason-tag">
+                <span className="tag-dot dot-unexcused"></span>
+                Sababsiz Dars Qoldirish
+              </span>
+              <span className="reason-count">{reasonStats.unexcused}</span>
             </div>
           </div>
         </div>

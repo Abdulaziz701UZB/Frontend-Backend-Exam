@@ -18,6 +18,26 @@
   margin-left: auto;
 }
 
+.attendance-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-mark-all {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+.btn-mark-all:hover {
+  background: #059669 !important;
+  transform: translateY(-1px);
+}
+
 .attendance-toggle-group {
   display: inline-flex;
   background: #f1f5f9;
@@ -140,6 +160,66 @@
   font-size: 13px !important;
 }
 
+.btn-telegram-action {
+  background: #e0e7ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+  font-weight: 700;
+  font-size: 11.5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-telegram-action:hover {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+.consecutive-danger-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fda4af;
+  animation: pulseDanger 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseDanger {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.15); }
+}
+
+.btn-dropout-warning {
+  background: #f43f5e;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-dropout-warning:hover {
+  background: #be123c;
+}
+
 .grid-2-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -149,112 +229,95 @@
 .stats-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
-.student-stat-item {
+.stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
   background: #f8fafc;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  font-size: 13.5px;
 }
 
-.stat-student-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-student-info strong {
-  font-size: 14px;
+.stat-row strong {
   color: #0f172a;
+  font-size: 15px;
 }
 
-.stat-student-info span {
-  font-size: 12px;
-  color: #64748b;
+.stat-row.highlight {
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
 }
 
-.stat-progress-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 220px;
+.stat-row.highlight strong {
+  color: #1d4ed8;
 }
 
-.progress-bar {
-  flex: 1;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #10b981, #34d399);
-  border-radius: 4px;
-}
-
-.absence-breakdown-list {
+.reason-breakdown-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
-.absence-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.absence-header {
+.reason-stat-item {
   display: flex;
   justify-content: space-between;
-  font-size: 13.5px;
-  color: #334155;
-  font-weight: 500;
-}
-
-.absence-header strong {
-  color: #0f172a;
-}
-
-.fill-medical {
-  background: #3b82f6 !important;
-}
-
-.fill-family {
-  background: #8b5cf6 !important;
-}
-
-.fill-competition {
-  background: #f59e0b !important;
-}
-
-.fill-technical {
-  background: #06b6d4 !important;
-}
-
-.fill-unexcused {
-  background: #ef4444 !important;
-}
-
-.rate-text {
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
   font-size: 13px;
-  font-weight: 800;
-  color: #0f172a;
-  width: 40px;
-  text-align: right;
+  background: #f8fafc;
 }
 
-@media (max-width: 992px) {
+.reason-tag {
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-medical { background: #10b981; }
+.dot-family { background: #3b82f6; }
+.dot-competition { background: #8b5cf6; }
+.dot-technical { background: #f59e0b; }
+.dot-other_excused { background: #64748b; }
+.dot-unexcused { background: #ef4444; }
+
+.reason-count {
+  font-weight: 700;
+  color: #0f172a;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
   .grid-2-col {
     grid-template-columns: 1fr;
   }
 
+  .reason-categorizer-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reason-select {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
   .attendance-control-row {
     flex-direction: column;
     align-items: stretch;
@@ -262,65 +325,18 @@
 
   .group-info-pill {
     margin-left: 0;
-    justify-content: space-between;
-  }
-
-  .stat-progress-wrap {
-    width: 150px;
-  }
-}
-
-@media (max-width: 640px) {
-  .attendance-toggle-group {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .attendance-toggle-group {
+    width: 100%;
   }
 
   .att-btn {
-    padding: 6px 8px;
-    font-size: 11px;
     flex: 1;
     justify-content: center;
-  }
-
-  .reason-categorizer-box {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .attendance-absent-pill,
-  .reason-select,
-  .reason-custom-note {
-    height: 34px;
-    min-height: 34px;
-    font-size: 12px !important;
-  }
-
-  .reason-select {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .reason-custom-note {
-    min-width: 100%;
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .group-info-pill {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .student-stat-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .stat-progress-wrap {
-    width: 100%;
+    padding: 6px 8px;
+    font-size: 11.5px;
   }
 }
