@@ -38,18 +38,18 @@
 }
 
 .brand-logo-wrap {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   overflow: hidden;
-  padding: 4px;
+  padding: 3px;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
 }
 
 .brand-logo-img {
@@ -61,11 +61,11 @@
 }
 
 .brand-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 900;
   color: #f8fafc;
   margin: 0;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .brand-subtitle {
