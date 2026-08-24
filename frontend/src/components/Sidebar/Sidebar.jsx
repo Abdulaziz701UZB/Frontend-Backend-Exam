@@ -52,9 +52,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className={`role-badge role-${currentRole}`}>
           <span className="role-dot"></span>
           <span className="role-name">
-            {isAdmin && <><FaCrown style={{ marginRight: 6 }} /> Administrator</>}
-            {isTeacher && <><FaChalkboardUser style={{ marginRight: 6 }} /> O'qituvchi Panel</>}
-            {isStudent && <><FaGraduationCap style={{ marginRight: 6 }} /> O'quvchi Kabineti</>}
+            {isAdmin && <><FaCrown className="inline-icon-sm" /> Administrator</>}
+            {isTeacher && <><FaChalkboardUser className="inline-icon-sm" /> O'qituvchi Panel</>}
+            {isStudent && <><FaGraduationCap className="inline-icon-sm" /> O'quvchi Kabineti</>}
           </span>
         </div>
 
@@ -70,7 +70,18 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineSquares2X2 /></span>
-            <span className="link-text">Dashboard (Boshqaruv)</span>
+            <span className="link-text">1. Dashboard</span>
+          </NavLink>
+
+          <NavLink
+            to="/students"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
+            onClick={onClose}
+          >
+            <span className="link-icon"><FaUserGraduate /></span>
+            <span className="link-text">2. O'quvchilar Boshqaruvi</span>
           </NavLink>
 
           <NavLink
@@ -81,18 +92,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineAcademicCap /></span>
-            <span className="link-text">1. Kurslar va Guruhlar</span>
-          </NavLink>
-
-          <NavLink
-            to="/students"
-            className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""}`
-            }
-            onClick={onClose}
-          >
-            <span className="link-icon"><HiOutlineUserGroup /></span>
-            <span className="link-text">2. O'quvchilar</span>
+            <span className="link-text">3. Kurslar va Guruhlar</span>
           </NavLink>
 
           <NavLink
@@ -103,18 +103,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineClipboardDocumentCheck /></span>
-            <span className="link-text">3. Davomat va Darslar</span>
-          </NavLink>
-
-          <NavLink
-            to="/payments"
-            className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""}`
-            }
-            onClick={onClose}
-          >
-            <span className="link-icon"><HiOutlineCreditCard /></span>
-            <span className="link-text">4. To'lovlar va Moliya</span>
+            <span className="link-text">4. Davomat (Journal)</span>
           </NavLink>
 
           <NavLink
@@ -124,19 +113,30 @@ const Sidebar = ({ isOpen, onClose }) => {
             }
             onClick={onClose}
           >
-            <span className="link-icon"><HiOutlineUsers /></span>
+            <span className="link-icon"><FaChalkboardUser /></span>
             <span className="link-text">5. O'qituvchilar</span>
           </NavLink>
 
           <NavLink
-            to="/exams"
+            to="/payments"
             className={({ isActive }) =>
               `sidebar-link ${isActive ? "active" : ""}`
             }
             onClick={onClose}
           >
-            <span className="link-icon"><HiOutlineTrophy /></span>
-            <span className="link-text">6. Imtihonlar & Baholar</span>
+            <span className="link-icon"><HiOutlineBanknotes /></span>
+            <span className="link-text">6. To'lovlar & Kassa</span>
+          </NavLink>
+
+          <NavLink
+            to="/leads"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
+            onClick={onClose}
+          >
+            <span className="link-icon"><HiOutlineUserPlus /></span>
+            <span className="link-text">7. Lidlar (Lid Management)</span>
           </NavLink>
 
           <NavLink
@@ -147,18 +147,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineBookOpen /></span>
-            <span className="link-text">7. Uyga Vazifalar</span>
-          </NavLink>
-
-          <NavLink
-            to="/certificates"
-            className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""}`
-            }
-            onClick={onClose}
-          >
-            <span className="link-icon"><HiOutlineDocumentText /></span>
-            <span className="link-text">8. Sertifikatlar</span>
+            <span className="link-text">8. Vazifalar (Homework)</span>
           </NavLink>
 
           <NavLink
@@ -169,18 +158,18 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineBuildingOffice2 /></span>
-            <span className="link-text">9. Xonalar & Inventar</span>
+            <span className="link-text">9. Xonalar & Bandlik</span>
           </NavLink>
 
           <NavLink
-            to="/leads"
+            to="/certificates"
             className={({ isActive }) =>
               `sidebar-link ${isActive ? "active" : ""}`
             }
             onClick={onClose}
           >
-            <span className="link-icon"><HiOutlinePhoneArrowUpRight /></span>
-            <span className="link-text">10. Lidlar & Sales CRM</span>
+            <span className="link-icon"><HiOutlineSparkles /></span>
+            <span className="link-text">10. Sertifikatlar</span>
           </NavLink>
 
           <NavLink
@@ -191,7 +180,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <span className="link-icon"><HiOutlineStar /></span>
-            <span className="link-text">11. Fikrlar & 1-10 Baholash</span>
+            <span className="link-text">11. Fikrlar & NPS</span>
           </NavLink>
 
           <NavLink
@@ -201,7 +190,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             }
             onClick={onClose}
           >
-            <span className="link-icon"><HiOutlineSparkles /></span>
+            <span className="link-icon"><HiOutlineDocumentText /></span>
             <span className="link-text">12. Sinov Darslari</span>
           </NavLink>
 
@@ -212,7 +201,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             }
             onClick={onClose}
           >
-            <span className="link-icon" style={{ color: '#38bdf8' }}><FaTelegram /></span>
+            <span className="link-icon text-blue"><FaTelegram /></span>
             <span className="link-text">13. Telegram Bot & WebApp</span>
           </NavLink>
         </nav>

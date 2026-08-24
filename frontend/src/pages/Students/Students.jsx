@@ -197,7 +197,7 @@ const Students = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 8, color: '#4f46e5' }} />
+            <FaUserGraduate className="title-icon-indigo" />
             O'quvchilar Boshqaruvi
           </h1>
           <p className="page-subtitle">
@@ -245,7 +245,7 @@ const Students = () => {
 
       <div className="card table-card">
         {loading ? (
-          <div style={{ padding: 20 }}>
+          <div className="skeleton-wrap">
             <div className="skeleton skeleton-table-row"></div>
             <div className="skeleton skeleton-table-row"></div>
             <div className="skeleton skeleton-table-row"></div>
@@ -258,51 +258,58 @@ const Students = () => {
                 <tr>
                   <th>F.I.SH</th>
                   <th>Telefon Raqami</th>
-                  <th>Guruh</th>
-                  <th>Qo'shilgan Sana</th>
+                  <th>Guruhi</th>
                   <th>To'lov Holati</th>
-                  <th>Balans / Qarz</th>
-                  <th>Holat</th>
-                  {canManageStudents && <th className="text-center">Amallar</th>}
+                  <th>Balans</th>
+                  <th>Holati</th>
+                  {canManageStudents && (
+                    <th className="text-center">Harakatlar</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={canManageStudents ? 8 : 7} className="text-center py-6 text-muted">
-                      Mos keluvchi o'quvchilar topilmadi
+                    <td colSpan="7" className="text-center text-muted">
+                      Hech qanday o'quvchi topilmadi
                     </td>
                   </tr>
                 ) : (
                   filteredStudents.map((s) => (
                     <tr key={s.id}>
                       <td>
-                        <div className="student-name-col">
-                          <strong className="student-name-text">{s.fullName}</strong>
+                        <div className="student-name-cell">
+                          <span className="avatar-circle">
+                            <FaUserGraduate />
+                          </span>
+                          <span className="student-name-text">
+                            {s.fullName}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="phone-cell">
+                          <span className="user-phone">
+                            <HiOutlinePhone className="inline-icon-xs" /> {s.phone}
+                          </span>
                           {s.parentPhone && (
-                            <small className="text-muted flex items-center gap-1">
-                              Ota-ona: {s.parentPhone}
-                            </small>
+                            <span className="parent-phone">
+                              Ota-onasi: {s.parentPhone}
+                            </span>
                           )}
                         </div>
                       </td>
                       <td>
-                        <a href={`tel:${s.phone}`} className="phone-link">
-                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {s.phone}
-                        </a>
+                        <span className="group-tag-pill">{s.groupName}</span>
                       </td>
-                      <td>
-                        <span className="group-badge-pill">{s.groupName}</span>
-                      </td>
-                      <td>{s.joinDate || "2026-08-01"}</td>
                       <td>
                         <span
                           className={`status-pill pill-${(s.paymentStatus || "paid").toLowerCase()}`}
                         >
                           {s.paymentStatus === "Paid" ? (
-                            <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 2 }} /> To'langan</>
+                            <><HiOutlineCheckCircle className="inline-icon-xs" /> To'langan</>
                           ) : (
-                            <><HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 2 }} /> Qarzdor</>
+                            <><HiOutlineExclamationTriangle className="inline-icon-xs" /> Qarzdor</>
                           )}
                         </span>
                       </td>
@@ -371,22 +378,23 @@ const Students = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                <HiOutlineArrowsRightLeft style={{ verticalAlign: 'middle', marginRight: 6, color: '#4f46e5' }} />
-                Guruhlar O'rtasida O'tkazish (Transfer #18)
+                <HiOutlineArrowsRightLeft className="text-indigo" />
+                Guruhlar O'rtasida O'tkazish (Transfer)
               </h2>
               <button
                 type="button"
                 className="modal-close-btn"
                 onClick={() => setIsTransferModalOpen(false)}
+                aria-label="Yopish"
               >
                 <HiXMark />
               </button>
             </div>
 
             <form onSubmit={handleTransferSubmit}>
-              <div className="alert alert-info mb-4" style={{ background: '#e0e7ff', borderLeft: '4px solid #4f46e5', padding: '12px 16px', borderRadius: 8 }}>
-                <strong>O'quvchi:</strong> {transferringStudent.fullName} <br />
-                <strong>Hozirgi Guruhi:</strong> {transferringStudent.groupName}
+              <div className="transfer-info-banner">
+                <div><strong>O'quvchi:</strong> {transferringStudent.fullName}</div>
+                <div><strong>Hozirgi Guruhi:</strong> {transferringStudent.groupName}</div>
               </div>
 
               <div className="form-group">
@@ -439,7 +447,7 @@ const Students = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                <FaUserGraduate className="title-icon-indigo" />
                 {editingStudent
                   ? "O'quvchi Ma'lumotlarini Tahrirlash"
                   : "Yangi O'quvchi Ro'yxatdan O'tkazish"}

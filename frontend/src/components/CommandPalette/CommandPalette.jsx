@@ -118,7 +118,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {!q && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                <HiBolt style={{ verticalAlign: 'middle', marginRight: 4 }} /> TEZKOR BUYRUQLAR
+                <HiBolt className="inline-icon-xs text-amber" /> TEZKOR BUYRUQLAR
               </span>
               {quickActions.map((action, idx) => (
                 <div
@@ -126,7 +126,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
                   className="cmd-item"
                   onClick={() => handleSelect(action.path)}
                 >
-                  <span className="cmd-item-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="cmd-item-title">
                     {action.icon} {action.title}
                   </span>
                   <span className="cmd-item-arrow"><HiArrowRight /></span>
@@ -138,7 +138,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {filteredStudents.length > 0 && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                <FaUserGraduate style={{ verticalAlign: 'middle', marginRight: 4 }} /> O'QUVCHILAR ({filteredStudents.length})
+                <FaUserGraduate className="inline-icon-xs text-indigo" /> O'QUVCHILAR ({filteredStudents.length})
               </span>
               {filteredStudents.map((s) => (
                 <div
@@ -150,7 +150,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
                   <div className="cmd-item-text">
                     <strong>{s.fullName}</strong>
                     <small>
-                      {s.groupName} • <HiOutlinePhone style={{ verticalAlign: 'middle' }} /> {s.phone}
+                      {s.groupName} • <HiOutlinePhone className="inline-icon-xs" /> {s.phone}
                     </small>
                   </div>
                 </div>
@@ -161,7 +161,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {filteredGroups.length > 0 && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 4 }} /> GURUHLAR ({filteredGroups.length})
+                <HiOutlineAcademicCap className="inline-icon-xs text-indigo" /> GURUHLAR ({filteredGroups.length})
               </span>
               {filteredGroups.map((g) => (
                 <div
@@ -175,7 +175,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
                       {g.name} ({g.courseName})
                     </strong>
                     <small>
-                      <FaChalkboardUser style={{ verticalAlign: 'middle', marginRight: 2 }} /> {g.teacherName} • <HiOutlineMapPin style={{ verticalAlign: 'middle', marginRight: 2 }} /> {g.room}
+                      <FaChalkboardUser className="inline-icon-xs" /> {g.teacherName} • <HiOutlineMapPin className="inline-icon-xs" /> {g.room}
                     </small>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
           {filteredTeachers.length > 0 && (
             <div className="cmd-section">
               <span className="cmd-section-title">
-                <FaChalkboardUser style={{ verticalAlign: 'middle', marginRight: 4 }} /> O'QITUVCHILAR ({filteredTeachers.length})
+                <FaChalkboardUser className="inline-icon-xs text-blue" /> O'QITUVCHILAR ({filteredTeachers.length})
               </span>
               {filteredTeachers.map((t) => (
                 <div
@@ -198,7 +198,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
                   <div className="cmd-item-text">
                     <strong>{t.name}</strong>
                     <small>
-                      {t.subject} • <HiOutlinePhone style={{ verticalAlign: 'middle' }} /> {t.phone}
+                      {t.subject} • <HiOutlinePhone className="inline-icon-xs" /> {t.phone}
                     </small>
                   </div>
                 </div>
@@ -209,7 +209,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
 
         <div className="cmd-footer">
           <span>
-            <FaLightbulb style={{ verticalAlign: 'middle', marginRight: 4, color: '#f59e0b' }} />
+            <FaLightbulb className="inline-icon-xs text-amber" />
             Maslahat: Qidiruvni yopish uchun <code>ESC</code> yoki qayta{" "}
             <code>Ctrl + K</code> bosing
           </span>

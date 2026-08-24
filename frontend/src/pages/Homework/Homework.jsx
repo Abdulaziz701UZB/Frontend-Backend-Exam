@@ -107,7 +107,7 @@ const Homework = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineBookOpen style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineBookOpen className="title-icon-indigo" />
             7. Uyga Vazifalar va Topshiriqlar
           </h1>
           <p className="page-subtitle">
@@ -150,7 +150,7 @@ const Homework = () => {
                     <strong className="student-name-text">{h.title}</strong>
                   </td>
                   <td className="text-danger font-bold">
-                    <HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                    <HiOutlineClock className="inline-icon-xs" />
                     {h.deadline}
                   </td>
                   <td>

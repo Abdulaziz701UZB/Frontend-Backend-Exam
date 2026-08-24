@@ -240,7 +240,7 @@ const Groups = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineAcademicCap className="title-icon-indigo" />
             Kurslar va Guruhlar
           </h1>
           <p className="page-subtitle">
@@ -290,9 +290,9 @@ const Groups = () => {
 
       <div className="groups-grid">
         {loading ? (
-          <div className="skeleton-card" style={{ height: 260 }}></div>
+          <div className="skeleton-card skeleton-card-lg"></div>
         ) : filteredGroups.length === 0 ? (
-          <div className="card" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px 20px" }}>
+          <div className="card empty-state-card">
             <p className="text-muted">Guruhlar topilmadi</p>
           </div>
         ) : (

@@ -108,16 +108,16 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-page">
-        <div className="dashboard-welcome-banner skeleton" style={{ minHeight: 140 }}></div>
+        <div className="dashboard-welcome-banner skeleton skeleton-banner"></div>
         <div className="stats-grid">
-          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
-          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
-          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
-          <div className="stat-card skeleton" style={{ minHeight: 120 }}></div>
+          <div className="stat-card skeleton skeleton-stat"></div>
+          <div className="stat-card skeleton skeleton-stat"></div>
+          <div className="stat-card skeleton skeleton-stat"></div>
+          <div className="stat-card skeleton skeleton-stat"></div>
         </div>
         <div className="dashboard-grid-2">
-          <div className="card skeleton" style={{ minHeight: 280 }}></div>
-          <div className="card skeleton" style={{ minHeight: 280 }}></div>
+          <div className="card skeleton skeleton-dash-card"></div>
+          <div className="card skeleton skeleton-dash-card"></div>
         </div>
       </div>
     );
@@ -128,7 +128,7 @@ const Dashboard = () => {
       <div className="dashboard-welcome-banner">
         <div className="banner-text">
           <h2>
-            EduControl CRM Boshqaruv Markazi <HiRocketLaunch style={{ verticalAlign: 'middle', color: '#6366f1' }} />
+            EduControl CRM Boshqaruv Markazi <HiRocketLaunch className="banner-rocket-icon" />
           </h2>
           <p>
             O'quv markazingiz davomati, to'lovlari va dars jadvallarini real
@@ -296,7 +296,7 @@ const Dashboard = () => {
                 <div className="group-extra-col">
                   <span className="group-teacher-name">{g.teacherName}</span>
                   <span className="group-students-badge">
-                    <HiOutlineUser style={{ verticalAlign: 'middle', marginRight: 3 }} /> {g.currentStudents || g.current_students || 12}/{g.maxStudents || g.max_students || 15}
+                    <HiOutlineUser className="inline-icon-xs" /> {g.currentStudents || g.current_students || 12}/{g.maxStudents || g.max_students || 15}
                   </span>
                 </div>
               </div>
@@ -325,7 +325,7 @@ const Dashboard = () => {
                       {d.groupName}
                     </span>
                     <a href={`tel:${d.phone}`} className="debtor-phone-link">
-                      <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 3 }} /> {d.phone}
+                      <HiOutlinePhone className="inline-icon-xs" /> {d.phone}
                     </a>
                   </div>
                   <div className="debtor-amount">
@@ -345,7 +345,7 @@ const Dashboard = () => {
           <div className="analytics-header">
             <div>
               <h3 className="section-title">
-                <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                <HiOutlineChartBar className="inline-icon-sm text-indigo" />
                 Moliyaviy Xavf & Xarajatlar Tahlili
               </h3>
               <p className="analytics-subtitle">
@@ -363,7 +363,7 @@ const Dashboard = () => {
           <div className="analytics-details-grid">
             <div className="analytics-col">
               <h4 className="sub-heading">
-                <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                <HiOutlineChartBar className="inline-icon-xs text-indigo" />
                 Xarajatlar Taqsimoti:
               </h4>
               <div className="breakdown-list">
@@ -388,7 +388,7 @@ const Dashboard = () => {
 
             <div className="analytics-col">
               <h4 className="sub-heading">
-                <HiOutlineShieldCheck style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                <HiOutlineShieldCheck className="inline-icon-xs text-indigo" />
                 Moliyaviy Xavf & Xatar Indikatorlari:
               </h4>
               <div className="risk-indicators-list">
@@ -415,7 +415,7 @@ const Dashboard = () => {
         <div className="student-personal-grid">
           <div className="card">
             <h3 className="section-title">
-              <HiOutlineAcademicCap style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              <HiOutlineAcademicCap className="inline-icon-sm text-indigo" />
               Mening Guruhim
             </h3>
             <div className="student-group-box">
@@ -439,7 +439,7 @@ const Dashboard = () => {
 
           <div className="card">
             <h3 className="section-title">
-              <HiOutlineCreditCard style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              <HiOutlineCreditCard className="inline-icon-sm text-indigo" />
               To'lov Holatim
             </h3>
             <div className="student-payment-box">
@@ -447,9 +447,9 @@ const Dashboard = () => {
                 className={`status-pill pill-${(studentData.paymentStatus || "paid").toLowerCase()}`}
               >
                 {studentData.paymentStatus === "Paid" ? (
-                  <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 4 }} /> To'langan (Qarzsiz)</>
+                  <><HiOutlineCheckCircle className="inline-icon-xs" /> To'langan (Qarzsiz)</>
                 ) : (
-                  <><HiOutlineExclamationTriangle style={{ verticalAlign: 'middle', marginRight: 4 }} /> Qarzdorlik Mavjud</>
+                  <><HiOutlineExclamationTriangle className="inline-icon-xs" /> Qarzdorlik Mavjud</>
                 )}
               </div>
               <p className="balance-info">

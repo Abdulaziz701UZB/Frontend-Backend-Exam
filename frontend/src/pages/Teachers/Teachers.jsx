@@ -168,7 +168,7 @@ const Teachers = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <FaChalkboardUser style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <FaChalkboardUser className="title-icon-indigo" />
             5. O'qituvchilar va Xodimlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
@@ -226,7 +226,7 @@ const Teachers = () => {
                     <span className="group-tag-pill">{t.subject}</span>
                   </td>
                   <td>
-                    <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} />
+                    <HiOutlinePhone className="inline-icon-xs" />
                     {t.phone}
                   </td>
                   <td>{t.experience}</td>

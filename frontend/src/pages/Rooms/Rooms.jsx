@@ -134,7 +134,7 @@ const Rooms = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineBuildingOffice2 style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineBuildingOffice2 className="title-icon-indigo" />
             9. Xonalar & Bandlik Matritsasi
           </h1>
           <p className="page-subtitle">
@@ -194,7 +194,7 @@ const Rooms = () => {
         <div className="section-header-flex mb-4">
           <div>
             <h3 className="section-title mb-1">
-              <HiOutlineCalendarDays style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              <HiOutlineCalendarDays className="title-icon-indigo" />
               Xonalar Haftalik Dars Jadvali & Bandlik Holati
             </h3>
             <p className="text-muted text-sm m-0">
@@ -215,7 +215,7 @@ const Rooms = () => {
                   <div className="room-title-wrap">
                     <h4 className="room-card-title">{r.name}</h4>
                     <span className="room-capacity-badge">
-                      <HiOutlineUserGroup style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                      <HiOutlineUserGroup className="inline-icon-xs" />
                       Maksimal sig'im: {r.capacity} o'quvchi
                     </span>
                   </div>
@@ -309,7 +309,7 @@ const Rooms = () => {
                     </td>
                     <td>
                       <span className="text-indigo">
-                        <HiOutlineComputerDesktop style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                        <HiOutlineComputerDesktop className="inline-icon-xs" />
                         {r.computersCount} ta
                       </span>
                     </td>
@@ -357,7 +357,7 @@ const Rooms = () => {
             <div className="modal-header">
               <div>
                 <h2>
-                  <HiOutlineCalendarDays style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                  <HiOutlineCalendarDays className="title-icon-indigo" />
                   {selectedTimetableRoom.room.name} — Haftalik Dars Jadvali
                 </h2>
                 <p className="text-muted text-sm m-0 mt-1">
@@ -394,7 +394,7 @@ const Rooms = () => {
                           </>
                         ) : (
                           <strong className="text-emerald">
-                            <HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 2 }} /> Bo'sh
+                            <HiOutlineCheckCircle className="inline-icon-xs" /> Bo'sh
                           </strong>
                         )}
                       </div>
@@ -422,7 +422,7 @@ const Rooms = () => {
                           </>
                         ) : (
                           <strong className="text-emerald">
-                            <HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 2 }} /> Bo'sh
+                            <HiOutlineCheckCircle className="inline-icon-xs" /> Bo'sh
                           </strong>
                         )}
                       </div>

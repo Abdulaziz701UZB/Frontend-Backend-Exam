@@ -191,15 +191,15 @@ const Reviews = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineChatBubbleLeftRight style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            Mijozlar Fikr-Mulohazalari va 1-10 Baholash (NPS)
+            <HiOutlineChatBubbleLeftRight className="title-icon-indigo" />
+            11. Mijozlar Fikr-Mulohazalari va NPS
           </h1>
           <p className="page-subtitle">
             O'quvchilar va ota-onalarning ta'lim sifati, o'qituvchilar va sharoitlar bo'yicha 1 dan 10 gacha qo'ygan baholari monitoringi
           </p>
         </div>
 
-        <button className="btn btn-primary btn-lg" onClick={openCreateModal}>
+        <button className="btn btn-primary" onClick={openCreateModal}>
           <HiOutlinePlus /> Yangi Fikr Qo'shish
         </button>
       </div>
@@ -410,7 +410,7 @@ const Reviews = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                <HiOutlineChatBubbleLeftRight style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                <HiOutlineChatBubbleLeftRight className="title-icon-indigo" />
                 {modalMode === "create" ? "Yangi Fikr-Mulohaza Qo'shish" : "Fikrni Tahrirlash"}
               </h2>
               <button

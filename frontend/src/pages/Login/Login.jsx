@@ -57,7 +57,7 @@ const Login = () => {
         <form onSubmit={handleLoginSubmit} className="login-form">
           <div className="login-form-group">
             <label className="login-form-label">
-              <HiOutlineDevicePhoneMobile style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              <HiOutlineDevicePhoneMobile className="inline-icon-xs" />
               Telefon raqami yoki Email:
             </label>
             <div className="login-input-wrap">
@@ -75,7 +75,7 @@ const Login = () => {
 
           <div className="login-form-group">
             <label className="login-form-label">
-              <HiLockClosed style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              <HiLockClosed className="inline-icon-xs" />
               Tizim paroli:
             </label>
             <div className="login-password-input-wrap">

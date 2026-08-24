@@ -107,8 +107,8 @@ const Certificates = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineDocumentText style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            8. Sertifikatlar va Bitiruvchilar
+            <HiOutlineDocumentText className="title-icon-indigo" />
+            10. Sertifikatlar va Bitiruvchilar
           </h1>
           <p className="page-subtitle">
             QR-kodli raqamli sertifikatlar reestri va bitiruvchilar
@@ -156,7 +156,7 @@ const Certificates = () => {
                   </td>
                   <td>
                     <code className="text-indigo flex items-center gap-1">
-                      <HiOutlineQrCode style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                      <HiOutlineQrCode className="inline-icon-xs" />
                       {c.qrCode}
                     </code>
                   </td>

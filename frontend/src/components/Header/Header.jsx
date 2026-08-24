@@ -111,7 +111,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   </span>
                 </div>
                 <span className="header-date-text">
-                  <HiCalendarDays style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                  <HiCalendarDays className="inline-icon-xs" />
                   {formattedDate}
                 </span>
               </div>
@@ -197,7 +197,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
           <div className="modal-content card auth-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                <HiLockClosed style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                <HiLockClosed className="inline-icon-sm" />
                 {targetRole === "admin"
                   ? "Admin Paneli Paroli"
                   : targetRole === "teacher"

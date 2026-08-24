@@ -239,7 +239,7 @@ const Attendance = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineClipboardDocumentCheck style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineClipboardDocumentCheck className="title-icon-indigo" />
             Davomat va Darslar Boshqaruvi
           </h1>
           <p className="page-subtitle">
@@ -278,11 +278,11 @@ const Attendance = () => {
 
           <div className="group-info-pill">
             <span>
-              <HiOutlineMapPin style={{ verticalAlign: 'middle', marginRight: 3 }} />
+              <HiOutlineMapPin className="inline-icon-xs" />
               Xona: <strong>{currentGroupObj?.room}</strong>
             </span>
             <span>
-              <HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 3 }} />
+              <HiOutlineClock className="inline-icon-xs" />
               Vaqt: <strong>{currentGroupObj?.scheduleTime}</strong>
             </span>
           </div>
@@ -291,14 +291,14 @@ const Attendance = () => {
 
       {savedSuccess && (
         <div className="alert alert-success">
-          <HiOutlineCheck style={{ verticalAlign: 'middle', marginRight: 4 }} /> Davomat muvaffaqiyatli saqlandi!
+          <HiOutlineCheck className="inline-icon-xs" /> Davomat muvaffaqiyatli saqlandi!
         </div>
       )}
 
       <div className="card table-card mb-6">
         <div className="card-header-flex px-6 pt-6">
           <h3 className="section-title">
-            <HiOutlineUserGroup style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineUserGroup className="title-icon-indigo" />
             {currentGroupObj?.name} O'quvchilari ({activeGroupStudents.length} ta)
           </h3>
           <span className="text-muted text-sm">
@@ -430,7 +430,7 @@ const Attendance = () => {
                           </div>
                         ) : (
                           <span className="text-success font-semibold flex items-center gap-1">
-                            <HiOutlineCheck style={{ color: '#16a34a' }} /> Darsda qatnashmoqda
+                            <HiOutlineCheck className="text-emerald" /> Darsda qatnashmoqda
                           </span>
                         )}
                       </td>
@@ -457,7 +457,7 @@ const Attendance = () => {
       <div className="grid-2-col">
         <div className="card">
           <h3 className="section-title">
-            <HiOutlineChartBar style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineChartBar className="title-icon-indigo" />
             Guruh bo'yicha Oylik Davomat Statistikasi
           </h3>
           <p className="text-muted text-sm mb-4">

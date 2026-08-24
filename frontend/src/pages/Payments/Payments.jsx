@@ -187,11 +187,11 @@ const Payments = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineCreditCard style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineCreditCard className="title-icon-indigo" />
             To'lovlar va Moliya Boshqaruvi
           </h1>
           <p className="page-subtitle">
-            O'quv markazining oylik to'lovlari, to'lov usullari filtri (#12) va tushum hisoboti
+            O'quv markazining oylik to'lovlari, to'lov usullari filtri va tushum hisoboti
           </p>
         </div>
         {canManagePayments && (
@@ -262,10 +262,9 @@ const Payments = () => {
               </div>
 
               <select
-                className="form-select"
+                className="form-select filter-select-fixed"
                 value={filterMethod}
                 onChange={(e) => setFilterMethod(e.target.value)}
-                style={{ width: 200 }}
               >
                 <option value="all">Barcha To'lov Usullari</option>
                 <option value="click">Click</option>
@@ -280,7 +279,7 @@ const Payments = () => {
 
       <div className="card table-card">
         {loading ? (
-          <div style={{ padding: 20 }}>
+          <div className="skeleton-wrap">
             <div className="skeleton skeleton-table-row"></div>
             <div className="skeleton skeleton-table-row"></div>
             <div className="skeleton skeleton-table-row"></div>
@@ -385,7 +384,7 @@ const Payments = () => {
                       </td>
                       <td>
                         <a href={`tel:${d.phone}`} className="phone-link">
-                          <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} /> {d.phone}
+                          <HiOutlinePhone className="inline-icon-xs" /> {d.phone}
                         </a>
                       </td>
                       <td>{d.groupName}</td>
@@ -426,7 +425,7 @@ const Payments = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                <HiOutlineCreditCard style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                <HiOutlineCreditCard className="title-icon-indigo" />
                 {editingPayment ? "To'lovni Tahrirlash" : "Yangi To'lov Qabul Qilish"}
               </h2>
               <button

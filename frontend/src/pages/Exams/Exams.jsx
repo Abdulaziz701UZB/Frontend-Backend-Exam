@@ -112,7 +112,7 @@ const Exams = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineTrophy style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlineTrophy className="title-icon-indigo" />
             6. Imtihonlar va Baholash
           </h1>
           <p className="page-subtitle">
@@ -169,9 +169,9 @@ const Exams = () => {
                       className={`status-badge ${ex.status === "Completed" ? "badge-active" : "badge-finished"}`}
                     >
                       {ex.status === "Completed" ? (
-                        <><HiOutlineCheckCircle style={{ verticalAlign: 'middle', marginRight: 3 }} /> Yakunlangan</>
+                        <><HiOutlineCheckCircle className="inline-icon-xs" /> Yakunlangan</>
                       ) : (
-                        <><HiOutlineClock style={{ verticalAlign: 'middle', marginRight: 3 }} /> Kutilmoqda</>
+                        <><HiOutlineClock className="inline-icon-xs" /> Kutilmoqda</>
                       )}
                     </span>
                   </td>

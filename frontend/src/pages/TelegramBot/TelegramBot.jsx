@@ -171,7 +171,7 @@ const TelegramBot = () => {
         <div className="bot-card-form">
           <div className="form-group mb-0">
             <label className="form-label text-xs">
-              <HiOutlineKey style={{ verticalAlign: "middle", marginRight: 4 }} />
+              <HiOutlineKey className="inline-icon-xs" />
               BotFather Token (Bo'sh qoldirilgan - tokeningizni kiriting):
             </label>
             <input
@@ -187,7 +187,7 @@ const TelegramBot = () => {
 
           <div className="form-group mb-0">
             <label className="form-label text-xs">
-              <HiOutlineGlobeAlt style={{ verticalAlign: "middle", marginRight: 4 }} />
+              <HiOutlineGlobeAlt className="inline-icon-xs" />
               Bot Username:
             </label>
             <input
@@ -230,14 +230,8 @@ const TelegramBot = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <FaTelegram
-              style={{
-                verticalAlign: "middle",
-                marginRight: 8,
-                color: "#0284c7",
-              }}
-            />
-            4 ta Alohida Telegram Botlar Boshqaruvi
+            <FaTelegram className="title-icon-blue" />
+            13. 4 ta Alohida Telegram Botlar Boshqaruvi
           </h1>
           <p className="page-subtitle">
             Ota-onalar, O'quvchilar, O'qituvchilar va Bosh Admin uchun 4 ta mustaqil bot tokenlarini sozlash
@@ -247,17 +241,15 @@ const TelegramBot = () => {
 
       {alertSuccess && (
         <div className="alert alert-success">
-          <HiOutlineCheckCircle
-            style={{ verticalAlign: "middle", marginRight: 6 }}
-          />
+          <HiOutlineCheckCircle className="inline-icon-sm" />
           {alertSuccess}
         </div>
       )}
 
       <div className="bot-guide-card">
         <div className="flex items-center gap-2">
-          <HiOutlineInformationCircle style={{ fontSize: 22, color: "#38bdf8" }} />
-          <strong style={{ fontSize: 16 }}>BotFather dan 4 ta Bot ochish bo'yicha qisqa yo'riqnoma:</strong>
+          <HiOutlineInformationCircle className="bot-guide-header-icon" />
+          <strong className="bot-guide-title">BotFather dan 4 ta Bot ochish bo'yicha qisqa yo'riqnoma:</strong>
         </div>
         <div className="guide-steps-grid">
           <div className="guide-step-item">
@@ -303,7 +295,7 @@ const TelegramBot = () => {
           "icon-admin",
           <div className="form-group mb-0">
             <label className="form-label text-xs">
-              <FaCrown style={{ verticalAlign: "middle", marginRight: 4 }} />
+              <FaCrown className="inline-icon-xs" />
               Admin Telegram Chat ID:
             </label>
             <input
@@ -322,85 +314,84 @@ const TelegramBot = () => {
       <div className="telegram-grid-2">
         <div className="card">
           <h3 className="section-title">
-            <HiOutlineBellAlert
-              style={{ verticalAlign: "middle", marginRight: 6 }}
-            />
+            <HiOutlineBellAlert className="title-icon-indigo" />
             Avtomatik Xabarnoma Triggerlari
           </h3>
           <p className="text-muted text-sm mb-4">
-            Tegishli botlarga qaysi xabarlar avtomat borishini yoqing/o'chiring:
+            O'quv markazidagi muhim hodisalar yuz berganda botlar orqali avtomatik
+            yuboriladigan xabarlar
           </p>
 
-          <div className="auto-toggle-row">
-            <div className="auto-toggle-text">
-              <strong>Davomatda Ota-ona Botiga Xabar</strong>
-              <span>Farzand keldi/kelmadi belgilanganda Ota-onalar botiga 1 soniyada xabar boradi</span>
+          <div className="triggers-list">
+            <div className="trigger-item">
+              <div className="trigger-info">
+                <strong>To'lov qabul qilinganda kvitansiya</strong>
+                <p>Ota-ona va o'quvchiga darhol PDF / chek yuboriladi</p>
+              </div>
+              <button
+                type="button"
+                className={`switch-toggle ${
+                  botsConfig.autoNotifyPayment ? "active" : ""
+                }`}
+                onClick={() => handleToggle("autoNotifyPayment")}
+              >
+                <span className="switch-circle"></span>
+              </button>
             </div>
-            <button
-              type="button"
-              className={`switch-toggle ${
-                botsConfig.autoNotifyAttendance ? "active" : ""
-              }`}
-              onClick={() => handleToggle("autoNotifyAttendance")}
-            >
-              <span className="switch-circle"></span>
-            </button>
-          </div>
 
-          <div className="auto-toggle-row">
-            <div className="auto-toggle-text">
-              <strong>To'lov Kvitansiyasi (Chek)</strong>
-              <span>To'lov qilinganda Ota-onalar va O'quvchilar botiga chek boradi</span>
+            <div className="trigger-item">
+              <div className="trigger-info">
+                <strong>Davomatda "Kelmadi" belgilanganda</strong>
+                <p>Ota-onaga dars qoldirilgani haqida ogohlantirish</p>
+              </div>
+              <button
+                type="button"
+                className={`switch-toggle ${
+                  botsConfig.autoNotifyAbsence ? "active" : ""
+                }`}
+                onClick={() => handleToggle("autoNotifyAbsence")}
+              >
+                <span className="switch-circle"></span>
+              </button>
             </div>
-            <button
-              type="button"
-              className={`switch-toggle ${
-                botsConfig.autoNotifyPayment ? "active" : ""
-              }`}
-              onClick={() => handleToggle("autoNotifyPayment")}
-            >
-              <span className="switch-circle"></span>
-            </button>
-          </div>
 
-          <div className="auto-toggle-row">
-            <div className="auto-toggle-text">
-              <strong>Yangi Lid (Ariza) Signali</strong>
-              <span>Sayt yoki botdan yangi mijoz ariza berganda Admin Botiga xabar boradi</span>
+            <div className="trigger-item">
+              <div className="trigger-info">
+                <strong>Yangi Lid tushganda Admin botiga</strong>
+                <p>Sayt yoki telegramdan yangi murojaat tushsa admin xabardor bo'ladi</p>
+              </div>
+              <button
+                type="button"
+                className={`switch-toggle ${
+                  botsConfig.autoNotifyLead ? "active" : ""
+                }`}
+                onClick={() => handleToggle("autoNotifyLead")}
+              >
+                <span className="switch-circle"></span>
+              </button>
             </div>
-            <button
-              type="button"
-              className={`switch-toggle ${
-                botsConfig.autoNotifyLead ? "active" : ""
-              }`}
-              onClick={() => handleToggle("autoNotifyLead")}
-            >
-              <span className="switch-circle"></span>
-            </button>
-          </div>
 
-          <div className="auto-toggle-row">
-            <div className="auto-toggle-text">
-              <strong>Kechki Kunlik Moliyaviy Hisobot</strong>
-              <span>Har oqshom soat 21:00 da Admin Botiga kunlik tushum xulosasi yuboriladi</span>
+            <div className="trigger-item">
+              <div className="trigger-info">
+                <strong>Kunlik umumiy hisobot</strong>
+                <p>Har kuni 20:00 da markaz kunlik tushum va davomat xulosasi</p>
+              </div>
+              <button
+                type="button"
+                className={`switch-toggle ${
+                  botsConfig.autoNotifyDailyReport ? "active" : ""
+                }`}
+                onClick={() => handleToggle("autoNotifyDailyReport")}
+              >
+                <span className="switch-circle"></span>
+              </button>
             </div>
-            <button
-              type="button"
-              className={`switch-toggle ${
-                botsConfig.autoNotifyDailyReport ? "active" : ""
-              }`}
-              onClick={() => handleToggle("autoNotifyDailyReport")}
-            >
-              <span className="switch-circle"></span>
-            </button>
           </div>
         </div>
 
         <div className="card">
           <h3 className="section-title">
-            <HiOutlinePaperAirplane
-              style={{ verticalAlign: "middle", marginRight: 6 }}
-            />
+            <HiOutlinePaperAirplane className="title-icon-indigo" />
             Ommaviy Xabarnoma Yuborish (Broadcast)
           </h3>
 
@@ -446,15 +437,10 @@ const TelegramBot = () => {
 
       <div className="card">
         <h3 className="section-title">
-          <HiOutlineClock
-            style={{ verticalAlign: "middle", marginRight: 6 }}
-          />
+          <HiOutlineClock className="title-icon-indigo" />
           So'nggi Telegram Xabarlari Logi
         </h3>
-        <div
-          className="telegram-logs-wrap"
-          style={{ maxHeight: 280, overflowY: "auto" }}
-        >
+        <div className="telegram-logs-wrap">
           {logs.map((log) => {
             const tagClass =
               log.type === "PAYMENT"

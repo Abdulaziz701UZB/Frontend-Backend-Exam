@@ -192,15 +192,15 @@ const TrialLessons = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlineSparkles style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            Bepul Sinov Darslari va Konvertatsiya (Trial Lessons)
+            <HiOutlineSparkles className="title-icon-indigo" />
+            12. Bepul Sinov Darslari va Konvertatsiya (Trial Lessons)
           </h1>
           <p className="page-subtitle">
             Yangi qiziquvchilar uchun 1 martalik bepul ochiq sinov darslari grafigi va ularning guruhlarga yozilish konvertatsiyasi
           </p>
         </div>
 
-        <button className="btn btn-primary btn-lg" onClick={openCreateModal}>
+        <button className="btn btn-primary" onClick={openCreateModal}>
           <HiOutlinePlus /> Sinov Darsi Rejalashtirish
         </button>
       </div>
@@ -394,7 +394,7 @@ const TrialLessons = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                <HiOutlineSparkles style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                <HiOutlineSparkles className="title-icon-indigo" />
                 {modalMode === "create" ? "Yangi Sinov Darsi Rejalashtirish" : "Sinov Darsini Tahrirlash"}
               </h2>
               <button

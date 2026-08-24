@@ -107,7 +107,7 @@ const Leads = () => {
       <div className="page-header-flex">
         <div>
           <h1 className="page-title">
-            <HiOutlinePhoneArrowUpRight style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            <HiOutlinePhoneArrowUpRight className="title-icon-indigo" />
             10. Lidlar va Arizalar - Sales CRM
           </h1>
           <p className="page-subtitle">
@@ -148,7 +148,7 @@ const Leads = () => {
                     <strong className="student-name-text">{l.name}</strong>
                   </td>
                   <td>
-                    <HiOutlinePhone style={{ verticalAlign: 'middle', marginRight: 2 }} />
+                    <HiOutlinePhone className="inline-icon-xs" />
                     {l.phone}
                   </td>
                   <td>
