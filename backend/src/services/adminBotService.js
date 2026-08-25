@@ -17,8 +17,7 @@ const getMainMenuKeyboard = () => {
     keyboard: [
       [{ text: "📊 Bugungi Kassa & Tushum" }, { text: "🧾 Oxirgi Cheklar (To'lovlar)" }],
       [{ text: "👥 O'quvchilar Nazorati" }, { text: "📚 Faol Guruhlar" }],
-      [{ text: "⚠️ Qarzdorlar Ro'yxati" }, { text: "⚡ Yangi Lidlar & Arizalar" }],
-      [{ text: "🖥️ Tizim Holati & Server" }, { text: "🌐 CRM Panelga O'tish" }]
+      [{ text: "⚠️ Qarzdorlar Ro'yxati" }, { text: "⚡ Yangi Lidlar & Arizalar" }]
     ],
     resize_keyboard: true,
     persistent: true
@@ -47,17 +46,16 @@ const handleIncomingMessage = async (msg) => {
   const chatId = msg.chat.id;
   registeredAdminChatIds.add(chatId);
   const text = (msg.text || "").trim();
-  const userName = msg.from?.first_name || "Boshqaruvchi";
 
   if (text === "/start" || text === "/help" || text === "Bosh menyu") {
-    const welcomeText = `🚀 <b>VELNEX | Bosh Admin Boshqaruv Markazi</b>\n\n` +
-      `Assalomu alaykum, <b>${userName}</b>!\n` +
-      `Siz VELNEX o'quv markazi boshqaruv tizimi botiga muvaffaqiyatli ulandingiz.\n\n` +
-      `Ushbu bot orqali siz to'lovlar, cheklar, davomat, guruhlar va qarzdorliklarni to'liq nazorat qilasiz.\n\n` +
-      `<i>Quyidagi menyulardan birini tanlang:</i>`;
+    const welcomeText = `👋 <b>Assalomu alaykum, Bosh Admin ABDULAZIZ!</b>\n\n` +
+      `🛠️ <b>Bot boshqaruv paneliga xush kelibsiz.</b>\n` +
+      `Quyidagi menyudan foydalanib botni boshqarishingiz mumkin:\n\n` +
+      `📩 <b>Murojaat uchun:</b> <a href="https://t.me/Abdulaziz7o1">ABDULAZIZ</a>`;
 
     await sendTelegramMessage(chatId, welcomeText, {
-      reply_markup: getMainMenuKeyboard()
+      reply_markup: getMainMenuKeyboard(),
+      disable_web_page_preview: false
     });
     return;
   }
