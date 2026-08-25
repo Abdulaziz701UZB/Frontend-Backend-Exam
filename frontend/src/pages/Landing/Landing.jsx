@@ -123,16 +123,6 @@ const Landing = () => {
                 <span>Bizga qo'shiling</span>
                 <FaArrowRight className="btn-icon-right" />
               </button>
-
-              <a
-                href="https://t.me/Abdulaziz7o1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-hero-secondary"
-              >
-                <FaTelegram className="btn-tg-icon" />
-                <span>Demo so'rash</span>
-              </a>
             </div>
 
             <div className="hero-trust-row">
