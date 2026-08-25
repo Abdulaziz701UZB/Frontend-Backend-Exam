@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   HiOutlinePhone,
-  HiOutlineArrowRight,
   HiOutlineChatBubbleLeftRight,
   HiOutlineCheckCircle,
   HiOutlineAcademicCap,
@@ -11,14 +10,11 @@ import {
   HiOutlineDevicePhoneMobile,
   HiOutlineShieldCheck,
   HiOutlineSparkles,
-  HiOutlineChartBar,
-  HiOutlineBellAlert,
-  HiOutlineQrCode,
-  HiOutlineCheckBadge,
   HiOutlineSquares2X2,
   HiOutlineUsers,
+  HiOutlineCalendarDays,
   HiOutlineCurrencyDollar,
-  HiOutlineCalendarDays
+  HiOutlineIdentification
 } from "react-icons/hi2";
 import {
   FaTelegram,
@@ -27,9 +23,7 @@ import {
   FaCheck,
   FaArrowRight,
   FaChalkboardUser,
-  FaGraduationCap,
-  FaCrown,
-  FaArrowTrendUp
+  FaGraduationCap
 } from "react-icons/fa6";
 import { useEduAuth } from "../../context/EduAuthContext";
 import "./Landing.css";
@@ -37,7 +31,48 @@ import "./Landing.css";
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useEduAuth();
-  const [activeTab, setActiveTab] = useState("admin");
+  const [selectedScreen, setSelectedScreen] = useState("dashboard");
+
+  const screens = {
+    dashboard: {
+      title: "Boshqaruv Markazi (Dashboard)",
+      desc: "Umumiy tushum, faol guruhlar, jami o'quvchilar va qarzdorliklar real vaqt rejimida.",
+      img: "/velnex-hero-banner.png",
+      badge: "Umumiy Tahlil"
+    },
+    students: {
+      title: "O'quvchilar Boshqaruvi",
+      desc: "O'quvchilarning to'liq ro'yxati, 9 xonali ID, to'lov holati va shaxsiy profili.",
+      img: "/velnex-students-preview.png",
+      badge: "O'quvchilar"
+    },
+    groups: {
+      title: "Kurslar va Guruhlar Boshqaruvi",
+      desc: "Guruhlar dars jadvali, to'lov salomatligi, xonalar va o'qituvchilar taqsimoti.",
+      img: "/velnex-groups-preview.png",
+      badge: "Guruhlar"
+    },
+    attendance: {
+      title: "Davomat va Baholar Jurnali",
+      desc: "Kunlik dars davomati (Keldi / Kelmadi), baholar va test natijalari.",
+      img: "/velnex-attendance-preview.png",
+      badge: "Davomat"
+    },
+    teachers: {
+      title: "O'qituvchilar va Xodimlar",
+      desc: "O'qituvchilar maosh stavkalari, dars soatlari, tajribasi va profillari.",
+      img: "/velnex-teachers-preview.png",
+      badge: "Ustozlar"
+    },
+    payments: {
+      title: "To'lovlar va Kassa Boshqaruvi",
+      desc: "Click, Payme, naqd pul kassa hisoboti, kvitansiyalar va qarzdorlar ro'yxati.",
+      img: "/velnex-payments-preview.png",
+      badge: "Moliya"
+    }
+  };
+
+  const activeData = screens[selectedScreen] || screens.dashboard;
 
   return (
     <div className="velnex-landing-page">
@@ -73,9 +108,8 @@ const Landing = () => {
           </Link>
 
           <nav className="landing-nav-menu">
+            <a href="#showcase" className="nav-item">Platforma Ko'rinishi</a>
             <a href="#features" className="nav-item">Imkoniyatlar</a>
-            <a href="#student-app" className="nav-item">Student App</a>
-            <a href="#parent-app" className="nav-item">Ota-ona Ilovasi</a>
             <a href="#pricing" className="nav-item">Narxlar</a>
             <a href="#stats" className="nav-item">Statistika</a>
           </nav>
@@ -188,6 +222,112 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Interactive Platform Live Screen Showcase */}
+      <section id="showcase" className="landing-showcase-gallery-section">
+        <div className="landing-container">
+          <div className="section-head-center">
+            <span className="section-subtitle-tag">JONLI KO'RINISHLAR</span>
+            <h2 className="section-main-heading">
+              Platformaning Asosiy Bo'limlari
+            </h2>
+            <p className="section-desc-text">
+              Quyidagi bo'limlardan birini tanlang va VELNEX tizimining haqiqiy sahifalarini ko'zdan kechiring.
+            </p>
+          </div>
+
+          <div className="showcase-tabs-nav">
+            <button
+              type="button"
+              className={`showcase-tab-btn ${selectedScreen === "dashboard" ? "active" : ""}`}
+              onClick={() => setSelectedScreen("dashboard")}
+            >
+              <HiOutlineSquares2X2 className="tab-icon" />
+              <span>Dashboard</span>
+            </button>
+            <button
+              type="button"
+              className={`showcase-tab-btn ${selectedScreen === "students" ? "active" : ""}`}
+              onClick={() => setSelectedScreen("students")}
+            >
+              <HiOutlineUsers className="tab-icon" />
+              <span>O'quvchilar</span>
+            </button>
+            <button
+              type="button"
+              className={`showcase-tab-btn ${selectedScreen === "groups" ? "active" : ""}`}
+              onClick={() => setSelectedScreen("groups")}
+            >
+              <HiOutlineCalendarDays className="tab-icon" />
+              <span>Guruhlar</span>
+            </button>
+            <button
+              type="button"
+              className={`showcase-tab-btn ${selectedScreen === "attendance" ? "active" : ""}`}
+              onClick={() => setSelectedScreen("attendance")}
+            >
+              <HiOutlineAcademicCap className="tab-icon" />
+              <span>Davomat</span>
+            </button>
+            <button
+              type="button"
+              className={`showcase-tab-btn ${selectedScreen === "teachers" ? "active" : ""}`}
+              onClick={() => setSelectedScreen("teachers")}
+            >
+              <FaChalkboardUser className="tab-icon" />
+              <span>O'qituvchilar</span>
+            </button>
+            <button
+              type="button"
+              className={`showcase-tab-btn ${selectedScreen === "payments" ? "active" : ""}`}
+              onClick={() => setSelectedScreen("payments")}
+            >
+              <HiOutlineCurrencyDollar className="tab-icon" />
+              <span>To'lovlar & Kassa</span>
+            </button>
+          </div>
+
+          <div className="showcase-display-wrapper">
+            <div className="showcase-meta-header">
+              <div className="showcase-meta-left">
+                <span className="showcase-badge">{activeData.badge}</span>
+                <h3 className="showcase-active-title">{activeData.title}</h3>
+                <p className="showcase-active-desc">{activeData.desc}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
+                className="btn-showcase-cta"
+              >
+                <span>Sinab Ko'rish</span>
+                <FaArrowRight />
+              </button>
+            </div>
+
+            <div className="showcase-mac-window">
+              <div className="mac-window-top">
+                <div className="frame-dots">
+                  <span className="dot red"></span>
+                  <span className="dot yellow"></span>
+                  <span className="dot green"></span>
+                </div>
+                <div className="mac-url-bar">
+                  <span className="secure-icon">🔒</span>
+                  <span>app.velnex.uz/{selectedScreen}</span>
+                </div>
+              </div>
+              <div className="mac-window-content">
+                <img
+                  key={activeData.img}
+                  src={activeData.img}
+                  alt={activeData.title}
+                  className="showcase-screen-img"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="landing-features-section">
         <div className="landing-container">
@@ -260,121 +400,6 @@ const Landing = () => {
               <p className="feature-card-desc">
                 Bosh admin, filial menejeri, o'qituvchi va kassir uchun alohida kirish huquqlari va ma'lumotlar xavfsizligi.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Student & Parent App Showcase */}
-      <section id="student-app" className="landing-app-showcase-section">
-        <div className="landing-container">
-          <div className="app-showcase-card">
-            <div className="app-showcase-text">
-              <span className="app-badge-tag">MOBIL QULAYLIK</span>
-              <h2 className="app-showcase-title">
-                O'quvchilar va Ota-onalar uchun qulay shaxsiy kabinet
-              </h2>
-              <p className="app-showcase-desc">
-                Ota-onalar farzandining darsga kelgan-kelmaganligini, olgan baholari va to'lov holatini uydan turib istalgan paytda nazorat qila oladi.
-              </p>
-
-              <div className="app-feature-bullets">
-                <div className="bullet-row">
-                  <div className="bullet-icon"><FaCheck /></div>
-                  <span>Real vaqt rejimida SMS va Telegram xabarlari</span>
-                </div>
-                <div className="bullet-row">
-                  <div className="bullet-icon"><FaCheck /></div>
-                  <span>Elektron jurnal, uyga vazifalar va test natijalari</span>
-                </div>
-                <div className="bullet-row">
-                  <div className="bullet-icon"><FaCheck /></div>
-                  <span>Onlayn to'lov cheklari va to'lovlar tarixi</span>
-                </div>
-              </div>
-
-              <div className="app-cta-row">
-                <button
-                  type="button"
-                  onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
-                  className="btn-hero-primary"
-                >
-                  <span>Hoziroq sinab ko'ring</span>
-                  <FaArrowRight className="btn-icon-right" />
-                </button>
-              </div>
-            </div>
-
-            <div className="app-showcase-preview">
-              <div className="app-interactive-screen">
-                <div className="app-screen-header">
-                  <div className="app-tab-switcher">
-                    <button
-                      type="button"
-                      className={`tab-btn ${activeTab === "admin" ? "active" : ""}`}
-                      onClick={() => setActiveTab("admin")}
-                    >
-                      <FaChalkboardUser /> Ustoz Paneli
-                    </button>
-                    <button
-                      type="button"
-                      className={`tab-btn ${activeTab === "student" ? "active" : ""}`}
-                      onClick={() => setActiveTab("student")}
-                    >
-                      <FaGraduationCap /> O'quvchi
-                    </button>
-                  </div>
-                </div>
-
-                <div className="app-screen-body">
-                  {activeTab === "admin" ? (
-                    <div className="mock-panel-content">
-                      <div className="mock-group-header">
-                        <strong>F-12 Guruh (Frontend ReactJS)</strong>
-                        <span className="mock-badge">12/15 O'quvchi</span>
-                      </div>
-                      <div className="mock-attendance-list">
-                        <div className="att-item">
-                          <span>Abdulaziz Abdulhayev</span>
-                          <span className="status-dot present">Kelgan</span>
-                        </div>
-                        <div className="att-item">
-                          <span>Azizbek Murodov</span>
-                          <span className="status-dot present">Kelgan</span>
-                        </div>
-                        <div className="att-item">
-                          <span>Jasurbek Rustamov</span>
-                          <span className="status-dot present">Kelgan</span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mock-panel-content">
-                      <div className="mock-student-profile">
-                        <div className="mock-avatar">🎓</div>
-                        <div className="mock-details">
-                          <strong>Abdulaziz Abdulhayev</strong>
-                          <span>ID: #100000002</span>
-                        </div>
-                      </div>
-                      <div className="mock-scores-row">
-                        <div className="score-box">
-                          <strong>100%</strong>
-                          <span>Davomat</span>
-                        </div>
-                        <div className="score-box">
-                          <strong>95 ball</strong>
-                          <span>Uy vazifasi</span>
-                        </div>
-                        <div className="score-box">
-                          <strong>To'langan</strong>
-                          <span>Balans</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -502,8 +527,8 @@ const Landing = () => {
           <div className="footer-nav-col">
             <h4>Sahifalar</h4>
             <ul>
+              <li><a href="#showcase">Platforma Ko'rinishi</a></li>
               <li><a href="#features">Imkoniyatlar</a></li>
-              <li><a href="#student-app">Student App</a></li>
               <li><a href="#pricing">Narxlar</a></li>
               <li><Link to="/login">Tizimga Kirish</Link></li>
             </ul>
