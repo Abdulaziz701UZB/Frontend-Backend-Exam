@@ -215,71 +215,88 @@ const Dashboard = () => {
         </Link>
       </div>
 
+      {/* To'lov Usullari Bo'yicha Tushum Taqsimoti */}
       <div className="card payment-methods-breakdown-card">
         <div className="section-header-flex">
           <div>
             <h3 className="section-title">
-              <HiOutlineBanknotes style={{ verticalAlign: 'middle', marginRight: 6, color: '#4f46e5' }} />
+              <HiOutlineBanknotes className="inline-icon-sm text-indigo" />
               To'lov Usullari Bo'yicha Tushum Taqsimoti
             </h3>
             <p className="text-muted text-xs">
               Click, Payme, Naqd pul va Bank o'tkazmalari orqali amalga oshirilgan to'lovlar tahlili
             </p>
           </div>
-          <Link to="/payments" className="btn btn-secondary btn-sm">
+          <Link to="/payments" className="link-btn">
             Barcha To'lovlar <HiArrowRight />
           </Link>
         </div>
 
         <div className="payment-channels-grid">
           <div className="payment-channel-card channel-click">
-            <div className="channel-icon-wrap">
-              <HiOutlineDevicePhoneMobile />
+            <div className="channel-top">
+              <div className="channel-icon-wrap">
+                <HiOutlineDevicePhoneMobile />
+              </div>
+              <span className="channel-badge">{cardPct}% Ulush</span>
             </div>
             <div className="channel-data">
-              <span>Click / Payme / Karta</span>
-              <strong>{formatMoney(cardAmount)}</strong>
+              <span className="channel-label">Click / Payme / Karta</span>
+              <strong className="channel-amount">{formatMoney(cardAmount)}</strong>
               <div className="channel-progress-wrap">
                 <div className="channel-progress-bar bar-click" style={{ width: `${cardPct}%` }}></div>
               </div>
-              <small>{cardPct}% ulush ({cardPayments.length || 24} ta to'lov)</small>
+              <small className="channel-meta-text">{cardPayments.length || 1} ta to'lov operatsiyasi</small>
             </div>
           </div>
 
           <div className="payment-channel-card channel-cash">
-            <div className="channel-icon-wrap">
-              <HiOutlineBanknotes />
+            <div className="channel-top">
+              <div className="channel-icon-wrap">
+                <HiOutlineBanknotes />
+              </div>
+              <span className="channel-badge">{cashPct}% Ulush</span>
             </div>
             <div className="channel-data">
-              <span>Naqd Pul (Kassa)</span>
-              <strong>{formatMoney(cashAmount)}</strong>
+              <span className="channel-label">Naqd Pul (Kassa)</span>
+              <strong className="channel-amount">{formatMoney(cashAmount)}</strong>
               <div className="channel-progress-wrap">
                 <div className="channel-progress-bar bar-cash" style={{ width: `${cashPct}%` }}></div>
               </div>
-              <small>{cashPct}% ulush ({cashPayments.length || 14} ta to'lov)</small>
+              <small className="channel-meta-text">{cashPayments.length || 14} ta to'lov operatsiyasi</small>
             </div>
           </div>
 
           <div className="payment-channel-card channel-bank">
-            <div className="channel-icon-wrap">
-              <HiOutlineBuildingLibrary />
+            <div className="channel-top">
+              <div className="channel-icon-wrap">
+                <HiOutlineBuildingLibrary />
+              </div>
+              <span className="channel-badge">{bankPct}% Ulush</span>
             </div>
             <div className="channel-data">
-              <span>Bank O'tkazmasi</span>
-              <strong>{formatMoney(bankAmount)}</strong>
+              <span className="channel-label">Bank O'tkazmasi</span>
+              <strong className="channel-amount">{formatMoney(bankAmount)}</strong>
               <div className="channel-progress-wrap">
                 <div className="channel-progress-bar bar-bank" style={{ width: `${bankPct}%` }}></div>
               </div>
-              <small>{bankPct}% ulush ({bankPayments.length || 4} ta to'lov)</small>
+              <small className="channel-meta-text">{bankPayments.length || 4} ta to'lov operatsiyasi</small>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Faol Guruhlar va Qarzdorlik Holatlari */}
       <div className="dashboard-grid-2">
-        <div className="card">
+        <div className="card dashboard-groups-card">
           <div className="section-header-flex">
-            <h3 className="section-title">Faol Guruhlar</h3>
+            <div>
+              <h3 className="section-title">
+                <HiOutlineBookOpen className="inline-icon-sm text-indigo" />
+                Faol Guruhlar
+              </h3>
+              <p className="text-muted text-xs">Joriy o'quv guruhlari va o'qituvchilar</p>
+            </div>
             <Link to="/groups" className="link-btn">
               Barchasi <HiArrowRight />
             </Link>
@@ -288,15 +305,20 @@ const Dashboard = () => {
             {groups.slice(0, 4).map((g) => (
               <div key={g.id} className="dash-group-item">
                 <div className="group-info-col">
-                  <span className="group-name-title">{g.name}</span>
+                  <div className="group-title-row">
+                    <span className="group-badge-code">{g.name}</span>
+                    <span className="group-course-tag">{g.courseName || "Dasturlash"}</span>
+                  </div>
                   <span className="group-meta-text">
-                    {g.courseName} • {g.scheduleDays}
+                    {g.scheduleDays}
                   </span>
                 </div>
                 <div className="group-extra-col">
-                  <span className="group-teacher-name">{g.teacherName}</span>
+                  <span className="group-teacher-chip">
+                    <HiOutlineUser className="teacher-icon" /> {g.teacherName}
+                  </span>
                   <span className="group-students-badge">
-                    <HiOutlineUser className="inline-icon-xs" /> {g.currentStudents || g.current_students || 12}/{g.maxStudents || g.max_students || 15}
+                    <HiOutlineUsers className="students-icon" /> {g.currentStudents || g.current_students || 12}/{g.maxStudents || g.max_students || 15}
                   </span>
                 </div>
               </div>
@@ -304,29 +326,36 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card dashboard-debtors-card">
           <div className="section-header-flex">
-            <h3 className="section-title">Qarzdorlik Holatlari</h3>
+            <div>
+              <h3 className="section-title">
+                <HiOutlineExclamationTriangle className="inline-icon-sm text-amber" />
+                Qarzdorlik Holatlari
+              </h3>
+              <p className="text-muted text-xs">To'lov muddati kechikkan o'quvchilar</p>
+            </div>
             <Link to="/students" className="link-btn">
               Ro'yxat <HiArrowRight />
             </Link>
           </div>
           <div className="debtors-list">
             {overdueDebtors.length === 0 ? (
-              <p className="empty-state-text">
-                Hozirda qarzdor o'quvchilar mavjud emas
-              </p>
+              <div className="empty-debt-state">
+                <HiOutlineCheckCircle className="empty-debt-icon" />
+                <p>Hozirda barcha to'lovlar to'liq amalga oshirilgan</p>
+              </div>
             ) : (
               overdueDebtors.slice(0, 4).map((d) => (
                 <div key={d.id} className="debtor-item">
                   <div className="debtor-info">
                     <span className="debtor-name-title">{d.fullName}</span>
-                    <span className="debtor-group-text">
-                      {d.groupName}
-                    </span>
-                    <a href={`tel:${d.phone}`} className="debtor-phone-link">
-                      <HiOutlinePhone className="inline-icon-xs" /> {d.phone}
-                    </a>
+                    <div className="debtor-meta-row">
+                      <span className="debtor-group-badge">{d.groupName}</span>
+                      <a href={`tel:${d.phone}`} className="debtor-phone-link">
+                        <HiOutlinePhone className="inline-icon-xs" /> {d.phone}
+                      </a>
+                    </div>
                   </div>
                   <div className="debtor-amount">
                     <span className="amount-badge">

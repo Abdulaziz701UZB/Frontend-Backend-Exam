@@ -91,53 +91,56 @@ const Landing = () => {
       <div className="ambient-glow glow-top-right"></div>
       <div className="ambient-glow glow-center"></div>
 
-      {/* Top Phone Info Bar */}
-      <div className="landing-topbar">
-        <div className="landing-container topbar-flex">
-          <div className="topbar-left">
-            <span className="topbar-badge">YANGI</span>
-            <span className="topbar-text">VELNEX 2.0 yangi avlod boshqaruv tizimi ishga tushdi!</span>
-          </div>
-          <div className="topbar-right">
-            <a href="tel:+998905990600" className="topbar-phone-link">
-              <HiOutlinePhone className="topbar-icon" />
-              <span>+998 (90) 599-06-00</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navbar */}
-      <header className="landing-navbar-wrap">
-        <div className="landing-container navbar-flex">
-          <Link to="/" className="landing-brand-logo">
-            <div className="brand-logo-glow-wrap">
-              <img src="/velnex-logo.png" alt="VELNEX" className="brand-logo-img" />
+      {/* Sticky Header Wrapper (Topbar + Navbar) */}
+      <div className="landing-header-sticky-group">
+        {/* Top Phone Info Bar */}
+        <div className="landing-topbar">
+          <div className="landing-container topbar-flex">
+            <div className="topbar-left">
+              <span className="topbar-badge">YANGI</span>
+              <span className="topbar-text">VELNEX 2.0 yangi avlod boshqaruv tizimi ishga tushdi!</span>
             </div>
-            <span className="brand-logo-text">VELNEX</span>
-          </Link>
-
-          <nav className="landing-nav-menu">
-            <a href="#features" className="nav-item">Imkoniyatlar</a>
-            <a href="#features" className="nav-item">Student App</a>
-            <a href="#features" className="nav-item">Ota-ona Ilovasi</a>
-            <a href="#pricing" className="nav-item">Narxlar</a>
-            <a href="#stats" className="nav-item">Statistika</a>
-          </nav>
-
-          <div className="landing-nav-actions">
-            <a
-              href="https://t.me/Abdulaziz7o1"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-contact-telegram"
-            >
-              <HiOutlineChatBubbleLeftRight className="btn-icon" />
-              <span>Biz bilan bog'lanish</span>
-            </a>
+            <div className="topbar-right">
+              <a href="tel:+998905990600" className="topbar-phone-link">
+                <HiOutlinePhone className="topbar-icon" />
+                <span>+998 (90) 599-06-00</span>
+              </a>
+            </div>
           </div>
         </div>
-      </header>
+
+        {/* Main Navbar */}
+        <header className="landing-navbar-wrap">
+          <div className="landing-container navbar-flex">
+            <Link to="/" className="landing-brand-logo">
+              <div className="brand-logo-glow-wrap">
+                <img src="/velnex-logo.png" alt="VELNEX" className="brand-logo-img" />
+              </div>
+              <span className="brand-logo-text">VELNEX</span>
+            </Link>
+
+            <nav className="landing-nav-menu">
+              <a href="#features" className="nav-item">Imkoniyatlar</a>
+              <a href="#features" className="nav-item">Student App</a>
+              <a href="#features" className="nav-item">Ota-ona Ilovasi</a>
+              <a href="#pricing" className="nav-item">Narxlar</a>
+              <a href="#stats" className="nav-item">Statistika</a>
+            </nav>
+
+            <div className="landing-nav-actions">
+              <a
+                href="https://t.me/Abdulaziz7o1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-contact-telegram"
+              >
+                <HiOutlineChatBubbleLeftRight className="btn-icon" />
+                <span>Biz bilan bog'lanish</span>
+              </a>
+            </div>
+          </div>
+        </header>
+      </div>
 
       {/* Hero Section with Auto-Rotating Multi-Screen Showcase */}
       <section className="landing-hero-section">
