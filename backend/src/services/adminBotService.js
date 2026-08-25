@@ -87,23 +87,109 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 2. ➕ O'quv Markaz Qo'shish ➕
-  if (text.includes("O'quv Markaz Qo'shish")) {
-    const msgText = `➕ <b>YANGI O'QUV MARKAZ (MIJOZ) QO'SHISH</b>\n\n` +
-      `Siz yangi o'quv markazni tizimga ulab, ularga alohida CRM va bot ochib berishingiz mumkin.\n\n` +
-      `<b>Qo'shish tartibi:</b>\n` +
-      `1. Markaz nomi: (Masalan: <i>Registon Academy</i>)\n` +
-      `2. Rahbar telefoni: (Masalan: <i>+998901234567</i>)\n` +
-      `3. Tanlangan Tarif: (<i>Start / Standart / Enterprise</i>)\n\n` +
-      `👉 <i>Tezkor qo'shish uchun CRM Boshqaruv panelidan foydalaning yoki adminga buyurtma bering.</i>`;
+  if (text.includes("O'quv Markaz Qo'shish") || text === "/add_center") {
+    const existingIds = REGISTERED_CENTERS.map(c => Number(c.id)).filter(n => !isNaN(n));
+    let nextCode = 1;
+    while (existingIds.includes(nextCode)) {
+      nextCode++;
+    }
 
-    await sendTelegramMessage(chatId, msgText, {
+    userStepState[chatId] = { step: "WAIT_CODE", suggestedCode: nextCode };
+
+    const addPrompt = `🏢 <b>O'QUV MARKAZ QO'SHISH REJIMI</b>\n\n` +
+      `💡 <b>Ushbu o'quv markaz uchun nechinchi kod berasiz?</b>\n` +
+      `<i>Tavsiya etilgan eng birinchi bo'sh kod:</i> <b>${nextCode}</b>\n\n` +
+      `Istalgan kod raqamini matn shaklida yuboring (masalan: <b>${nextCode}</b> yoki <b>101</b>), YOKI to'g'ridan-to'g'ri o'quv markaz nomini yuboring:\n\n` +
+      `📩 <b>Murojaat uchun:</b> <a href="https://t.me/Abdulaziz7o1">ABDULAZIZ</a>`;
+
+    await sendTelegramMessage(chatId, addPrompt, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "➕ Yangi Markaz Ochish (CRM)", url: "http://localhost:5173" }]
+          [{ text: `⚡ Avto-kod (${nextCode}) ni tanlash`, callback_data: `auto_code_${nextCode}` }],
+          [{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]
         ]
-      }
+      },
+      disable_web_page_preview: false
     });
     return;
+  }
+
+  // Handle interactive addition steps (Code -> Name -> Phone)
+  const currentState = userStepState[chatId];
+  if (currentState) {
+    if (currentState.step === "WAIT_CODE") {
+      let code = parseInt(text);
+      if (isNaN(code)) {
+        currentState.code = currentState.suggestedCode || (REGISTERED_CENTERS.length + 1);
+        currentState.name = text;
+        currentState.step = "WAIT_PHONE";
+
+        const phonePrompt = `🏢 <b>Markaz Kodi:</b> #${currentState.code}\n` +
+          `🏢 <b>Markaz Nomi:</b> <b>${currentState.name}</b>\n\n` +
+          `Endi markaz rahbari yoki adminning <b>telefon raqamini</b> yuboring (masalan: <code>+998901234567</code>):`;
+
+        await sendTelegramMessage(chatId, phonePrompt, {
+          reply_markup: {
+            inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+          }
+        });
+        return;
+      } else {
+        currentState.code = code;
+        currentState.step = "WAIT_NAME";
+
+        const namePrompt = `✅ <b>Kod: #${code} tanlandi!</b>\n\n` +
+          `Endi ushbu o'quv markaz <b>nomini</b> yozib yuboring (masalan: <i>Registon O'quv Markazi</i>):`;
+
+        await sendTelegramMessage(chatId, namePrompt, {
+          reply_markup: {
+            inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+          }
+        });
+        return;
+      }
+    } else if (currentState.step === "WAIT_NAME") {
+      currentState.name = text;
+      currentState.step = "WAIT_PHONE";
+
+      const phonePrompt = `🏢 <b>Markaz Nomi:</b> <b>${currentState.name}</b> (#${currentState.code})\n\n` +
+        `Endi markaz rahbari yoki administratorining <b>telefon raqamini</b> yuboring (masalan: <code>+998901234567</code>):`;
+
+      await sendTelegramMessage(chatId, phonePrompt, {
+        reply_markup: {
+          inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+        }
+      });
+      return;
+    } else if (currentState.step === "WAIT_PHONE") {
+      const newCenter = {
+        id: currentState.code,
+        name: currentState.name,
+        tariff: "Pro Enterprise",
+        owner: msg.from?.first_name ? `${msg.from.first_name} (@${msg.from.username || "admin"})` : "Admin",
+        phone: text,
+        students: 0,
+        status: "Faol"
+      };
+
+      REGISTERED_CENTERS.push(newCenter);
+      userStepState[chatId] = null;
+
+      const successMsg = `🎉 <b>YANGI O'QUV MARKAZ MUVAFFAQIYATLI QO'SHILDI!</b>\n\n` +
+        `🆔 <b>Markaz Kodi:</b> #${newCenter.id}\n` +
+        `🏢 <b>Markaz Nomi:</b> <b>${newCenter.name}</b>\n` +
+        `👤 <b>Rahbar / Admin:</b> ${newCenter.owner}\n` +
+        `📞 <b>Telefon:</b> <code>${newCenter.phone}</code>\n` +
+        `📦 <b>Tarif:</b> Pro Enterprise (Cheksiz)\n` +
+        `🌐 <b>CRM Panel:</b> http://localhost:5173\n` +
+        `🤖 <b>Telegram Bot:</b> @Velnex_bot ulandi\n\n` +
+        `✅ <i>O'quv markaz bazaga yozildi va barcha boshqaruv modullari faollashtirildi!</i>`;
+
+      await sendTelegramMessage(chatId, successMsg, {
+        reply_markup: getMasterAdminKeyboard()
+      });
+      return;
+    }
   }
 
   // 3. ❌ O'quv Markaz O'chirish ❌
@@ -426,7 +512,24 @@ const handleCallbackQuery = async (callbackQuery) => {
   const chatId = callbackQuery.message?.chat?.id;
   const data = callbackQuery.data;
 
-  if (data === "notify_all_debtors") {
+  if (data.startsWith("auto_code_")) {
+    const code = parseInt(data.replace("auto_code_", ""));
+    userStepState[chatId] = { step: "WAIT_NAME", code };
+
+    const namePrompt = `✅ <b>Avto-kod: #${code} tanlandi!</b>\n\n` +
+      `Endi ushbu o'quv markaz <b>nomini</b> yozib yuboring (masalan: <i>Registon O'quv Markazi</i>):`;
+
+    await sendTelegramMessage(chatId, namePrompt, {
+      reply_markup: {
+        inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+      }
+    });
+  } else if (data === "cancel_add_center") {
+    userStepState[chatId] = null;
+    await sendTelegramMessage(chatId, `❌ <b>O'quv markaz qo'shish bekor qilindi.</b>`, {
+      reply_markup: getMasterAdminKeyboard()
+    });
+  } else if (data === "notify_all_debtors") {
     await sendTelegramMessage(chatId, `🔔 <b>Barcha qarzdor o'quvchilar va ularning ota-onalariga to'lov eslatmasi yuborildi!</b>\n\n✅ Xabarnomalar yetkazildi.`);
   } else if (data.startsWith("ad_")) {
     await sendTelegramMessage(chatId, `📢 <b>Reklama xabarnomasi muvaffaqiyatli rejalashtirildi va tanlangan guruhlarga yuborildi!</b>`);
