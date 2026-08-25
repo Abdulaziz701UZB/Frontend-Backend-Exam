@@ -8,16 +8,20 @@ let registeredAdminChatIds = new Set();
 let isPollingActive = false;
 let lastUpdateId = 0;
 let botMode = "Faol Rejim (Ishlamoqda) 🟢";
+let userStepState = {};
+
+const SUPER_ADMIN_ID = 7140599182;
+const ADMIN_NAME_LINK = `<a href="https://t.me/Abdulazizbee_701">ABDULAZIZ</a>`;
 
 // SaaS O'quv Markazlari (Mijozlar) bazasi
 let REGISTERED_CENTERS = [
-  { id: 1, name: "VELNEX Academy (Bosh Markaz)", tariff: "Pro Enterprise", owner: "Abdulaziz (@Abdulaziz7o1)", phone: "+998 90 599 06 00", students: 312, status: "Faol" },
+  { id: 1, name: "VELNEX Academy (Bosh Markaz)", tariff: "Pro Enterprise", owner: "Abdulaziz (@Abdulazizbee_701)", phone: "+998 90 599 06 00", students: 312, status: "Faol" },
   { id: 2, name: "Oxford Learning Center", tariff: "Standart", owner: "Sardor Rahimov", phone: "+998 90 123 45 67", students: 180, status: "Faol" },
   { id: 3, name: "IT Park Academy", tariff: "Pro Enterprise", owner: "Jasurbek Rustamov", phone: "+998 93 987 65 43", students: 450, status: "Faol" }
 ];
 
 let SPONSOR_CHANNELS = [
-  { id: 1, name: "VELNEX Rasmiy Yangiliklar", username: "@Abdulaziz7o1" }
+  { id: 1, name: "VELNEX Rasmiy Yangiliklar", username: "@Abdulazizbee_701" }
 ];
 
 let SENT_BROADCASTS = [
@@ -27,9 +31,6 @@ let SENT_BROADCASTS = [
 const formatMoney = (amount) => {
   return Number(amount || 0).toLocaleString("uz-UZ") + " so'm";
 };
-
-const SUPER_ADMIN_ID = 7140599182;
-const ADMIN_NAME_LINK = `<a href="https://t.me/Abdulazizbee_701">ABDULAZIZ</a>`;
 
 // Master Admin Boshqaruv Klaviaturasi
 const getMasterAdminKeyboard = () => {
@@ -74,9 +75,10 @@ export const sendTelegramMessage = async (chatId, text, extra = {}) => {
       ...extra
     };
     const res = await axios.post(`${TELEGRAM_API}/sendMessage`, payload);
+    console.log(`[Telegram Bot] Message sent to ${chatId}`);
     return res.data;
   } catch (err) {
-    console.error("Telegram send error:", err.response?.data || err.message);
+    console.error(`[Telegram Bot] Send error to ${chatId}:`, err.response?.data || err.message);
     return null;
   }
 };
@@ -95,6 +97,23 @@ const handleIncomingMessage = async (msg) => {
   const senderName = msg.from?.first_name || (isSuperAdmin ? "ABDULAZIZ" : "Foydalanuvchi");
   const senderLink = `<a href="tg://user?id=${senderId}">${senderName}</a>`;
   const text = (msg.text || "").trim();
+
+  console.log(`[Telegram Bot] Inbound msg from ${chatId} (${senderName}): "${text}"`);
+
+  // Agar foydalanuvchi menyu tugmasini bossa, oldingi kutish holatlarini tozalash
+  const isCommandOrMenu = text.startsWith("/") ||
+    text.includes("➕") || text.includes("❌") || text.includes("✏️") ||
+    text.includes("🔄") || text.includes("📊") || text.includes("💰") ||
+    text.includes("📥") || text.includes("⚠️") || text.includes("📢") ||
+    text.includes("📅") || text.includes("👥") || text.includes("⚙️") ||
+    text.includes("💎") || text.includes("💳") || text.includes("💾") ||
+    text.includes("🧹") || text.includes("👑") || text.includes("🛠️") ||
+    text.includes("🏢") || text.includes("📞") || text.includes("🌐") ||
+    text === "Bosh menyu";
+
+  if (isCommandOrMenu) {
+    userStepState[chatId] = null;
+  }
 
   // 1. /start & Bosh Menyu
   if (text === "/start" || text === "/help" || text === "⬅️ Bosh Menyu" || text === "Bosh menyu") {
@@ -125,70 +144,6 @@ const handleIncomingMessage = async (msg) => {
     }
   }
 
-  // Oddiy foydalanuvchilar (mijozlar) tugmalari
-  if (text === "🏢 O'quv Markazlarimiz") {
-    let centersText = `🏢 <b>VELNEX TIZIMIDAGI O'QUV MARKAZLAR:</b>\n\n`;
-    REGISTERED_CENTERS.forEach((c, idx) => {
-      centersText += `<b>${idx + 1}. ${c.name}</b>\n` +
-        `👤 <b>Rahbar:</b> ${c.owner}\n` +
-        `🎓 <b>O'quvchilar:</b> ${c.students} nafar\n` +
-        `────────────────────\n`;
-    });
-    centersText += `\n<i>Siz ham o'z o'quv markazingizni tizimga ulab, barcha jarayonlarni avtomatlashtiring!</i>`;
-    await sendTelegramMessage(chatId, centersText, { reply_markup: getClientMenuKeyboard() });
-    return;
-  }
-
-  if (text === "👑 Tariflar & Narxlar") {
-    const tariffMsg = `👑 <b>VELNEX SAAS TARIF VA NARXLARI:</b>\n\n` +
-      `1️⃣ <b>Start:</b> <code>290,000 so'm / oy</code>\n• 100 tagacha o'quvchi\n• Davomat va Jurnal\n• To'lovlar va Kassa\n\n` +
-      `2️⃣ <b>Standart:</b> <code>590,000 so'm / oy</code> (Tavsiya etiladi 🌟)\n• 500 tagacha o'quvchi\n• Telegram Bot integratsiyasi\n• SMS xabarnomalar\n\n` +
-      `3️⃣ <b>Pro Enterprise:</b> <code>990,000 so'm / oy</code>\n• Cheksiz o'quvchilar\n• Ko'p filialli tizim\n• 24/7 Shaxsiy menejer\n\n` +
-      `📩 <b>Ulanish uchun:</b> ${ADMIN_NAME_LINK}`;
-    await sendTelegramMessage(chatId, tariffMsg, { reply_markup: getClientMenuKeyboard() });
-    return;
-  }
-
-  if (text === "💳 Karta Rekvizitlari") {
-    const cardMsg = `💳 <b>TO'LOV VA LITSENZIYA REKVIZITLARI:</b>\n\n` +
-      `💳 <b>Karta:</b> <code>8600 5304 **** 1234</code>\n` +
-      `👤 <b>Egasi:</b> ABDULAZIZ ABDULHAYEV\n` +
-      `🏦 <b>Bank:</b> O'zmilliybank / Click / Payme\n\n` +
-      `To'lov qilgach, chekni ${ADMIN_NAME_LINK} ga yuboring.`;
-    await sendTelegramMessage(chatId, cardMsg, { reply_markup: getClientMenuKeyboard() });
-    return;
-  }
-
-  if (text === "🤖 Student & Parent Botlar") {
-    const botMsg = `🤖 <b>VELNEX TELEGRAM BOTLAR TIZIMI:</b>\n\n` +
-      `• 👨‍💼 <b>Bosh Admin Boti:</b> @Velnex_bot\n` +
-      `• 🎓 <b>O'quvchilar Boti & WebApp:</b> @VelnexStudentBot\n` +
-      `• 👨‍👩‍👧 <b>Ota-onalar Boti:</b> @VelnexParentBot\n` +
-      `• 👨‍🏫 <b>O'qituvchilar Boti:</b> @VelnexTeacherBot\n\n` +
-      `Markazingiz uchun to'liq bot tizimi 1 kunda o'rnatib beriladi!`;
-    await sendTelegramMessage(chatId, botMsg, { reply_markup: getClientMenuKeyboard() });
-    return;
-  }
-
-  if (text === "📞 Admin Bilan Bog'lanish") {
-    const contactMsg = `📞 <b>BOSH ADMIN VA DASTURCHI ALOQASI:</b>\n\n` +
-      `👑 <b>Boshqaruvchi:</b> ${ADMIN_NAME_LINK}\n` +
-      `📱 <b>Telefon:</b> <code>+998 (90) 599-06-00</code>\n` +
-      `✈️ <b>Telegram:</b> @Abdulazizbee_701\n` +
-      `📍 <b>Manzil:</b> Namangan shahri, O'zbekiston`;
-    await sendTelegramMessage(chatId, contactMsg, { reply_markup: getClientMenuKeyboard() });
-    return;
-  }
-
-  if (text === "🌐 Web Platformaga O'tish") {
-    await sendTelegramMessage(chatId, `🌐 <b>VELNEX CRM Platformasiga Kirish:</b>\nhttp://localhost:5173`, {
-      reply_markup: {
-        inline_keyboard: [[{ text: "🚀 Web Platformani Ochish", url: "http://localhost:5173" }]]
-      }
-    });
-    return;
-  }
-
   // 2. ➕ O'quv Markaz Qo'shish ➕
   if (text.includes("O'quv Markaz Qo'shish") || text === "/add_center") {
     const existingIds = REGISTERED_CENTERS.map(c => Number(c.id)).filter(n => !isNaN(n));
@@ -217,7 +172,40 @@ const handleIncomingMessage = async (msg) => {
     return;
   }
 
-  // Handle interactive addition steps (Code -> Name -> Phone)
+  // 3. ❌ O'quv Markaz O'chirish ❌
+  if (text.includes("O'quv Markaz O'chirish") || text === "/delete_center") {
+    if (REGISTERED_CENTERS.length === 0) {
+      await sendTelegramMessage(chatId, `ℹ️ Hozircha tizimda o'chiradigan o'quv markazlar mavjud emas.`, {
+        reply_markup: getMasterAdminKeyboard()
+      });
+      return;
+    }
+
+    userStepState[chatId] = { step: "WAIT_DELETE_CODE" };
+
+    let centersList = "";
+    REGISTERED_CENTERS.forEach((c) => {
+      centersList += `• <b>${c.name}</b> (Kodi: <code>${c.id}</code>) — ${c.owner}\n`;
+    });
+
+    const delPrompt = `🗑️ <b>O'QUV MARKAZ O'CHIRISH REJIMI FAOLLASHDI!</b>\n\n` +
+      `💡 <b>Qaysi o'quv markazni o'chirmoqchisiz?</b>\n` +
+      `O'chirmoqchi bo'lgan o'quv markaz kodlarini yuboring (masalan: <b>1, 2, 4</b> yoki birga: <b>1, 2, 3</b>).\n` +
+      `<i>Eslatma: Bitta yuborishda 1 ta yoki bir nechta o'quv markaz kodlarini yuborib o'chirishingiz mumkin.</i>\n\n` +
+      `<b>Mavjud O'quv Markazlar:</b>\n` +
+      `${centersList}\n` +
+      `📩 <b>Murojaat uchun:</b> ${ADMIN_NAME_LINK}`;
+
+    await sendTelegramMessage(chatId, delPrompt, {
+      reply_markup: {
+        inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+      },
+      disable_web_page_preview: false
+    });
+    return;
+  }
+
+  // Handle interactive input steps if user is answering a prompt
   const currentState = userStepState[chatId];
   if (currentState) {
     if (currentState.step === "WAIT_CODE") {
@@ -326,39 +314,6 @@ const handleIncomingMessage = async (msg) => {
     }
   }
 
-  // 3. ❌ O'quv Markaz O'chirish ❌
-  if (text.includes("O'quv Markaz O'chirish") || text === "/delete_center") {
-    if (REGISTERED_CENTERS.length === 0) {
-      await sendTelegramMessage(chatId, `ℹ️ Hozircha tizimda o'chiradigan o'quv markazlar mavjud emas.`, {
-        reply_markup: getMasterAdminKeyboard()
-      });
-      return;
-    }
-
-    userStepState[chatId] = { step: "WAIT_DELETE_CODE" };
-
-    let centersList = "";
-    REGISTERED_CENTERS.forEach((c) => {
-      centersList += `• <b>${c.name}</b> (Kodi: <code>${c.id}</code>) — ${c.owner}\n`;
-    });
-
-    const delPrompt = `🗑️ <b>O'QUV MARKAZ O'CHIRISH REJIMI FAOLLASHDI!</b>\n\n` +
-      `💡 <b>Qaysi o'quv markazni o'chirmoqchisiz?</b>\n` +
-      `O'chirmoqchi bo'lgan o'quv markaz kodlarini yuboring (masalan: <b>1, 2, 4</b> yoki birga: <b>1, 2, 3</b>).\n` +
-      `<i>Eslatma: Bitta yuborishda 1 ta yoki bir nechta o'quv markaz kodlarini yuborib o'chirishingiz mumkin.</i>\n\n` +
-      `<b>Mavjud O'quv Markazlar:</b>\n` +
-      `${centersList}\n` +
-      `📩 <b>Murojaat uchun:</b> ${ADMIN_NAME_LINK}`;
-
-    await sendTelegramMessage(chatId, delPrompt, {
-      reply_markup: {
-        inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
-      },
-      disable_web_page_preview: false
-    });
-    return;
-  }
-
   // 4. ✏️ O'quv Markaz Tahrirlash ✏️
   if (text.includes("O'quv Markaz Tahrirlash")) {
     let editMsg = `✏️ <b>O'QUV MARKAZLARINI TAHRIRLASH:</b>\n\n` +
@@ -376,7 +331,7 @@ const handleIncomingMessage = async (msg) => {
   if (text.includes("O'quv Markaz yangilash")) {
     const updateMsg = `🔄 <b>TIZIM VA O'QUV MARKAZLARINI YANGILASH:</b>\n\n` +
       `🚀 <b>Joriy Versiya:</b> VELNEX v2.0.4 PRO\n` +
-      `📦 <b>Markazlar holati:</b> 3 ta markazning barcha bazalari to'liq yangilangan.\n` +
+      `📦 <b>Markazlar holati:</b> ${REGISTERED_CENTERS.length} ta markazning barcha bazalari to'liq yangilangan.\n` +
       `⚡ <b>Sinxronizatsiya:</b> 100% muvaffaqiyatli\n\n` +
       `✅ Barcha o'quv markazlar eng so'nggi dasturiy ta'minotda ishlamoqda!`;
 
@@ -385,14 +340,14 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 6. 📊 Statistika 📊
-  if (text === "📊 Statistika 📊" || text === "/stat") {
+  if (text.includes("Statistika") || text === "/stat") {
     try {
       const students = await Student.findAll();
       const groups = await Group.findAll();
       const payments = await Payment.findAll();
 
       const statText = `📊 <b>VELNEX SAAS UMUMIY STATISTIKASI:</b>\n\n` +
-        `🏢 <b>Ulangan O'quv Markazlar:</b> 3 ta markaz\n` +
+        `🏢 <b>Ulangan O'quv Markazlar:</b> ${REGISTERED_CENTERS.length} ta markaz\n` +
         `🎓 <b>Jami Faol O'quvchilar:</b> ${students.length || 7} nafar (Markazlar bo'yicha: 942 nafar)\n` +
         `📚 <b>Jami Faol Guruhlar:</b> ${groups.length || 5} ta\n` +
         `🧾 <b>Jami Rasmiylashtirilgan Cheklar:</b> ${payments.length || 19} ta\n` +
@@ -408,7 +363,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 7. 💰 Kassa 💰
-  if (text === "💰 Kassa 💰" || text === "/kassa") {
+  if (text.includes("Kassa") || text === "/kassa") {
     try {
       const payments = await Payment.findAll();
       const totalRevenue = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
@@ -434,7 +389,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 8. 📥 Chek so'rovlari 📥
-  if (text.includes("Chek so'rovlari")) {
+  if (text.includes("Chek so'rovlari") || text.includes("Cheklar")) {
     try {
       const payments = await Payment.findAll({ limit: 5, order: [["id", "DESC"]] });
 
@@ -456,7 +411,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 9. ⚠️ Qarzdorlar & Eslatma 🔔
-  if (text.includes("Qarzdorlar & Eslatma")) {
+  if (text.includes("Qarzdorlar")) {
     try {
       const students = await Student.findAll();
       const debtors = students.filter(s => Number(s.balance) < 0 || s.payment_status === "Qarzdor");
@@ -488,7 +443,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 10. 📢 Reklama yuborish 📢
-  if (text === "📢 Reklama yuborish 📢") {
+  if (text.includes("Reklama yuborish") || text.includes("Ommaviy Xabarnoma")) {
     const advText = `📢 <b>OMMAVIY REKLAMA VA XABARNOMA YUBORISH:</b>\n\n` +
       `Siz barcha ulangan o'quv markazlar, talabalar va ota-onalarga reklama yuborishingiz mumkin.\n\n` +
       `<b>Auditoriyani tanlang:</b>`;
@@ -545,9 +500,9 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 14. 👥 Moderatorlar 👥
-  if (text === "👥 Moderatorlar 👥") {
+  if (text.includes("Moderatorlar") && !text.includes("boshqarish")) {
     const modText = `👥 <b>TIZIM MODERATORLARI VA ADMINLARI:</b>\n\n` +
-      `👑 <b>Bosh Admin & Egasi:</b> Abdulaziz (@Abdulaziz7o1)\n` +
+      `👑 <b>Bosh Admin & Egasi:</b> ${ADMIN_NAME_LINK}\n` +
       `🛡️ <b>Texnik Admin:</b> VELNEX Bot Engine\n` +
       `👨‍💼 <b>Filial Menejeri:</b> Sardor Rahimov\n` +
       `👩‍💻 <b>Kassir-Moderator:</b> Nilufar Karimova\n\n` +
@@ -583,7 +538,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 17. 💳 Card
-  if (text.includes("Card")) {
+  if (text.includes("Card") || text.includes("Karta")) {
     const cardText = `💳 <b>TO'LOV KARTALARI VA REKVIZITLAR:</b>\n\n` +
       `O'quv markazlar litsenziyasi va to'lovlari uchun rasmiy karta:\n\n` +
       `💳 <b>Karta Raqami:</b> <code>8600 5304 **** 1234</code>\n` +
@@ -596,7 +551,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 18. 💾 Zaxira (Backup) 💾
-  if (text.includes("Zaxira (Backup)")) {
+  if (text.includes("Zaxira (Backup)") || text.includes("Zaxira")) {
     const backupMsg = `💾 <b>BAZA ZAXIRA NUSXASI (BACKUP)</b>\n\n` +
       `📦 <b>Format:</b> PostgreSQL SQL Dump + JSON\n` +
       `📅 <b>Oxirgi zaxira:</b> ${new Date().toLocaleDateString("uz-UZ")} ${new Date().toLocaleTimeString("uz-UZ")}\n` +
@@ -608,7 +563,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 19. 🧹 Keshni tozalash 🧹
-  if (text.includes("Keshni tozalash")) {
+  if (text.includes("Keshni tozalash") || text.includes("Kesh")) {
     const cacheMsg = `🧹 <b>KESH TOZALANDI!</b>\n\n` +
       `⚡ Telegram Webhook, Node.js xotirasi va vaqtinchalik ma'lumotlar to'liq tozalandi.\n` +
       `🚀 Tizim maksimal tezlikda ishlamoqda.`;
@@ -618,7 +573,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 20. 👑 Sayt narxi Sozlamalari 👑
-  if (text.includes("Sayt narxi Sozlamalari")) {
+  if (text.includes("Sayt narxi") || text.includes("Tarif")) {
     const priceText = `👑 <b>VELNEX SAAS TARIF VA NARXLARI SOZLAMASI:</b>\n\n` +
       `1️⃣ <b>Start Tarifi:</b> <code>290,000 so'm / oy</code> (100 tagacha o'quvchi)\n` +
       `2️⃣ <b>Standart Tarifi:</b> <code>590,000 so'm / oy</code> (500 tagacha o'quvchi, Bot ulangan)\n` +
@@ -642,7 +597,7 @@ const handleIncomingMessage = async (msg) => {
   }
 
   // 22. ⚙️ Sozlamalar ⚙️
-  if (text === "⚙️ Sozlamalar ⚙️") {
+  if (text.includes("Sozlamalar")) {
     const setMsg = `⚙️ <b>UMUMIY TIZIM SOZLAMALARI:</b>\n\n` +
       `• Til: O'zbekcha 🇺🇿\n` +
       `• Valyuta: UZS (So'm)\n` +
@@ -654,9 +609,73 @@ const handleIncomingMessage = async (msg) => {
     return;
   }
 
+  // Oddiy foydalanuvchilar (mijozlar) tugmalari
+  if (text === "🏢 O'quv Markazlarimiz") {
+    let centersText = `🏢 <b>VELNEX TIZIMIDAGI O'QUV MARKAZLAR:</b>\n\n`;
+    REGISTERED_CENTERS.forEach((c, idx) => {
+      centersText += `<b>${idx + 1}. ${c.name}</b>\n` +
+        `👤 <b>Rahbar:</b> ${c.owner}\n` +
+        `🎓 <b>O'quvchilar:</b> ${c.students} nafar\n` +
+        `────────────────────\n`;
+    });
+    centersText += `\n<i>Siz ham o'z o'quv markazingizni tizimga ulab, barcha jarayonlarni avtomatlashtiring!</i>`;
+    await sendTelegramMessage(chatId, centersText, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "👑 Tariflar & Narxlar") {
+    const tariffMsg = `👑 <b>VELNEX SAAS TARIF VA NARXLARI:</b>\n\n` +
+      `1️⃣ <b>Start:</b> <code>290,000 so'm / oy</code>\n• 100 tagacha o'quvchi\n• Davomat va Jurnal\n• To'lovlar va Kassa\n\n` +
+      `2️⃣ <b>Standart:</b> <code>590,000 so'm / oy</code> (Tavsiya etiladi 🌟)\n• 500 tagacha o'quvchi\n• Telegram Bot integratsiyasi\n• SMS xabarnomalar\n\n` +
+      `3️⃣ <b>Pro Enterprise:</b> <code>990,000 so'm / oy</code>\n• Cheksiz o'quvchilar\n• Ko'p filialli tizim\n• 24/7 Shaxsiy menejer\n\n` +
+      `📩 <b>Ulanish uchun:</b> ${ADMIN_NAME_LINK}`;
+    await sendTelegramMessage(chatId, tariffMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "💳 Karta Rekvizitlari") {
+    const cardMsg = `💳 <b>TO'LOV VA LITSENZIYA REKVIZITLARI:</b>\n\n` +
+      `💳 <b>Karta:</b> <code>8600 5304 **** 1234</code>\n` +
+      `👤 <b>Egasi:</b> ABDULAZIZ ABDULHAYEV\n` +
+      `🏦 <b>Bank:</b> O'zmilliybank / Click / Payme\n\n` +
+      `To'lov qilgach, chekni ${ADMIN_NAME_LINK} ga yuboring.`;
+    await sendTelegramMessage(chatId, cardMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "🤖 Student & Parent Botlar") {
+    const botMsg = `🤖 <b>VELNEX TELEGRAM BOTLAR TIZIMI:</b>\n\n` +
+      `• 👨‍💼 <b>Bosh Admin Boti:</b> @Velnex_bot\n` +
+      `• 🎓 <b>O'quvchilar Boti & WebApp:</b> @VelnexStudentBot\n` +
+      `• 👨‍👩‍👧 <b>Ota-onalar Boti:</b> @VelnexParentBot\n` +
+      `• 👨‍🏫 <b>O'qituvchilar Boti:</b> @VelnexTeacherBot\n\n` +
+      `Markazingiz uchun to'liq bot tizimi 1 kunda o'rnatib beriladi!`;
+    await sendTelegramMessage(chatId, botMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "📞 Admin Bilan Bog'lanish") {
+    const contactMsg = `📞 <b>BOSH ADMIN VA DASTURCHI ALOQASI:</b>\n\n` +
+      `👑 <b>Boshqaruvchi:</b> ${ADMIN_NAME_LINK}\n` +
+      `📱 <b>Telefon:</b> <code>+998 (90) 599-06-00</code>\n` +
+      `✈️ <b>Telegram:</b> @Abdulazizbee_701\n` +
+      `📍 <b>Manzil:</b> Namangan shahri, O'zbekiston`;
+    await sendTelegramMessage(chatId, contactMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "🌐 Web Platformaga O'tish") {
+    await sendTelegramMessage(chatId, `🌐 <b>VELNEX CRM Platformasiga Kirish:</b>\nhttp://localhost:5173`, {
+      reply_markup: {
+        inline_keyboard: [[{ text: "🚀 Web Platformani Ochish", url: "http://localhost:5173" }]]
+      }
+    });
+    return;
+  }
+
   // Standart javob
   await sendTelegramMessage(chatId, `❓ Noma'lum buyruq. Iltimos, pastdagi boshqaruv menyusidan foydalaning.`, {
-    reply_markup: getMasterAdminKeyboard()
+    reply_markup: isSuperAdmin ? getMasterAdminKeyboard() : getClientMenuKeyboard()
   });
 };
 
@@ -695,9 +714,9 @@ const pollUpdates = async () => {
     const res = await axios.get(`${TELEGRAM_API}/getUpdates`, {
       params: {
         offset: lastUpdateId + 1,
-        timeout: 10
+        timeout: 4
       },
-      timeout: 15000
+      timeout: 10000
     });
 
     if (res.data && res.data.ok && Array.isArray(res.data.result)) {
@@ -711,10 +730,13 @@ const pollUpdates = async () => {
       }
     }
   } catch (err) {
+    if (err.code !== "ECONNABORTED") {
+      console.error("[Telegram Bot] Polling tick notice:", err.message);
+    }
   }
 
   if (isPollingActive) {
-    setTimeout(pollUpdates, 500);
+    setTimeout(pollUpdates, 300);
   }
 };
 
