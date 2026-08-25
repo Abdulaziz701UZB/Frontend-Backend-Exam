@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   HiOutlinePhone,
@@ -10,69 +10,79 @@ import {
   HiOutlineDevicePhoneMobile,
   HiOutlineShieldCheck,
   HiOutlineSparkles,
-  HiOutlineSquares2X2,
-  HiOutlineUsers,
-  HiOutlineCalendarDays,
-  HiOutlineCurrencyDollar,
-  HiOutlineIdentification
+  HiOutlineChevronLeft,
+  HiOutlineChevronRight
 } from "react-icons/hi2";
 import {
   FaTelegram,
   FaInstagram,
   FaYoutube,
   FaCheck,
-  FaArrowRight,
-  FaChalkboardUser,
-  FaGraduationCap
+  FaArrowRight
 } from "react-icons/fa6";
 import { useEduAuth } from "../../context/EduAuthContext";
 import "./Landing.css";
 
+const heroSlides = [
+  {
+    id: "dashboard",
+    title: "Boshqaruv Markazi (Dashboard)",
+    url: "app.velnex.uz/dashboard",
+    img: "/velnex-hero-banner.png"
+  },
+  {
+    id: "students",
+    title: "O'quvchilar Boshqaruvi",
+    url: "app.velnex.uz/students",
+    img: "/velnex-students-preview.png"
+  },
+  {
+    id: "groups",
+    title: "Kurslar va Guruhlar",
+    url: "app.velnex.uz/groups",
+    img: "/velnex-groups-preview.png"
+  },
+  {
+    id: "attendance",
+    title: "Davomat va Baholar Jurnali",
+    url: "app.velnex.uz/attendance",
+    img: "/velnex-attendance-preview.png"
+  },
+  {
+    id: "teachers",
+    title: "O'qituvchilar va Xodimlar",
+    url: "app.velnex.uz/teachers",
+    img: "/velnex-teachers-preview.png"
+  },
+  {
+    id: "payments",
+    title: "To'lovlar va Kassa Boshqaruvi",
+    url: "app.velnex.uz/payments",
+    img: "/velnex-payments-preview.png"
+  }
+];
+
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useEduAuth();
-  const [selectedScreen, setSelectedScreen] = useState("dashboard");
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
-  const screens = {
-    dashboard: {
-      title: "Boshqaruv Markazi (Dashboard)",
-      desc: "Umumiy tushum, faol guruhlar, jami o'quvchilar va qarzdorliklar real vaqt rejimida.",
-      img: "/velnex-hero-banner.png",
-      badge: "Umumiy Tahlil"
-    },
-    students: {
-      title: "O'quvchilar Boshqaruvi",
-      desc: "O'quvchilarning to'liq ro'yxati, 9 xonali ID, to'lov holati va shaxsiy profili.",
-      img: "/velnex-students-preview.png",
-      badge: "O'quvchilar"
-    },
-    groups: {
-      title: "Kurslar va Guruhlar Boshqaruvi",
-      desc: "Guruhlar dars jadvali, to'lov salomatligi, xonalar va o'qituvchilar taqsimoti.",
-      img: "/velnex-groups-preview.png",
-      badge: "Guruhlar"
-    },
-    attendance: {
-      title: "Davomat va Baholar Jurnali",
-      desc: "Kunlik dars davomati (Keldi / Kelmadi), baholar va test natijalari.",
-      img: "/velnex-attendance-preview.png",
-      badge: "Davomat"
-    },
-    teachers: {
-      title: "O'qituvchilar va Xodimlar",
-      desc: "O'qituvchilar maosh stavkalari, dars soatlari, tajribasi va profillari.",
-      img: "/velnex-teachers-preview.png",
-      badge: "Ustozlar"
-    },
-    payments: {
-      title: "To'lovlar va Kassa Boshqaruvi",
-      desc: "Click, Payme, naqd pul kassa hisoboti, kvitansiyalar va qarzdorlar ro'yxati.",
-      img: "/velnex-payments-preview.png",
-      badge: "Moliya"
-    }
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 3200);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
   };
 
-  const activeData = screens[selectedScreen] || screens.dashboard;
+  const prevSlide = () => {
+    setCurrentSlideIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const activeSlide = heroSlides[currentSlideIndex];
 
   return (
     <div className="velnex-landing-page">
@@ -108,7 +118,6 @@ const Landing = () => {
           </Link>
 
           <nav className="landing-nav-menu">
-            <a href="#showcase" className="nav-item">Platforma Ko'rinishi</a>
             <a href="#features" className="nav-item">Imkoniyatlar</a>
             <a href="#pricing" className="nav-item">Narxlar</a>
             <a href="#stats" className="nav-item">Statistika</a>
@@ -128,7 +137,7 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section with Auto-Rotating Multi-Screen Showcase */}
       <section className="landing-hero-section">
         <div className="landing-container hero-grid">
           <div className="hero-content-col">
@@ -142,7 +151,7 @@ const Landing = () => {
             </h1>
 
             <p className="hero-subtitle">
-              Bepul demo versiyani sinab ko'ring va platformaning barcha imkoniyatlarini o'rganing. Davomat, to'lovlar, Telegram bot va o'quvchilar nazorati bir joyda.
+              Platformaning barcha imkoniyatlari: Davomat, to'lovlar, Telegram bot va o'quvchilar nazorati bir joyda.
             </p>
 
             <div className="hero-action-buttons">
@@ -182,15 +191,40 @@ const Landing = () => {
                 </div>
                 <div className="frame-address-bar">
                   <span className="secure-icon">🔒</span>
-                  <span className="frame-url">app.velnex.uz/dashboard</span>
+                  <span className="frame-url">{activeSlide.url}</span>
+                </div>
+                <div className="frame-nav-arrows">
+                  <button type="button" onClick={prevSlide} className="frame-arrow-btn" aria-label="Oldingi rasm">
+                    <HiOutlineChevronLeft />
+                  </button>
+                  <button type="button" onClick={nextSlide} className="frame-arrow-btn" aria-label="Keyingi rasm">
+                    <HiOutlineChevronRight />
+                  </button>
                 </div>
               </div>
+
               <div className="banner-frame-body">
                 <img
-                  src="/velnex-hero-banner.png"
-                  alt="VELNEX Boshqaruv Markazi"
-                  className="hero-banner-main-img"
+                  key={activeSlide.img}
+                  src={activeSlide.img}
+                  alt={activeSlide.title}
+                  className="hero-banner-main-img fade-in-slide"
                 />
+              </div>
+
+              <div className="banner-frame-footer">
+                <div className="slider-indicators-row">
+                  {heroSlides.map((s, idx) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      className={`slider-pill-indicator ${idx === currentSlideIndex ? "active" : ""}`}
+                      onClick={() => setCurrentSlideIndex(idx)}
+                    >
+                      {s.title.split(" ")[0]}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -218,112 +252,6 @@ const Landing = () => {
           <div className="stat-counter-item">
             <span className="counter-val">24/7</span>
             <span className="counter-title">Telegram Bot Xizmati</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Platform Live Screen Showcase */}
-      <section id="showcase" className="landing-showcase-gallery-section">
-        <div className="landing-container">
-          <div className="section-head-center">
-            <span className="section-subtitle-tag">JONLI KO'RINISHLAR</span>
-            <h2 className="section-main-heading">
-              Platformaning Asosiy Bo'limlari
-            </h2>
-            <p className="section-desc-text">
-              Quyidagi bo'limlardan birini tanlang va VELNEX tizimining haqiqiy sahifalarini ko'zdan kechiring.
-            </p>
-          </div>
-
-          <div className="showcase-tabs-nav">
-            <button
-              type="button"
-              className={`showcase-tab-btn ${selectedScreen === "dashboard" ? "active" : ""}`}
-              onClick={() => setSelectedScreen("dashboard")}
-            >
-              <HiOutlineSquares2X2 className="tab-icon" />
-              <span>Dashboard</span>
-            </button>
-            <button
-              type="button"
-              className={`showcase-tab-btn ${selectedScreen === "students" ? "active" : ""}`}
-              onClick={() => setSelectedScreen("students")}
-            >
-              <HiOutlineUsers className="tab-icon" />
-              <span>O'quvchilar</span>
-            </button>
-            <button
-              type="button"
-              className={`showcase-tab-btn ${selectedScreen === "groups" ? "active" : ""}`}
-              onClick={() => setSelectedScreen("groups")}
-            >
-              <HiOutlineCalendarDays className="tab-icon" />
-              <span>Guruhlar</span>
-            </button>
-            <button
-              type="button"
-              className={`showcase-tab-btn ${selectedScreen === "attendance" ? "active" : ""}`}
-              onClick={() => setSelectedScreen("attendance")}
-            >
-              <HiOutlineAcademicCap className="tab-icon" />
-              <span>Davomat</span>
-            </button>
-            <button
-              type="button"
-              className={`showcase-tab-btn ${selectedScreen === "teachers" ? "active" : ""}`}
-              onClick={() => setSelectedScreen("teachers")}
-            >
-              <FaChalkboardUser className="tab-icon" />
-              <span>O'qituvchilar</span>
-            </button>
-            <button
-              type="button"
-              className={`showcase-tab-btn ${selectedScreen === "payments" ? "active" : ""}`}
-              onClick={() => setSelectedScreen("payments")}
-            >
-              <HiOutlineCurrencyDollar className="tab-icon" />
-              <span>To'lovlar & Kassa</span>
-            </button>
-          </div>
-
-          <div className="showcase-display-wrapper">
-            <div className="showcase-meta-header">
-              <div className="showcase-meta-left">
-                <span className="showcase-badge">{activeData.badge}</span>
-                <h3 className="showcase-active-title">{activeData.title}</h3>
-                <p className="showcase-active-desc">{activeData.desc}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
-                className="btn-showcase-cta"
-              >
-                <span>Sinab Ko'rish</span>
-                <FaArrowRight />
-              </button>
-            </div>
-
-            <div className="showcase-mac-window">
-              <div className="mac-window-top">
-                <div className="frame-dots">
-                  <span className="dot red"></span>
-                  <span className="dot yellow"></span>
-                  <span className="dot green"></span>
-                </div>
-                <div className="mac-url-bar">
-                  <span className="secure-icon">🔒</span>
-                  <span>app.velnex.uz/{selectedScreen}</span>
-                </div>
-              </div>
-              <div className="mac-window-content">
-                <img
-                  key={activeData.img}
-                  src={activeData.img}
-                  alt={activeData.title}
-                  className="showcase-screen-img"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -414,7 +342,7 @@ const Landing = () => {
               Markazingiz hajmiga mos qulay narxlar
             </h2>
             <p className="section-desc-text">
-              Yashirin to'lovlarsiz, 14 kunlik bepul sinov muddati bilan.
+              Yashirin to'lovlarsiz o'quv markazingiz uchun eng qulay tariflar.
             </p>
           </div>
 
@@ -527,7 +455,6 @@ const Landing = () => {
           <div className="footer-nav-col">
             <h4>Sahifalar</h4>
             <ul>
-              <li><a href="#showcase">Platforma Ko'rinishi</a></li>
               <li><a href="#features">Imkoniyatlar</a></li>
               <li><a href="#pricing">Narxlar</a></li>
               <li><Link to="/login">Tizimga Kirish</Link></li>
