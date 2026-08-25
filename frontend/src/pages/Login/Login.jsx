@@ -154,7 +154,7 @@ const Login = () => {
       const success = login(fullPhone, password);
       setIsLoading(false);
       if (success) {
-        navigate("/");
+        navigate("/dashboard");
       }
     }, 350);
   };

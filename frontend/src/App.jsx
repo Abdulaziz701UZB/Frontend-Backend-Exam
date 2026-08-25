@@ -19,6 +19,7 @@ import Reviews from "./pages/Reviews/Reviews";
 import TrialLessons from "./pages/TrialLessons/TrialLessons";
 import TelegramBot from "./pages/TelegramBot/TelegramBot";
 import Login from "./pages/Login/Login";
+import Landing from "./pages/Landing/Landing";
 
 import { EduAuthProvider, useEduAuth } from "./context/EduAuthContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -68,6 +69,7 @@ function ProtectedApp() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/groups" element={<Groups />} />
             <Route path="/groups/:id" element={<Groups />} />
             <Route path="/students" element={<Students />} />
@@ -85,8 +87,9 @@ function ProtectedApp() {
             <Route path="/leads" element={<Leads />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/trial-lessons" element={<TrialLessons />} />
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/telegram" element={<TelegramBot />} />
+            <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>
@@ -100,10 +103,15 @@ function MainRoutes() {
   return (
     <Routes>
       <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+        path="/"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Landing />}
       />
-      <Route path="*" element={<ProtectedApp />} />
+      <Route path="/landing" element={<Landing />} />
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
+      />
+      <Route path="/*" element={<ProtectedApp />} />
     </Routes>
   );
 }

@@ -58,8 +58,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           <div className="nav-section-label">ASOSIY MENYU</div>
 
           <NavLink
-            to="/"
-            end
+            to="/dashboard"
             className={({ isActive }) =>
               `sidebar-link ${isActive ? "active" : ""}`
             }
