@@ -467,7 +467,7 @@ const Landing = () => {
             <h4>Bog'lanish</h4>
             <p>Telefon: <a href="tel:+998905990600">+998 (90) 599-06-00</a></p>
             <p>Telegram: <a href="https://t.me/Abdulaziz7o1" target="_blank" rel="noopener noreferrer">@Abdulaziz7o1</a></p>
-            <p>Manzil: Toshkent shahri, O'zbekiston</p>
+            <p>Manzil: Namangan shahri, O'zbekiston</p>
           </div>
         </div>
 
