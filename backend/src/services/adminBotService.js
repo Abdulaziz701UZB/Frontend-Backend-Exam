@@ -28,6 +28,9 @@ const formatMoney = (amount) => {
   return Number(amount || 0).toLocaleString("uz-UZ") + " so'm";
 };
 
+const SUPER_ADMIN_ID = 7140599182;
+const ADMIN_NAME_LINK = `<a href="tg://user?id=7140599182">ABDULAZIZ</a>`;
+
 // Master Admin Boshqaruv Klaviaturasi
 const getMasterAdminKeyboard = () => {
   return {
@@ -43,6 +46,19 @@ const getMasterAdminKeyboard = () => {
       [{ text: "💾 Zaxira (Backup) 💾" }, { text: "🧹 Keshni tozalash 🧹" }],
       [{ text: "👑 Sayt narxi Sozlamalari 👑" }, { text: "🛠️ Bot Rejimi 🛠️" }],
       [{ text: "⚙️ Sozlamalar ⚙️" }]
+    ],
+    resize_keyboard: true,
+    persistent: true
+  };
+};
+
+// Oddiy Foydalanuvchilar (Mijozlar) uchun Menyu
+const getClientMenuKeyboard = () => {
+  return {
+    keyboard: [
+      [{ text: "🏢 O'quv Markazlarimiz" }, { text: "👑 Tariflar & Narxlar" }],
+      [{ text: "💳 Karta Rekvizitlari" }, { text: "🤖 Student & Parent Botlar" }],
+      [{ text: "📞 Admin Bilan Bog'lanish" }, { text: "🌐 Web Platformaga O'tish" }]
     ],
     resize_keyboard: true,
     persistent: true
@@ -69,19 +85,106 @@ const handleIncomingMessage = async (msg) => {
   if (!msg || !msg.chat) return;
 
   const chatId = msg.chat.id;
-  registeredAdminChatIds.add(chatId);
+  const senderId = Number(msg.from?.id || chatId);
+  const isSuperAdmin = senderId === SUPER_ADMIN_ID;
+
+  if (isSuperAdmin) {
+    registeredAdminChatIds.add(chatId);
+  }
+
+  const senderName = msg.from?.first_name || (isSuperAdmin ? "ABDULAZIZ" : "Foydalanuvchi");
+  const senderLink = `<a href="tg://user?id=${senderId}">${senderName}</a>`;
   const text = (msg.text || "").trim();
 
   // 1. /start & Bosh Menyu
   if (text === "/start" || text === "/help" || text === "⬅️ Bosh Menyu" || text === "Bosh menyu") {
-    const welcomeText = `👋 <b>Assalomu alaykum, Bosh Admin ABDULAZIZ!</b>\n\n` +
-      `🛠️ <b>Bot boshqaruv paneliga xush kelibsiz.</b>\n` +
-      `Quyidagi menyudan foydalanib botni va o'quv markazlar tizimini to'liq boshqarishingiz mumkin:\n\n` +
-      `📩 <b>Murojaat uchun:</b> <a href="https://t.me/Abdulaziz7o1">ABDULAZIZ</a>`;
+    userStepState[chatId] = null;
 
-    await sendTelegramMessage(chatId, welcomeText, {
-      reply_markup: getMasterAdminKeyboard(),
-      disable_web_page_preview: false
+    if (isSuperAdmin) {
+      const welcomeText = `👋 <b>Assalomu alaykum, Bosh Admin ${ADMIN_NAME_LINK}!</b>\n\n` +
+        `🛠️ <b>Bot boshqaruv paneliga xush kelibsiz.</b>\n` +
+        `Quyidagi menyudan foydalanib botni va o'quv markazlar tizimini to'liq boshqarishingiz mumkin:\n\n` +
+        `📩 <b>Murojaat uchun:</b> ${ADMIN_NAME_LINK}`;
+
+      await sendTelegramMessage(chatId, welcomeText, {
+        reply_markup: getMasterAdminKeyboard(),
+        disable_web_page_preview: false
+      });
+      return;
+    } else {
+      const welcomeText = `👋 <b>Assalomu alaykum, Foydalanuvchi ${senderLink}!</b>\n\n` +
+        `🏢 <b>VELNEX O'quv Markazlari Boshqaruv Tizimiga xush kelibsiz.</b>\n` +
+        `Siz bu yerda markazingiz uchun zamonaviy CRM platformani sotib olishingiz, tariflar bilan tanishishingiz va admin bilan bog'lanishingiz mumkin:\n\n` +
+        `📩 <b>Murojaat va sotib olish uchun:</b> ${ADMIN_NAME_LINK}`;
+
+      await sendTelegramMessage(chatId, welcomeText, {
+        reply_markup: getClientMenuKeyboard(),
+        disable_web_page_preview: false
+      });
+      return;
+    }
+  }
+
+  // Oddiy foydalanuvchilar (mijozlar) tugmalari
+  if (text === "🏢 O'quv Markazlarimiz") {
+    let centersText = `🏢 <b>VELNEX TIZIMIDAGI O'QUV MARKAZLAR:</b>\n\n`;
+    REGISTERED_CENTERS.forEach((c, idx) => {
+      centersText += `<b>${idx + 1}. ${c.name}</b>\n` +
+        `👤 <b>Rahbar:</b> ${c.owner}\n` +
+        `🎓 <b>O'quvchilar:</b> ${c.students} nafar\n` +
+        `────────────────────\n`;
+    });
+    centersText += `\n<i>Siz ham o'z o'quv markazingizni tizimga ulab, barcha jarayonlarni avtomatlashtiring!</i>`;
+    await sendTelegramMessage(chatId, centersText, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "👑 Tariflar & Narxlar") {
+    const tariffMsg = `👑 <b>VELNEX SAAS TARIF VA NARXLARI:</b>\n\n` +
+      `1️⃣ <b>Start:</b> <code>290,000 so'm / oy</code>\n• 100 tagacha o'quvchi\n• Davomat va Jurnal\n• To'lovlar va Kassa\n\n` +
+      `2️⃣ <b>Standart:</b> <code>590,000 so'm / oy</code> (Tavsiya etiladi 🌟)\n• 500 tagacha o'quvchi\n• Telegram Bot integratsiyasi\n• SMS xabarnomalar\n\n` +
+      `3️⃣ <b>Pro Enterprise:</b> <code>990,000 so'm / oy</code>\n• Cheksiz o'quvchilar\n• Ko'p filialli tizim\n• 24/7 Shaxsiy menejer\n\n` +
+      `📩 <b>Ulanish uchun:</b> ${ADMIN_NAME_LINK}`;
+    await sendTelegramMessage(chatId, tariffMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "💳 Karta Rekvizitlari") {
+    const cardMsg = `💳 <b>TO'LOV VA LITSENZIYA REKVIZITLARI:</b>\n\n` +
+      `💳 <b>Karta:</b> <code>8600 5304 **** 1234</code>\n` +
+      `👤 <b>Egasi:</b> ABDULAZIZ ABDULHAYEV\n` +
+      `🏦 <b>Bank:</b> O'zmilliybank / Click / Payme\n\n` +
+      `To'lov qilgach, chekni ${ADMIN_NAME_LINK} ga yuboring.`;
+    await sendTelegramMessage(chatId, cardMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "🤖 Student & Parent Botlar") {
+    const botMsg = `🤖 <b>VELNEX TELEGRAM BOTLAR TIZIMI:</b>\n\n` +
+      `• 👨‍💼 <b>Bosh Admin Boti:</b> @Velnex_bot\n` +
+      `• 🎓 <b>O'quvchilar Boti & WebApp:</b> @VelnexStudentBot\n` +
+      `• 👨‍👩‍👧 <b>Ota-onalar Boti:</b> @VelnexParentBot\n` +
+      `• 👨‍🏫 <b>O'qituvchilar Boti:</b> @VelnexTeacherBot\n\n` +
+      `Markazingiz uchun to'liq bot tizimi 1 kunda o'rnatib beriladi!`;
+    await sendTelegramMessage(chatId, botMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "📞 Admin Bilan Bog'lanish") {
+    const contactMsg = `📞 <b>BOSH ADMIN VA DASTURCHI ALOQASI:</b>\n\n` +
+      `👑 <b>Boshqaruvchi:</b> ${ADMIN_NAME_LINK}\n` +
+      `📱 <b>Telefon:</b> <code>+998 (90) 599-06-00</code>\n` +
+      `✈️ <b>Telegram:</b> @Abdulazizbee_701\n` +
+      `📍 <b>Manzil:</b> Namangan shahri, O'zbekiston`;
+    await sendTelegramMessage(chatId, contactMsg, { reply_markup: getClientMenuKeyboard() });
+    return;
+  }
+
+  if (text === "🌐 Web Platformaga O'tish") {
+    await sendTelegramMessage(chatId, `🌐 <b>VELNEX CRM Platformasiga Kirish:</b>\nhttp://localhost:5173`, {
+      reply_markup: {
+        inline_keyboard: [[{ text: "🚀 Web Platformani Ochish", url: "http://localhost:5173" }]]
+      }
     });
     return;
   }
@@ -100,7 +203,7 @@ const handleIncomingMessage = async (msg) => {
       `💡 <b>Ushbu o'quv markaz uchun nechinchi kod berasiz?</b>\n` +
       `<i>Tavsiya etilgan eng birinchi bo'sh kod:</i> <b>${nextCode}</b>\n\n` +
       `Istalgan kod raqamini matn shaklida yuboring (masalan: <b>${nextCode}</b> yoki <b>101</b>), YOKI to'g'ridan-to'g'ri o'quv markaz nomini yuboring:\n\n` +
-      `📩 <b>Murojaat uchun:</b> <a href="https://t.me/Abdulaziz7o1">ABDULAZIZ</a>`;
+      `📩 <b>Murojaat uchun:</b> ${ADMIN_NAME_LINK}`;
 
     await sendTelegramMessage(chatId, addPrompt, {
       reply_markup: {
@@ -245,7 +348,7 @@ const handleIncomingMessage = async (msg) => {
       `<i>Eslatma: Bitta yuborishda 1 ta yoki bir nechta o'quv markaz kodlarini yuborib o'chirishingiz mumkin.</i>\n\n` +
       `<b>Mavjud O'quv Markazlar:</b>\n` +
       `${centersList}\n` +
-      `📩 <b>Murojaat uchun:</b> <a href="https://t.me/Abdulaziz7o1">ABDULAZIZ</a>`;
+      `📩 <b>Murojaat uchun:</b> ${ADMIN_NAME_LINK}`;
 
     await sendTelegramMessage(chatId, delPrompt, {
       reply_markup: {
