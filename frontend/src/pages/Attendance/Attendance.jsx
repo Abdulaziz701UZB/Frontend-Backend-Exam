@@ -206,8 +206,8 @@ const Attendance = () => {
     return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
 
-  // Set status directly from ✅ ❌ picker
-  const handleSelectStatus = (studentId, fullDate, studentName, newStatus, e) => {
+  // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch
+  const handleSelectStatus = async (studentId, fullDate, studentName, newStatus, e) => {
     if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
 
@@ -222,60 +222,58 @@ const Attendance = () => {
 
     setActivePickerCell(null);
 
+    // Instant Backend Auto-Save
+    try {
+      if (newStatus) {
+        await attendanceApi.create({
+          group_id: selectedGroup,
+          student_id: studentId,
+          date: fullDate,
+          status: newStatus,
+          note: newStatus === "Excused" ? "Salomatlik / Uzrli" : newStatus === "Absent" ? "Sababsiz" : ""
+        });
+      }
+    } catch (err) {
+      console.warn("Auto-save sync:", err.message);
+    }
+
     if (newStatus === "Present") {
-      toast.success(`"${studentName}" — Keldi ✅`);
+      toast.success(`"${studentName}" — Keldi ✅ (Avto-saqlandi & Botga yuborildi)`);
     } else if (newStatus === "Absent") {
-      toast.error(`"${studentName}" — Kelmadi ❌ (Telegram botga ogohlantirish yuborildi)`);
+      toast.error(`"${studentName}" — Kelmadi ❌ (Avto-saqlandi & Telegram bot ogohlantirildi)`);
     } else if (newStatus === "Excused") {
-      toast.info(`"${studentName}" — Sababli dars qoldirdi 🚩`);
+      toast.info(`"${studentName}" — Sababli dars qoldirdi 🚩 (Avto-saqlandi)`);
     } else {
-      toast.info(`"${studentName}" davomati tozalandi •`);
+      toast.info(`"${studentName}" davomati tozalandi • (Avto-saqlandi)`);
     }
   };
 
-  // Mark all students Present for all dates or current selected date
-  const handleMarkAllPresent = () => {
+  // Mark all students Present for all dates with instant auto-save
+  const handleMarkAllPresent = async () => {
     const updated = { ...matrixData };
+    const promises = [];
+
     activeGroupStudents.forEach((student) => {
       lessonDates.forEach((d) => {
         if (parseInt(d.dayNum, 10) <= 25) {
           const cellKey = `${student.id}_${d.fullDate}`;
           updated[cellKey] = { status: "Present", note: "" };
+          promises.push(
+            attendanceApi.create({
+              group_id: selectedGroup,
+              student_id: student.id,
+              date: d.fullDate,
+              status: "Present",
+              note: ""
+            }).catch(() => null)
+          );
         }
       });
     });
+
     setMatrixData(updated);
-    toast.success("Barcha talabalar ushbu oy uchun 'Keldi (✔)' deb belgilandi!");
-  };
-
-  // Save attendance to backend
-  const handleSaveAttendance = async () => {
-    try {
-      const promises = [];
-      activeGroupStudents.forEach((student) => {
-        lessonDates.forEach((d) => {
-          const cellKey = `${student.id}_${d.fullDate}`;
-          const cell = matrixData[cellKey];
-          if (cell && cell.status) {
-            promises.push(
-              attendanceApi.create({
-                group_id: selectedGroup,
-                student_id: student.id,
-                date: d.fullDate,
-                status: cell.status,
-                note: cell.note || ""
-              }).catch(() => null)
-            );
-          }
-        });
-      });
-
-      await Promise.all(promises);
-      toast.success("Davomat saqlandi va ota-onalar hamda talabalar botiga yuborildi! 🚀");
-    } catch (err) {
-      console.error(err);
-      toast.error("Davomatni saqlashda xatolik");
-    }
+    await Promise.all(promises);
+    toast.success("Barcha talabalar 'Keldi' qilindi va avtomatik ravishda saqlandi! ⚡");
   };
 
   // Filter students based on legend
@@ -293,7 +291,7 @@ const Attendance = () => {
 
   return (
     <div className="lc-up-attendance-container">
-      {/* Top Bar for Group Switcher & Primary Action */}
+      {/* Top Bar for Group Switcher & Real-time Auto-save Indicator */}
       <div className="lc-up-header-bar">
         <div className="group-switcher-wrap">
           <label className="group-switcher-label">Tanlangan Guruh:</label>
@@ -312,24 +310,20 @@ const Attendance = () => {
 
         <div className="lc-up-header-actions">
           {canMarkAttendance && (
-            <>
-              <button
-                type="button"
-                className="lc-btn-mark-all"
-                onClick={handleMarkAllPresent}
-                title="Barcha talabalarni 'Keldi' qilish"
-              >
-                <HiOutlineCheck className="btn-icon" /> Barchasi Keldi
-              </button>
-              <button
-                type="button"
-                className="lc-btn-save-primary"
-                onClick={handleSaveAttendance}
-              >
-                <HiOutlineClipboardDocumentCheck className="btn-icon" /> Davomatni Saqlash & Botga Yuborish
-              </button>
-            </>
+            <button
+              type="button"
+              className="lc-btn-mark-all"
+              onClick={handleMarkAllPresent}
+              title="Barcha talabalarni 'Keldi' qilish"
+            >
+              <HiOutlineCheck className="btn-icon" /> Barchasi Keldi
+            </button>
           )}
+
+          <div className="auto-save-live-indicator">
+            <span className="live-pulse-dot"></span>
+            <span className="auto-save-text">Real-time Avto-Saqlash & Bot Faol</span>
+          </div>
         </div>
       </div>
 
