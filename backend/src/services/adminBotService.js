@@ -189,21 +189,70 @@ const handleIncomingMessage = async (msg) => {
         reply_markup: getMasterAdminKeyboard()
       });
       return;
+    } else if (currentState.step === "WAIT_DELETE_CODE") {
+      const inputCodes = text.split(/[\s,]+/).map(c => parseInt(c.replace("#", ""))).filter(n => !isNaN(n));
+      const deletedCenters = REGISTERED_CENTERS.filter(c => inputCodes.includes(Number(c.id)) || text.toLowerCase().includes(c.name.toLowerCase()));
+
+      if (deletedCenters.length === 0) {
+        await sendTelegramMessage(chatId, `⚠️ Kiritilgan kodlar bo'yicha o'quv markaz topilmadi. Iltimos, to'g'ri kod kiriting (masalan: <code>1</code> yoki <code>2</code>):`, {
+          reply_markup: {
+            inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+          }
+        });
+        return;
+      }
+
+      const deletedIds = deletedCenters.map(c => c.id);
+      REGISTERED_CENTERS = REGISTERED_CENTERS.filter(c => !deletedIds.includes(c.id));
+      userStepState[chatId] = null;
+
+      let delSummary = "";
+      deletedCenters.forEach((c) => {
+        delSummary += `• <b>${c.name}</b> (Kodi: <code>#${c.id}</code>)\n`;
+      });
+
+      const delSuccessMsg = `🗑️ <b>O'QUV MARKAZ MUVAFFAQIYATLI O'CHIRILDI!</b>\n\n` +
+        `<b>O'chirilgan markazlar:</b>\n` +
+        `${delSummary}\n` +
+        `✅ <i>Tizimdan to'liq tozalandi va litsenziyasi bekor qilindi.</i>`;
+
+      await sendTelegramMessage(chatId, delSuccessMsg, {
+        reply_markup: getMasterAdminKeyboard()
+      });
+      return;
     }
   }
 
   // 3. ❌ O'quv Markaz O'chirish ❌
-  if (text.includes("O'quv Markaz O'chirish")) {
-    let delText = `❌ <b>O'QUV MARKAZNI TIZIMDAN O'CHIRISH / BLOKLASH:</b>\n\n`;
-    REGISTERED_CENTERS.forEach((c, idx) => {
-      delText += `<b>${idx + 1}. ${c.name}</b>\n` +
-        `👤 <b>Rahbar:</b> ${c.owner} (${c.phone})\n` +
-        `📦 <b>Tarif:</b> ${c.tariff}\n` +
-        `────────────────────\n`;
-    });
-    delText += `\n⚠️ <i>O'chirish uchun markaz raqamini CRM paneldan tanlang.</i>`;
+  if (text.includes("O'quv Markaz O'chirish") || text === "/delete_center") {
+    if (REGISTERED_CENTERS.length === 0) {
+      await sendTelegramMessage(chatId, `ℹ️ Hozircha tizimda o'chiradigan o'quv markazlar mavjud emas.`, {
+        reply_markup: getMasterAdminKeyboard()
+      });
+      return;
+    }
 
-    await sendTelegramMessage(chatId, delText, { reply_markup: getMasterAdminKeyboard() });
+    userStepState[chatId] = { step: "WAIT_DELETE_CODE" };
+
+    let centersList = "";
+    REGISTERED_CENTERS.forEach((c) => {
+      centersList += `• <b>${c.name}</b> (Kodi: <code>${c.id}</code>) — ${c.owner}\n`;
+    });
+
+    const delPrompt = `🗑️ <b>O'QUV MARKAZ O'CHIRISH REJIMI FAOLLASHDI!</b>\n\n` +
+      `💡 <b>Qaysi o'quv markazni o'chirmoqchisiz?</b>\n` +
+      `O'chirmoqchi bo'lgan o'quv markaz kodlarini yuboring (masalan: <b>1, 2, 4</b> yoki birga: <b>1, 2, 3</b>).\n` +
+      `<i>Eslatma: Bitta yuborishda 1 ta yoki bir nechta o'quv markaz kodlarini yuborib o'chirishingiz mumkin.</i>\n\n` +
+      `<b>Mavjud O'quv Markazlar:</b>\n` +
+      `${centersList}\n` +
+      `📩 <b>Murojaat uchun:</b> <a href="https://t.me/Abdulaziz7o1">ABDULAZIZ</a>`;
+
+    await sendTelegramMessage(chatId, delPrompt, {
+      reply_markup: {
+        inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_add_center" }]]
+      },
+      disable_web_page_preview: false
+    });
     return;
   }
 
