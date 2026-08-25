@@ -119,6 +119,8 @@ const Landing = () => {
 
           <nav className="landing-nav-menu">
             <a href="#features" className="nav-item">Imkoniyatlar</a>
+            <a href="#features" className="nav-item">Student App</a>
+            <a href="#features" className="nav-item">Ota-ona Ilovasi</a>
             <a href="#pricing" className="nav-item">Narxlar</a>
             <a href="#stats" className="nav-item">Statistika</a>
           </nav>
