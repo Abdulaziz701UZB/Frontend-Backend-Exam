@@ -1,16 +1,16 @@
 /* ==========================================================================
-   LC-UP Style Attendance & Grading Journal
+   LC-UP Style Attendance & Grading Journal (Ultra Professional)
    ========================================================================== */
 
 .lc-up-attendance-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   animation: fadeIn 0.25s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -21,98 +21,100 @@
   align-items: center;
   gap: 16px;
   background: #ffffff;
-  padding: 12px 20px;
-  border-radius: 14px;
+  padding: 12px 24px;
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   flex-wrap: wrap;
 }
 
 .group-switcher-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .group-switcher-label {
   font-size: 13.5px;
   font-weight: 700;
-  color: #475569;
+  color: #334155;
   white-space: nowrap;
 }
 
 .lc-up-group-select {
-  padding: 8px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  font-size: 13.5px;
+  padding: 9px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: #0f172a;
   background: #f8fafc;
   outline: none;
   cursor: pointer;
-  min-width: 280px;
+  min-width: 300px;
   transition: all 0.2s ease;
 }
 
 .lc-up-group-select:focus {
   border-color: #0ea5e9;
+  background: #ffffff;
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
 .lc-up-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .lc-btn-mark-all {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-  font-size: 13px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1.5px solid #bbf7d0;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .lc-btn-mark-all:hover {
-  background: #d1fae5;
+  background: #dcfce7;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
 }
 
 .lc-btn-save-primary {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
   color: #ffffff;
   border: none;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
   transition: all 0.2s ease;
 }
 
 .lc-btn-save-primary:hover {
   background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.4);
 }
 
 /* ---------------- Main 2-Column LC-UP Layout ---------------- */
 .lc-up-main-layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 18px;
+  grid-template-columns: 330px 1fr;
+  gap: 20px;
   align-items: start;
 }
 
@@ -120,36 +122,38 @@
 .lc-left-panel {
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 80px;
 }
 
 .lc-group-passport-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 18px 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
 
 .passport-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .passport-title {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 900;
-  color: #1e293b;
+  color: #0f172a;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
 .passport-more-btn {
-  background: #f1f5f9;
-  border: none;
-  width: 28px;
-  height: 28px;
+  background: #f0f9ff;
+  border: 1px solid #e0f2fe;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: #0284c7;
   display: flex;
@@ -157,14 +161,20 @@
   justify-content: center;
   font-size: 18px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.passport-more-btn:hover {
+  background: #e0f2fe;
+  transform: scale(1.05);
 }
 
 .passport-details-list {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   font-size: 13.5px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .passport-row {
@@ -175,7 +185,7 @@
 
 .passport-label {
   font-weight: 700;
-  color: #334155;
+  color: #475569;
   font-size: 13px;
 }
 
@@ -186,23 +196,27 @@
 }
 
 .passport-val {
-  color: #475569;
-  font-weight: 500;
+  color: #334155;
+  font-weight: 600;
 }
 
 .passport-days-val {
   color: #059669;
-  font-weight: 700;
+  font-weight: 800;
+  background: #ecfdf5;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
 /* Status Legend Filter Pills */
 .passport-legend-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-wrap: wrap;
-  margin: 16px 0 12px;
-  padding: 8px 0;
+  margin: 16px 0 14px;
+  padding: 10px 0;
   border-top: 1px solid #f1f5f9;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -216,6 +230,11 @@
   padding: 2px 4px;
   display: flex;
   align-items: center;
+  border-radius: 4px;
+}
+
+.btn-sort-toggle:hover {
+  background: #f1f5f9;
 }
 
 .legend-pill {
@@ -225,61 +244,73 @@
   font-size: 11px;
   font-weight: 700;
   color: #475569;
-  background: transparent;
-  border: 1px solid transparent;
-  padding: 3px 6px;
-  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .legend-pill:hover,
 .legend-pill.active {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   display: inline-block;
 }
 
 .dot-red { background: #ef4444; }
 .dot-cyan { background: #06b6d4; }
-.dot-green { background: #22c55e; }
-.dot-yellow { background: #eab308; }
+.dot-green { background: #10b981; }
+.dot-yellow { background: #f59e0b; }
 
 /* Student Roster List */
 .passport-student-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  max-height: 480px;
+  gap: 3px;
+  max-height: 440px;
   overflow-y: auto;
   padding-right: 4px;
+}
+
+.passport-student-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.passport-student-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 .roster-student-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.15s ease;
+  border: 1px solid transparent;
 }
 
 .roster-student-item:hover {
   background: #f8fafc;
+  border-color: #e2e8f0;
 }
 
 .student-index {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #64748b;
-  width: 16px;
+  width: 14px;
 }
 
 .status-indicator-dot {
@@ -291,7 +322,7 @@
 
 .student-roster-name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   flex: 1;
   white-space: nowrap;
@@ -300,9 +331,9 @@
 }
 
 .student-roster-phone {
-  font-size: 11px;
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -310,16 +341,21 @@
   background: transparent;
   border: none;
   color: #0284c7;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   padding: 2px;
   display: flex;
   align-items: center;
+  border-radius: 4px;
+}
+
+.roster-item-menu:hover {
+  background: #e0f2fe;
 }
 
 .empty-roster {
   text-align: center;
-  padding: 20px;
+  padding: 24px;
   color: #94a3b8;
   font-size: 13px;
 }
@@ -328,9 +364,9 @@
 .lc-right-panel {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
 }
@@ -340,23 +376,23 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 0 16px;
+  padding: 0 20px;
   border-bottom: 1px solid #e2e8f0;
   background: #ffffff;
   overflow-x: auto;
 }
 
 .lc-tab-button {
-  padding: 14px 16px;
+  padding: 16px 18px;
   background: transparent;
   border: none;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
   position: relative;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .lc-tab-button:hover {
@@ -365,15 +401,15 @@
 
 .lc-tab-button.active {
   color: #0284c7;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .lc-tab-button.active::after {
   content: "";
   position: absolute;
   bottom: 0;
-  left: 12px;
-  right: 12px;
+  left: 14px;
+  right: 14px;
   height: 3px;
   background: #0284c7;
   border-radius: 3px 3px 0 0;
@@ -384,8 +420,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 18px;
-  background: #ffffff;
+  padding: 12px 22px;
+  background: #fafbfc;
   border-bottom: 1px solid #f1f5f9;
   gap: 12px;
   flex-wrap: wrap;
@@ -397,46 +433,53 @@
 }
 
 .lc-year-dropdown {
-  padding: 4px 10px;
-  border: 1px solid #cbd5e1;
+  padding: 5px 12px;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e293b;
   background: #ffffff;
   cursor: pointer;
   outline: none;
+  transition: all 0.2s ease;
+}
+
+.lc-year-dropdown:focus {
+  border-color: #0ea5e9;
 }
 
 .ribbon-months-list {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   overflow-x: auto;
 }
 
 .month-pill-btn {
-  padding: 4px 10px;
+  padding: 5px 12px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
   color: #0284c7;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .month-pill-btn:hover {
   background: #f0f9ff;
   border-color: #bae6fd;
+  transform: translateY(-1px);
 }
 
 .month-pill-btn.active {
-  background: #38bdf8;
-  border-color: #38bdf8;
+  background: #0ea5e9;
+  border-color: #0ea5e9;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.35);
 }
 
 .ribbon-right-controls {
@@ -445,14 +488,21 @@
 }
 
 .ribbon-fullscreen-btn {
-  background: transparent;
-  border: none;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 16px;
   color: #64748b;
   cursor: pointer;
-  padding: 4px;
+  padding: 5px 8px;
   display: flex;
   align-items: center;
+  transition: all 0.2s ease;
+}
+
+.ribbon-fullscreen-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 /* ---------------- Attendance Matrix Table ---------------- */
@@ -463,41 +513,49 @@
 
 .lc-matrix-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
 }
 
 .lc-matrix-table th {
-  padding: 10px 8px;
+  padding: 12px 10px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0284c7;
   text-align: center;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1.5px solid #e2e8f0;
   border-right: 1px solid #f1f5f9;
   background: #f8fafc;
   white-space: nowrap;
+  letter-spacing: 0.3px;
 }
 
 .lc-matrix-table th.th-talabalar {
   text-align: left;
-  padding-left: 18px;
-  min-width: 220px;
+  padding-left: 22px;
+  min-width: 230px;
   position: sticky;
   left: 0;
   background: #f8fafc;
   z-index: 2;
+  border-right: 1.5px solid #e2e8f0;
 }
 
 .lc-matrix-table th.th-date-col {
-  min-width: 54px;
+  min-width: 58px;
 }
 
 .lc-matrix-table td {
-  padding: 8px 6px;
+  padding: 10px 6px;
   border-bottom: 1px solid #f1f5f9;
   border-right: 1px solid #f8fafc;
   vertical-align: middle;
+  height: 52px;
+}
+
+.lc-matrix-table tr:hover td {
+  background: #fafbfc;
 }
 
 .td-student-info {
@@ -505,40 +563,47 @@
   left: 0;
   background: #ffffff;
   z-index: 1;
-  padding-left: 18px !important;
+  padding-left: 22px !important;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   white-space: nowrap;
+  border-right: 1.5px solid #e2e8f0 !important;
+  height: 52px;
+}
+
+.lc-matrix-table tr:hover .td-student-info {
+  background: #fafbfc;
 }
 
 .td-student-num {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 800;
   color: #64748b;
   width: 14px;
 }
 
 .td-student-name {
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #0f172a;
   cursor: pointer;
+  font-size: 13.5px;
+  transition: color 0.15s ease;
 }
 
 .td-student-name:hover {
   color: #0284c7;
-  text-decoration: underline;
 }
 
 .td-attendance-cell {
   text-align: center;
   cursor: pointer;
   user-select: none;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .td-attendance-cell:hover {
-  background: #f0f9ff;
+  background: #f0f9ff !important;
 }
 
 /* Circular Badges matching Image 2 */
@@ -547,26 +612,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cell-circle:hover {
-  transform: scale(1.12);
+  transform: scale(1.2);
 }
 
-/* Present: solid blue with white check */
+/* Present: solid sky-blue with white check */
 .circle-present {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #38bdf8;
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(56, 189, 248, 0.3);
+  box-shadow: 0 2px 6px rgba(14, 165, 233, 0.35);
 }
 
 .circle-icon {
   font-size: 18px;
-  stroke-width: 2.5;
+  stroke-width: 2.8;
 }
 
 /* Excused: rounded box with green flag */
@@ -575,11 +640,12 @@
   height: 28px;
   border-radius: 12px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid #d1fae5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .circle-flag-green {
-  color: #22c55e;
+  color: #10b981;
   font-size: 15px;
 }
 
@@ -588,12 +654,13 @@
   width: 38px;
   height: 28px;
   border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #fee2e2;
+  background: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.08);
 }
 
 .circle-flag-red {
-  color: #ef4444;
+  color: #e11d48;
   font-size: 15px;
 }
 
@@ -619,6 +686,12 @@
   height: 6px;
   background: #cbd5e1;
   border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.td-attendance-cell:hover .empty-dot {
+  background: #0ea5e9;
+  transform: scale(1.5);
 }
 
 .empty-matrix-msg {
@@ -629,7 +702,7 @@
 
 /* ---------------- Grades Tab Table ---------------- */
 .lc-grades-wrapper {
-  padding: 16px;
+  padding: 20px;
   overflow-x: auto;
 }
 
@@ -640,28 +713,29 @@
 
 .lc-grades-table th {
   text-align: left;
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 800;
   color: #475569;
   background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1.5px solid #e2e8f0;
 }
 
 .lc-grades-table td {
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-bottom: 1px solid #f1f5f9;
   font-size: 13.5px;
 }
 
 .lc-grade-input {
-  width: 60px;
+  width: 64px;
   padding: 6px 10px;
-  border: 1px solid #cbd5e1;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
   font-weight: 800;
   text-align: center;
   color: #0284c7;
+  font-size: 14px;
 }
 
 .checkbox-wrap {
@@ -669,12 +743,14 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
+  font-weight: 600;
+  color: #334155;
   cursor: pointer;
 }
 
 .lc-comment-input {
   width: 100%;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 13px;
@@ -684,25 +760,25 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   background: #f0fdf4;
   color: #16a34a;
   border: 1px solid #bbf7d0;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .lc-empty-tab-panel {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: #64748b;
 }
 
 .empty-tab-icon {
-  font-size: 40px;
-  color: #38bdf8;
+  font-size: 44px;
+  color: #0ea5e9;
   margin-bottom: 12px;
 }
 
@@ -735,6 +811,12 @@ body.dark-theme .lc-matrix-table th {
 
 body.dark-theme .td-student-info {
   background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-theme .lc-matrix-table tr:hover td,
+body.dark-theme .lc-matrix-table tr:hover .td-student-info {
+  background: #1e293b;
 }
 
 body.dark-theme .lc-matrix-table td {
@@ -751,5 +833,8 @@ body.dark-theme .circle-absent {
 @media (max-width: 1080px) {
   .lc-up-main-layout {
     grid-template-columns: 1fr;
+  }
+  .lc-left-panel {
+    position: static;
   }
 }

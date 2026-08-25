@@ -432,7 +432,14 @@ const Attendance = () => {
                         {st.fullName}
                       </span>
                       <span className="student-roster-phone">
-                        {st.phone ? `(${st.phone.slice(-9, -7)}) ${st.phone.slice(-7, -4)}-${st.phone.slice(-4, -2)}-${st.phone.slice(-2)}` : "(90) 599-06-00"}
+                        {(() => {
+                          const digits = String(st.phone || "").replace(/\D/g, "");
+                          if (digits.length >= 9) {
+                            const last9 = digits.slice(-9);
+                            return `(${last9.slice(0, 2)}) ${last9.slice(2, 5)}-${last9.slice(5, 7)}-${last9.slice(7)}`;
+                          }
+                          return st.phone || "(90) 599-06-00";
+                        })()}
                       </span>
                       <button 
                         className="roster-item-menu"
