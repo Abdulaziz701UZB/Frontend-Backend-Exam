@@ -154,10 +154,12 @@ const Attendance = () => {
     const newGrades = {};
 
     activeGroupStudents.forEach((student, sIdx) => {
-      lessonDates.forEach((d, dIdx) => {
+      lessonDates.forEach((d) => {
         const cellKey = `${student.id}_${d.fullDate}`;
         const found = attendanceRecords.find(
-          (r) => r.groupId === selectedGroup && r.studentId === student.id && r.date === d.fullDate
+          (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
+                 String(r.studentId || r.student_id) === String(student.id) &&
+                 r.date === d.fullDate
         );
 
         if (found) {
@@ -166,32 +168,21 @@ const Attendance = () => {
             note: found.note || ""
           };
         } else {
-          // Mock realistic default distribution matching image 2: majority present, a few excused (flag), a few absent
-          const isPast = parseInt(d.dayNum, 10) <= 25;
-          if (isPast) {
-            let defaultStatus = "Present";
-            if ((sIdx === 0 && dIdx === 1) || (sIdx === 2 && (dIdx === 3 || dIdx === 4 || dIdx === 5))) {
-              defaultStatus = "Excused";
-            } else if ((sIdx === 5 && (dIdx === 0 || dIdx === 6 || dIdx === 7)) || (sIdx === 6 && (dIdx === 1 || dIdx === 2 || dIdx === 7))) {
-              defaultStatus = "Absent";
-            }
-            newMatrix[cellKey] = { status: defaultStatus, note: defaultStatus === "Excused" ? "Sababli" : "" };
-          } else {
-            newMatrix[cellKey] = { status: null, note: "" };
-          }
+          // Default is unmarked (dot .)
+          newMatrix[cellKey] = { status: null, note: "" };
         }
       });
 
       newGrades[student.id] = {
-        score: 9 + (sIdx % 2),
+        score: 10,
         homework: true,
-        comment: "Muntazam darsga tayyor"
+        comment: ""
       };
     });
 
     setMatrixData(newMatrix);
     setGradesData(newGrades);
-  }, [selectedGroup, selectedMonth, selectedYear, activeGroupStudents.length]);
+  }, [selectedGroup, selectedMonth, selectedYear, activeGroupStudents.length, attendanceRecords.length]);
 
   // Active cell picker state (shows ✅ ❌ on two sides when clicked)
   const [activePickerCell, setActivePickerCell] = useState(null);
@@ -665,10 +656,6 @@ const Attendance = () => {
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="grades-lock-info-badge">
-                  <HiOutlineLockClosed className="inline-icon-xs text-amber" />
-                  <span>Darsga kelmagan o'quvchilarga baho qo'yish bloklangan</span>
                 </div>
               </div>
 
