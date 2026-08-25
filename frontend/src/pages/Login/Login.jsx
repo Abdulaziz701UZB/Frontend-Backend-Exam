@@ -31,7 +31,7 @@ const TRANSLATIONS = {
     checking: "Tekshirilmoqda...",
     qrBtn: "QR Kod orqali kirish (Admin Bot)",
     qrTitle: "Admin Bot QR Kod orqali Kirish",
-    qrStep1: "1. Telegram ilovasida @VelnexAdminBot ni oching.",
+    qrStep1: "1. Telegram ilovasida @Velnex_bot ni oching.",
     qrStep2: "2. Botdagi /login buyrug'ini yuboring yoki kamerangiz bilan QR kodni skanerlang.",
     openBot: "Admin Botni Telegramda Ochish",
     lightMode: "Yorug'",
@@ -420,7 +420,7 @@ const Login = () => {
 
               <div className="qr-modal-actions">
                 <a
-                  href="https://t.me/VelnexAdminBot"
+                  href="https://t.me/Velnex_bot"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-open-telegram-bot"

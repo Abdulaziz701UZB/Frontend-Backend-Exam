@@ -45,10 +45,10 @@ const TelegramBot = () => {
     adminBot: {
       id: "admin",
       name: "Bosh Admin & Rahbar Boti",
-      token: "",
+      token: "8964905885:AAEwo6WlKaruDcXrSQA-2oIezWdN21zMrvw",
       adminChatId: "",
-      username: "@VelnexAdminBot",
-      description: "Yangi arizalar (Lidlar) signali, kechki kunlik hisobot va ommaviy e'lonlar",
+      username: "@Velnex_bot",
+      description: "To'lovlar kvitansiyalari, kassa hisoboti, guruhlar, lidlar va qarzdorlar nazorati",
       isEnabled: true,
     },
     autoNotifyAttendance: true,

@@ -5,6 +5,7 @@ import apiRoutes from "./routes/index.js";
 import setupSwagger from "./swagger/swagger.js";
 import sequelize from "./config/database.js";
 import { seedDatabase } from "./config/seed.js";
+import { initAdminTelegramBot } from "./services/adminBotService.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
     message: "VELNEX API Server faol ishlamoqda",
     database: "PostgreSQL (Sequelize ORM) ulangan",
     swaggerDocs: "http://localhost:5000/api-docs",
+    telegramBot: "@Velnex_bot (Faol)",
     modulesCount: 11,
   });
 });
@@ -37,5 +39,12 @@ app.listen(PORT, async () => {
     console.log("PostgreSQL (Sequelize ORM) muvaffaqiyatli ulandi va ma'lumotlar sinxronlandi!");
   } catch (error) {
     console.log("Sequelize ulanish xatosi:", error.message);
+  }
+
+  try {
+    initAdminTelegramBot();
+    console.log("VELNEX Super Admin Telegram Bot (@Velnex_bot) muvaffaqiyatli ishga tushdi va xabarlarni qabul qilmoqda!");
+  } catch (botErr) {
+    console.log("Telegram Bot ishga tushirish xatosi:", botErr.message);
   }
 });

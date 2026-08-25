@@ -1,6 +1,7 @@
 import { Payment, Student } from "../models/index.js";
 import { validatePayment } from "../validation/paymentValidation.js";
 import { Op } from "sequelize";
+import { sendSuperAdminNotification } from "../services/adminBotService.js";
 
 export const createPayment = async (req, res) => {
   const { error } = validatePayment(req.body);
@@ -19,6 +20,19 @@ export const createPayment = async (req, res) => {
       recorded_by: req.body.recorded_by || req.body.recordedBy || "Admin",
     };
     const payment = await Payment.create(newPaymentData);
+
+    const formattedAmount = Number(payment.amount).toLocaleString("uz-UZ") + " so'm";
+    const notifyMsg = `🧾 <b>YANGI TO'LOV QABUL QILINDI!</b>\n\n` +
+      `👤 <b>O'quvchi:</b> ${payment.student_name}\n` +
+      `📚 <b>Guruh:</b> ${payment.group_name || "Asosiy guruh"}\n` +
+      `💰 <b>Summa:</b> <code>${formattedAmount}</code>\n` +
+      `💳 <b>To'lov Usuli:</b> ${payment.payment_method}\n` +
+      `📅 <b>Oy:</b> ${payment.month}\n` +
+      `🆔 <b>Chek ID:</b> <code>#${payment.id}</code>\n` +
+      `⏰ <b>Sana:</b> ${payment.date} ${new Date().toLocaleTimeString("uz-UZ")}\n\n` +
+      `✅ <i>To'lov muvaffaqiyatli tizim kassa bazasiga yozildi.</i>`;
+    sendSuperAdminNotification(notifyMsg);
+
     res.status(201).json(payment);
   } catch (err) {
     res.status(500).json({ error: err.message });
