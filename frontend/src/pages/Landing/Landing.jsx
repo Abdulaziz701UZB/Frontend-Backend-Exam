@@ -11,7 +11,8 @@ import {
   HiOutlineShieldCheck,
   HiOutlineSparkles,
   HiOutlineChevronLeft,
-  HiOutlineChevronRight
+  HiOutlineChevronRight,
+  HiOutlineLockClosed
 } from "react-icons/hi2";
 import {
   FaTelegram,
@@ -195,7 +196,7 @@ const Landing = () => {
                   <span className="dot green"></span>
                 </div>
                 <div className="frame-address-bar">
-                  <span className="secure-icon">🔒</span>
+                  <HiOutlineLockClosed className="secure-icon" />
                   <span className="frame-url">{activeSlide.url}</span>
                 </div>
                 <div className="frame-nav-arrows">

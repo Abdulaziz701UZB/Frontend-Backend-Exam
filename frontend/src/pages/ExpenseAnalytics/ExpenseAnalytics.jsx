@@ -479,7 +479,11 @@ const ExpenseAnalytics = () => {
           <div className="custom-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">
-                {editingExpense ? "✏️ Xarajatni Tahrirlash" : "➕ Yangi Xarajat Qo'shish"}
+                {editingExpense ? (
+                  <><HiOutlinePencilSquare className="inline-icon-sm text-indigo" /> Xarajatni Tahrirlash</>
+                ) : (
+                  <><HiOutlinePlus className="inline-icon-sm text-indigo" /> Yangi Xarajat Qo'shish</>
+                )}
               </h3>
               <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
                 <HiXMark />

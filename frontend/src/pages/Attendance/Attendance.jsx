@@ -573,33 +573,33 @@ const Attendance = () => {
                                     type="button"
                                     className="action-btn-choice btn-choice-present"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Present", e)}
-                                    title="Keldi (✅)"
+                                    title="Keldi"
                                   >
-                                    ✅
+                                    <HiOutlineCheck className="choice-icon text-emerald" />
                                   </button>
                                   <button
                                     type="button"
                                     className="action-btn-choice btn-choice-absent"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Absent", e)}
-                                    title="Kelmadi (❌)"
+                                    title="Kelmadi"
                                   >
-                                    ❌
+                                    <HiOutlineXMark className="choice-icon text-rose" />
                                   </button>
                                   <button
                                     type="button"
                                     className="action-btn-choice btn-choice-excused"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e)}
-                                    title="Sababli (🚩)"
+                                    title="Sababli"
                                   >
-                                    🚩
+                                    <HiOutlineFlag className="choice-icon text-amber" />
                                   </button>
                                   <button
                                     type="button"
                                     className="action-btn-choice btn-choice-clear"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, null, e)}
-                                    title="Tozalash (•)"
+                                    title="Tozalash"
                                   >
-                                    •
+                                    <span className="choice-dot">•</span>
                                   </button>
                                 </div>
                               ) : (

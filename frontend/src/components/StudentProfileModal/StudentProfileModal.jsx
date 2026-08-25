@@ -359,9 +359,9 @@ const StudentProfileModal = ({ student, onClose }) => {
                 <button
                   type="button"
                   className="btn btn-primary btn-sm"
-                  onClick={() => toast.success(`🎉 "${student.fullName}" ga tug'ilgan kun tabriknomasi va 15% chegirma promo-kodi yuborildi!`)}
+                  onClick={() => toast.success(`"${student.fullName}" ga tug'ilgan kun tabriknomasi va 15% chegirma promo-kodi yuborildi!`)}
                 >
-                  <HiOutlineSparkles /> 🎉 Tabrik Xabarnomasi & Chegirma Yuborish
+                  <HiOutlineSparkles /> Tabrik Xabarnomasi & Chegirma Yuborish
                 </button>
               </div>
             </div>

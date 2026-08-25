@@ -630,7 +630,11 @@ const Groups = () => {
                     <div className="text-xs text-muted mt-0.5">Sig'im: <strong>{groupFin.maxRoomCapacity} o'rin</strong> | Qatnashuvchi: <strong>{groupFin.activeCount} o'quvchi</strong></div>
                   </div>
                   <span className={`group-meta-pill ${groupFin.availableSeats > 0 ? "pill-seats-free" : "pill-seats-full"}`}>
-                    {groupFin.availableSeats > 0 ? `🟢 ${groupFin.availableSeats} ta bo'sh o'rin mavjud` : "🔴 Guruh to'lgan"}
+                    {groupFin.availableSeats > 0 ? (
+                      <><HiOutlineCheckCircle className="inline-icon-xs text-emerald" /> {groupFin.availableSeats} ta bo'sh o'rin mavjud</>
+                    ) : (
+                      <><HiOutlineExclamationCircle className="inline-icon-xs text-rose" /> Guruh to'lgan</>
+                    )}
                   </span>
                 </div>
               </div>
