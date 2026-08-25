@@ -600,10 +600,77 @@
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
+  position: relative;
 }
 
 .td-attendance-cell:hover {
   background: #f0f9ff !important;
+}
+
+.td-attendance-cell.picker-open {
+  background: #e0f2fe !important;
+  z-index: 10;
+}
+
+/* Inline ✅ ❌ Quick Action Picker */
+.inline-action-picker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: #ffffff;
+  border: 1.5px solid #0ea5e9;
+  border-radius: 20px;
+  padding: 3px 6px;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.25);
+  animation: popScale 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+}
+
+@keyframes popScale {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.action-btn-choice {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn-choice-present:hover {
+  transform: scale(1.25);
+  background: #dcfce7;
+}
+
+.btn-choice-absent:hover {
+  transform: scale(1.25);
+  background: #fee2e2;
+}
+
+.btn-choice-excused:hover {
+  transform: scale(1.25);
+  background: #fef3c7;
+}
+
+.btn-choice-clear {
+  font-size: 18px;
+  font-weight: 900;
+  color: #94a3b8;
+}
+
+.btn-choice-clear:hover {
+  transform: scale(1.25);
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 /* Circular Badges matching Image 2 */

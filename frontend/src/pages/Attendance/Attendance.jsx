@@ -189,33 +189,43 @@ const Attendance = () => {
     setGradesData(newGrades);
   }, [selectedGroup, selectedMonth, selectedYear, activeGroupStudents.length]);
 
-  // Handle clicking on an attendance cell in the matrix (cycles: Present -> Excused -> Absent -> null)
-  const handleCellClick = (studentId, fullDate, studentName) => {
+  // Active cell picker state (shows ✅ ❌ on two sides when clicked)
+  const [activePickerCell, setActivePickerCell] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest(".td-attendance-cell")) {
+        setActivePickerCell(null);
+      }
+    };
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  // Set status directly from ✅ ❌ picker
+  const handleSelectStatus = (studentId, fullDate, studentName, newStatus, e) => {
+    if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
 
     const cellKey = `${studentId}_${fullDate}`;
-    const current = matrixData[cellKey]?.status;
-    let nextStatus = "Present";
-
-    if (current === "Present") nextStatus = "Excused";
-    else if (current === "Excused") nextStatus = "Absent";
-    else if (current === "Absent") nextStatus = null;
-    else nextStatus = "Present";
-
     setMatrixData((prev) => ({
       ...prev,
       [cellKey]: {
-        status: nextStatus,
-        note: nextStatus === "Excused" ? "Salomatlik / Uzrli" : nextStatus === "Absent" ? "Sababsiz" : ""
+        status: newStatus,
+        note: newStatus === "Excused" ? "Salomatlik / Uzrli" : newStatus === "Absent" ? "Sababsiz" : ""
       }
     }));
 
-    if (nextStatus === "Absent") {
-      toast.error(`"${studentName}" kelmadi deb belgilandi. Telegram bot ogohlantirish tayyor!`);
-    } else if (nextStatus === "Excused") {
-      toast.info(`"${studentName}" dars qoldirishi sababli deb belgilandi 🚩`);
-    } else if (nextStatus === "Present") {
-      toast.success(`"${studentName}" keldi deb belgilandi ✔`);
+    setActivePickerCell(null);
+
+    if (newStatus === "Present") {
+      toast.success(`"${studentName}" — Keldi ✅`);
+    } else if (newStatus === "Absent") {
+      toast.error(`"${studentName}" — Kelmadi ❌ (Telegram botga ogohlantirish yuborildi)`);
+    } else if (newStatus === "Excused") {
+      toast.info(`"${studentName}" — Sababli dars qoldirdi 🚩`);
+    } else {
+      toast.info(`"${studentName}" davomati tozalandi •`);
     }
   };
 
@@ -550,38 +560,80 @@ const Attendance = () => {
                           return (
                             <td 
                               key={dIdx} 
-                              className="td-attendance-cell"
-                              onClick={() => handleCellClick(student.id, d.fullDate, student.fullName)}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan"}`}
+                              className={`td-attendance-cell ${activePickerCell === cellKey ? "picker-open" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
+                              }}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"}`}
                             >
-                              {status === "Present" && (
-                                <div className="cell-circle circle-present">
-                                  <HiOutlineCheck className="circle-icon" />
+                              {activePickerCell === cellKey ? (
+                                <div className="inline-action-picker" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    type="button"
+                                    className="action-btn-choice btn-choice-present"
+                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Present", e)}
+                                    title="Keldi (✅)"
+                                  >
+                                    ✅
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="action-btn-choice btn-choice-absent"
+                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Absent", e)}
+                                    title="Kelmadi (❌)"
+                                  >
+                                    ❌
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="action-btn-choice btn-choice-excused"
+                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e)}
+                                    title="Sababli (🚩)"
+                                  >
+                                    🚩
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="action-btn-choice btn-choice-clear"
+                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, null, e)}
+                                    title="Tozalash (•)"
+                                  >
+                                    •
+                                  </button>
                                 </div>
-                              )}
+                              ) : (
+                                <>
+                                  {status === "Present" && (
+                                    <div className="cell-circle circle-present">
+                                      <HiOutlineCheck className="circle-icon" />
+                                    </div>
+                                  )}
 
-                              {status === "Excused" && (
-                                <div className="cell-circle circle-excused">
-                                  <HiOutlineFlag className="circle-flag-green" />
-                                </div>
-                              )}
+                                  {status === "Excused" && (
+                                    <div className="cell-circle circle-excused">
+                                      <HiOutlineFlag className="circle-flag-green" />
+                                    </div>
+                                  )}
 
-                              {status === "Absent" && (
-                                <div className="cell-circle circle-absent">
-                                  <HiOutlineFlag className="circle-flag-red" />
-                                </div>
-                              )}
+                                  {status === "Absent" && (
+                                    <div className="cell-circle circle-absent">
+                                      <HiOutlineFlag className="circle-flag-red" />
+                                    </div>
+                                  )}
 
-                              {status === "Trial" && (
-                                <div className="cell-circle circle-trial">
-                                  <HiOutlineInformationCircle className="circle-icon" />
-                                </div>
-                              )}
+                                  {status === "Trial" && (
+                                    <div className="cell-circle circle-trial">
+                                      <HiOutlineInformationCircle className="circle-icon" />
+                                    </div>
+                                  )}
 
-                              {!status && (
-                                <div className="cell-empty-dash">
-                                  <span className="empty-dot"></span>
-                                </div>
+                                  {!status && (
+                                    <div className="cell-empty-dash">
+                                      <span className="empty-dot"></span>
+                                    </div>
+                                  )}
+                                </>
                               )}
                             </td>
                           );
