@@ -29,7 +29,7 @@ const formatMoney = (amount) => {
 };
 
 const SUPER_ADMIN_ID = 7140599182;
-const ADMIN_NAME_LINK = `<a href="tg://user?id=7140599182">ABDULAZIZ</a>`;
+const ADMIN_NAME_LINK = `<a href="https://t.me/Abdulazizbee_701">ABDULAZIZ</a>`;
 
 // Master Admin Boshqaruv Klaviaturasi
 const getMasterAdminKeyboard = () => {
