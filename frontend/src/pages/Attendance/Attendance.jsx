@@ -197,10 +197,51 @@ const Attendance = () => {
     return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
 
+  // 1-Qoida: Dars tugaganidan so'ng 1 soatgacha tahrirlash mumkin (faqat O'qituvchilar uchun). Admin esa istalgan payt o'zgartira oladi.
+  const isLessonTimeLocked = (fullDate) => {
+    if (currentRole === "admin") return false; // Admin cheklovsiz tahrirlaydi
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    // O'tib ketgan sana (kecha yoki oldingi kunlar)
+    if (fullDate < todayStr) {
+      return true;
+    }
+
+    // Kelajak sanasi
+    if (fullDate > todayStr) {
+      return false;
+    }
+
+    // Bugungi dars: dars tugashidan so'ng 1 soatgacha
+    const scheduleTimeStr = currentGroupObj?.time || currentGroupObj?.scheduleTime || "14:00 - 16:00";
+    const parts = scheduleTimeStr.split("-");
+    if (parts.length === 2) {
+      const endPart = parts[1].trim(); // "16:00"
+      const [endHour, endMin] = endPart.split(":").map(Number);
+      if (!isNaN(endHour)) {
+        const lockHour = endHour + 1; // 1 soatlik vaqt oynasi
+        const currentHour = today.getHours();
+        const currentMin = today.getMinutes();
+        if (currentHour > lockHour || (currentHour === lockHour && currentMin > (endMin || 0))) {
+          return true; // 1 soatdan ko'p vaqt o'tgan -> Qulflangan
+        }
+      }
+    }
+
+    return false;
+  };
+
   // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch
   const handleSelectStatus = async (studentId, fullDate, studentName, newStatus, e) => {
     if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
+
+    if (isLessonTimeLocked(fullDate)) {
+      toast.error("⏱️ Ushbu dars davomati qulflangan! Qoida bo'yicha dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin. O'zgartirish uchun Adminga murojaat qiling.");
+      return;
+    }
 
     const cellKey = `${studentId}_${fullDate}`;
     setMatrixData((prev) => ({
@@ -549,12 +590,16 @@ const Attendance = () => {
                           return (
                             <td 
                               key={dIdx} 
-                              className={`td-attendance-cell ${activePickerCell === cellKey ? "picker-open" : ""}`}
+                              className={`td-attendance-cell ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
+                                if (isLessonTimeLocked(d.fullDate)) {
+                                  toast.error("⏱️ Ushbu dars davomati qulflangan (Dars tugaganiga 1 soatdan ko'p vaqt o'tgan). O'zgartirish uchun Adminga murojaat qiling!");
+                                  return;
+                                }
                                 setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
                               }}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan ⏱️)" : ""}`}
                             >
                               {activePickerCell === cellKey ? (
                                 <div className="inline-action-picker" onClick={(e) => e.stopPropagation()}>
@@ -708,7 +753,7 @@ const Attendance = () => {
                           )}
                         </td>
                         <td>
-                          {isPresent ? (
+                          {isPresent && !isLessonTimeLocked(activeDateStr) ? (
                             <input
                               type="number"
                               min="1"
@@ -722,6 +767,20 @@ const Attendance = () => {
                               }
                               className="lc-grade-input"
                             />
+                          ) : isPresent && isLessonTimeLocked(activeDateStr) ? (
+                            <div
+                              className="locked-grade-cell"
+                              onClick={() =>
+                                toast.error(
+                                  `⏱️ Ushbu dars baholari qulflangan (Dars tugaganiga 1 soatdan ko'p vaqt o'tgan). O'zgartirish uchun Adminga murojaat qiling.`
+                                )
+                              }
+                              title="Dars tugaganiga 1 soatdan ko'p vaqt o'tgan (Qulflangan)"
+                            >
+                              <span className="badge-absent-lock" style={{ background: '#f8fafc', color: '#64748b', borderColor: '#e2e8f0' }}>
+                                <HiOutlineLockClosed className="inline-icon-xs" /> {gradesData[st.id]?.score || 10} ball
+                              </span>
+                            </div>
                           ) : (
                             <div
                               className="locked-grade-cell"
@@ -739,13 +798,13 @@ const Attendance = () => {
                           )}
                         </td>
                         <td>
-                          <label className={`checkbox-wrap ${!isPresent ? "disabled-checkbox" : ""}`}>
+                          <label className={`checkbox-wrap ${!isPresent || isLessonTimeLocked(activeDateStr) ? "disabled-checkbox" : ""}`}>
                             <input
                               type="checkbox"
-                              disabled={!isPresent}
+                              disabled={!isPresent || isLessonTimeLocked(activeDateStr)}
                               checked={isPresent ? (gradesData[st.id]?.homework ?? true) : false}
                               onChange={(e) =>
-                                isPresent &&
+                                isPresent && !isLessonTimeLocked(activeDateStr) &&
                                 setGradesData((prev) => ({
                                   ...prev,
                                   [st.id]: { ...prev[st.id], homework: e.target.checked }
@@ -758,25 +817,27 @@ const Attendance = () => {
                         <td>
                           <input
                             type="text"
-                            disabled={!isPresent}
+                            disabled={!isPresent || isLessonTimeLocked(activeDateStr)}
                             value={isPresent ? (gradesData[st.id]?.comment || "") : ""}
                             onChange={(e) =>
-                              isPresent &&
+                              isPresent && !isLessonTimeLocked(activeDateStr) &&
                               setGradesData((prev) => ({
                                 ...prev,
                                 [st.id]: { ...prev[st.id], comment: e.target.value }
                               }))
                             }
                             placeholder={
-                              isPresent
-                                ? "Darsdagi faollik izohi..."
-                                : "Darsda qatnashmaganligi sababli baholanmaydi"
+                              !isPresent
+                                ? "Darsda qatnashmaganligi sababli baholanmaydi"
+                                : isLessonTimeLocked(activeDateStr)
+                                ? "Dars qulflangan (O'zgartirib bo'lmaydi)"
+                                : "Darsdagi faollik izohi..."
                             }
-                            className={`lc-comment-input ${!isPresent ? "disabled-input" : ""}`}
+                            className={`lc-comment-input ${!isPresent || isLessonTimeLocked(activeDateStr) ? "disabled-input" : ""}`}
                           />
                         </td>
                         <td>
-                          {isPresent ? (
+                          {isPresent && !isLessonTimeLocked(activeDateStr) ? (
                             <button
                               type="button"
                               className="btn-tg-grade"
@@ -788,6 +849,10 @@ const Attendance = () => {
                             >
                               <FaTelegram /> Yuborish
                             </button>
+                          ) : isPresent && isLessonTimeLocked(activeDateStr) ? (
+                            <span className="tg-disabled-tag">
+                              <HiOutlineLockClosed className="inline-icon-xs" /> Qulflangan
+                            </span>
                           ) : (
                             <span className="tg-disabled-tag">
                               <HiOutlineNoSymbol className="inline-icon-xs" /> Darsda yo'q
