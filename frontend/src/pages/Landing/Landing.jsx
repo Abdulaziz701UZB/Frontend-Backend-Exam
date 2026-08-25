@@ -139,12 +139,25 @@ const Landing = () => {
           </div>
 
           <div className="hero-visual-col">
-            <div className="hero-banner-image-wrap">
-              <img
-                src="/velnex-hero-banner.png"
-                alt="VELNEX Platformasi"
-                className="hero-banner-main-img"
-              />
+            <div className="hero-banner-frame">
+              <div className="banner-frame-header">
+                <div className="frame-dots">
+                  <span className="dot red"></span>
+                  <span className="dot yellow"></span>
+                  <span className="dot green"></span>
+                </div>
+                <div className="frame-address-bar">
+                  <span className="secure-icon">🔒</span>
+                  <span className="frame-url">app.velnex.uz/dashboard</span>
+                </div>
+              </div>
+              <div className="banner-frame-body">
+                <img
+                  src="/velnex-hero-banner.png"
+                  alt="VELNEX Boshqaruv Markazi"
+                  className="hero-banner-main-img"
+                />
+              </div>
             </div>
           </div>
         </div>
