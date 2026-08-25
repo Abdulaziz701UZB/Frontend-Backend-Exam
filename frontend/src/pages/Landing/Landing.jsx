@@ -13,7 +13,12 @@ import {
   HiOutlineSparkles,
   HiOutlineChartBar,
   HiOutlineBellAlert,
-  HiOutlineQrCode
+  HiOutlineQrCode,
+  HiOutlineCheckBadge,
+  HiOutlineSquares2X2,
+  HiOutlineUsers,
+  HiOutlineCurrencyDollar,
+  HiOutlineCalendarDays
 } from "react-icons/hi2";
 import {
   FaTelegram,
@@ -22,7 +27,9 @@ import {
   FaCheck,
   FaArrowRight,
   FaChalkboardUser,
-  FaGraduationCap
+  FaGraduationCap,
+  FaCrown,
+  FaArrowTrendUp
 } from "react-icons/fa6";
 import { useEduAuth } from "../../context/EduAuthContext";
 import "./Landing.css";
@@ -34,10 +41,16 @@ const Landing = () => {
 
   return (
     <div className="velnex-landing-page">
+      {/* Background Ambient Glows */}
+      <div className="ambient-glow glow-top-left"></div>
+      <div className="ambient-glow glow-top-right"></div>
+      <div className="ambient-glow glow-center"></div>
+
+      {/* Top Phone Info Bar */}
       <div className="landing-topbar">
         <div className="landing-container topbar-flex">
           <div className="topbar-left">
-            <span className="topbar-badge">Yangi</span>
+            <span className="topbar-badge">YANGI</span>
             <span className="topbar-text">VELNEX 2.0 yangi avlod boshqaruv tizimi ishga tushdi!</span>
           </div>
           <div className="topbar-right">
@@ -49,10 +62,13 @@ const Landing = () => {
         </div>
       </div>
 
+      {/* Main Navbar */}
       <header className="landing-navbar-wrap">
         <div className="landing-container navbar-flex">
           <Link to="/" className="landing-brand-logo">
-            <img src="/velnex-logo.png" alt="VELNEX" className="brand-logo-img" />
+            <div className="brand-logo-glow-wrap">
+              <img src="/velnex-logo.png" alt="VELNEX" className="brand-logo-img" />
+            </div>
             <span className="brand-logo-text">VELNEX</span>
           </Link>
 
@@ -98,6 +114,7 @@ const Landing = () => {
         </div>
       </header>
 
+      {/* Hero Section */}
       <section className="landing-hero-section">
         <div className="landing-container hero-grid">
           <div className="hero-content-col">
@@ -143,6 +160,7 @@ const Landing = () => {
 
           <div className="hero-visual-col">
             <div className="hero-3d-mockup-wrapper">
+              {/* Layer 1: Desktop macOS Monitor Mockup */}
               <div className="mockup-desktop-card">
                 <div className="desktop-top-bar">
                   <div className="window-dots">
@@ -150,73 +168,136 @@ const Landing = () => {
                     <span className="dot yellow"></span>
                     <span className="dot green"></span>
                   </div>
-                  <span className="window-url">app.velnex.uz/dashboard</span>
+                  <div className="window-address-bar">
+                    <span className="secure-badge">🔒</span>
+                    <span className="window-url">app.velnex.uz/dashboard</span>
+                  </div>
                 </div>
+
                 <div className="desktop-screen-content">
-                  <div className="mock-dash-header">
-                    <div className="mock-dash-title">VELNEX Boshqaruv Markazi 🚀</div>
-                    <div className="mock-dash-kpi">
-                      <span className="kpi-tag active">24 Guruh Faol</span>
+                  {/* Mini Sidebar & Dashboard Layout */}
+                  <div className="mock-dash-layout">
+                    <div className="mock-mini-sidebar">
+                      <div className="mini-sb-logo">
+                        <img src="/velnex-logo.png" alt="V" />
+                      </div>
+                      <div className="mini-sb-item active"><HiOutlineSquares2X2 /></div>
+                      <div className="mini-sb-item"><HiOutlineUsers /></div>
+                      <div className="mini-sb-item"><HiOutlineCalendarDays /></div>
+                      <div className="mini-sb-item"><HiOutlineCurrencyDollar /></div>
                     </div>
-                  </div>
-                  <div className="mock-stats-mini-grid">
-                    <div className="mock-stat-box">
-                      <span className="mock-stat-num">312</span>
-                      <span className="mock-stat-lbl">Jami O'quvchilar</span>
+
+                    <div className="mock-dash-main">
+                      <div className="mock-dash-header">
+                        <div>
+                          <div className="mock-dash-title">VELNEX Boshqaruv Markazi 🚀</div>
+                          <span className="mock-dash-date">24-Avgust • Barcha tizimlar faol</span>
+                        </div>
+                        <div className="mock-dash-kpi">
+                          <span className="kpi-tag active">24 Guruh Faol</span>
+                        </div>
+                      </div>
+
+                      <div className="mock-stats-mini-grid">
+                        <div className="mock-stat-box stat-glow-blue">
+                          <span className="mock-stat-num">312</span>
+                          <span className="mock-stat-lbl">Jami O'quvchilar</span>
+                          <span className="stat-growth-tag">+12% bu oy</span>
+                        </div>
+                        <div className="mock-stat-box stat-glow-green">
+                          <span className="mock-stat-num">24.0M</span>
+                          <span className="mock-stat-lbl">Oylik Tushum (so'm)</span>
+                          <span className="stat-growth-tag green">+8.4% o'sish</span>
+                        </div>
+                        <div className="mock-stat-box stat-glow-indigo">
+                          <span className="mock-stat-num">99.2%</span>
+                          <span className="mock-stat-lbl">Davomat Sifat</span>
+                          <span className="stat-growth-tag blue">A'lo daraja</span>
+                        </div>
+                      </div>
+
+                      <div className="mock-chart-container">
+                        <div className="chart-header-row">
+                          <span className="chart-title">Haftalik Tushum Dinamikasi</span>
+                          <span className="chart-badge">Jonli Grafika</span>
+                        </div>
+                        <div className="mock-bars-row">
+                          <div className="mock-bar-col"><div className="bar-fill" style={{ height: "45%" }}></div><span>Dush</span></div>
+                          <div className="mock-bar-col"><div className="bar-fill" style={{ height: "65%" }}></div><span>Sesh</span></div>
+                          <div className="mock-bar-col"><div className="bar-fill" style={{ height: "80%" }}></div><span>Chor</span></div>
+                          <div className="mock-bar-col"><div className="bar-fill" style={{ height: "55%" }}></div><span>Pay</span></div>
+                          <div className="mock-bar-col"><div className="bar-fill highlight" style={{ height: "95%" }}></div><span>Juma</span></div>
+                          <div className="mock-bar-col"><div className="bar-fill" style={{ height: "70%" }}></div><span>Shan</span></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mock-stat-box">
-                      <span className="mock-stat-num">24,050,000</span>
-                      <span className="mock-stat-lbl">Oylik Tushum (so'm)</span>
-                    </div>
-                    <div className="mock-stat-box">
-                      <span className="mock-stat-num">99.2%</span>
-                      <span className="mock-stat-lbl">Davomat Sifat</span>
-                    </div>
-                  </div>
-                  <div className="mock-bars-row">
-                    <div className="mock-bar-line bar-1"></div>
-                    <div className="mock-bar-line bar-2"></div>
-                    <div className="mock-bar-line bar-3"></div>
                   </div>
                 </div>
               </div>
 
+              {/* Layer 2: Ultra-Realistic iPhone 15 Pro Mobile Mockup */}
               <div className="mockup-mobile-phone">
-                <div className="phone-notch"></div>
-                <div className="phone-screen-header">
-                  <div className="phone-user-avatar">
-                    <FaGraduationCap />
-                  </div>
-                  <div className="phone-user-meta">
-                    <strong>Azizbek Murodov</strong>
-                    <span>Frontend ReactJS</span>
-                  </div>
+                <div className="phone-dynamic-island">
+                  <span className="di-camera"></span>
+                  <span className="di-sensor"></span>
                 </div>
-                <div className="phone-app-menu-grid">
-                  <div className="phone-menu-btn btn-blue">
-                    <HiOutlineAcademicCap className="m-icon" />
-                    <span>Davomat</span>
+
+                <div className="phone-screen-body">
+                  <div className="phone-screen-header">
+                    <div className="phone-user-avatar">
+                      <FaGraduationCap />
+                    </div>
+                    <div className="phone-user-meta">
+                      <strong>Azizbek Murodov</strong>
+                      <span>Frontend ReactJS • #100000002</span>
+                    </div>
                   </div>
-                  <div className="phone-menu-btn btn-amber">
-                    <HiOutlineSparkles className="m-icon" />
-                    <span>Baholar</span>
+
+                  <div className="phone-status-card">
+                    <div className="status-kpi-row">
+                      <div>
+                        <span className="phone-sub-lbl">Oylik Balans:</span>
+                        <strong className="phone-balance-val">0 so'm (To'langan)</strong>
+                      </div>
+                      <span className="paid-badge-chip">✅ To'liq</span>
+                    </div>
                   </div>
-                  <div className="phone-menu-btn btn-emerald">
-                    <HiOutlineCreditCard className="m-icon" />
-                    <span>To'lovlar</span>
+
+                  <div className="phone-app-menu-grid">
+                    <div className="phone-menu-btn btn-blue">
+                      <div className="m-icon-wrap"><HiOutlineAcademicCap className="m-icon" /></div>
+                      <span>Davomat</span>
+                      <small>100% Qatnashuv</small>
+                    </div>
+                    <div className="phone-menu-btn btn-amber">
+                      <div className="m-icon-wrap"><HiOutlineSparkles className="m-icon" /></div>
+                      <span>Baholar</span>
+                      <small>95 Ball (A+)</small>
+                    </div>
+                    <div className="phone-menu-btn btn-emerald">
+                      <div className="m-icon-wrap"><HiOutlineCreditCard className="m-icon" /></div>
+                      <span>To'lovlar</span>
+                      <small>Cheklar tarixi</small>
+                    </div>
+                    <div className="phone-menu-btn btn-indigo">
+                      <div className="m-icon-wrap"><HiOutlineQrCode className="m-icon" /></div>
+                      <span>ID Pass</span>
+                      <small>Elektron karta</small>
+                    </div>
                   </div>
-                  <div className="phone-menu-btn btn-indigo">
-                    <HiOutlineQrCode className="m-icon" />
-                    <span>ID Pass</span>
+
+                  <div className="phone-notification-bubble">
+                    <div className="notif-dot"></div>
+                    <span>Bugun 14:00 da ReactJS darsi bor</span>
                   </div>
-                </div>
-                <div className="phone-quick-status">
-                  <span>Balans: <strong>0 so'm (To'langan)</strong></span>
                 </div>
               </div>
 
+              {/* Floating Floating Stat Badges */}
               <div className="floating-badge-card badge-top-right">
-                <HiOutlineChartBar className="f-icon green" />
+                <div className="badge-icon-box green">
+                  <FaArrowTrendUp />
+                </div>
                 <div>
                   <strong>+18.4%</strong>
                   <span>Tushum o'sishi</span>
@@ -224,7 +305,9 @@ const Landing = () => {
               </div>
 
               <div className="floating-badge-card badge-bottom-left">
-                <HiOutlineBellAlert className="f-icon purple" />
+                <div className="badge-icon-box purple">
+                  <HiOutlineBellAlert />
+                </div>
                 <div>
                   <strong>SMS & Bot</strong>
                   <span>Avto-ogohlantirish</span>
@@ -235,6 +318,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Stats Counter Bar */}
       <section id="stats" className="landing-stats-bar">
         <div className="landing-container stats-flex">
           <div className="stat-counter-item">
@@ -259,6 +343,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Features Section */}
       <section id="features" className="landing-features-section">
         <div className="landing-container">
           <div className="section-head-center">
@@ -335,6 +420,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Student & Parent App Showcase */}
       <section id="student-app" className="landing-app-showcase-section">
         <div className="landing-container">
           <div className="app-showcase-card">
@@ -449,6 +535,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Pricing Section */}
       <section id="pricing" className="landing-pricing-section">
         <div className="landing-container">
           <div className="section-head-center">
@@ -462,6 +549,7 @@ const Landing = () => {
           </div>
 
           <div className="pricing-grid">
+            {/* Plan 1 */}
             <div className="pricing-card">
               <div className="pricing-head">
                 <h3 className="plan-name">Start</h3>
@@ -486,6 +574,7 @@ const Landing = () => {
               </button>
             </div>
 
+            {/* Plan 2: Featured */}
             <div className="pricing-card featured">
               <div className="featured-ribbon">Eng Ommabop</div>
               <div className="pricing-head">
@@ -512,6 +601,7 @@ const Landing = () => {
               </button>
             </div>
 
+            {/* Plan 3 */}
             <div className="pricing-card">
               <div className="pricing-head">
                 <h3 className="plan-name">Pro Enterprise</h3>
@@ -540,6 +630,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="landing-footer">
         <div className="landing-container footer-flex">
           <div className="footer-brand-info">
