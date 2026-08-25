@@ -5,6 +5,7 @@ import {
   HiOutlineAcademicCap, 
   HiOutlineClipboardDocumentCheck, 
   HiOutlineBanknotes, 
+  HiOutlineChartBar,
   HiOutlineUsers, 
   HiOutlineBookOpen, 
   HiOutlineDocumentText, 
@@ -122,6 +123,19 @@ const Sidebar = ({ isOpen, onClose }) => {
             <span className="link-icon"><HiOutlineBanknotes /></span>
             <span className="link-text">To'lovlar & Kassa</span>
           </NavLink>
+
+          {isAdmin && (
+            <NavLink
+              to="/expense-analytics"
+              className={({ isActive }) =>
+                `sidebar-link ${isActive ? "active" : ""}`
+              }
+              onClick={onClose}
+            >
+              <span className="link-icon"><HiOutlineChartBar /></span>
+              <span className="link-text">Xarajatlar Tahlili</span>
+            </NavLink>
+          )}
 
           <NavLink
             to="/leads"

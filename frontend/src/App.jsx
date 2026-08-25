@@ -18,6 +18,7 @@ import Leads from "./pages/Leads/Leads";
 import Reviews from "./pages/Reviews/Reviews";
 import TrialLessons from "./pages/TrialLessons/TrialLessons";
 import TelegramBot from "./pages/TelegramBot/TelegramBot";
+import ExpenseAnalytics from "./pages/ExpenseAnalytics/ExpenseAnalytics";
 import Login from "./pages/Login/Login";
 import Landing from "./pages/Landing/Landing";
 
@@ -88,6 +89,8 @@ function ProtectedApp() {
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/trial-lessons" element={<TrialLessons />} />
             <Route path="/telegram" element={<TelegramBot />} />
+            <Route path="/expenses" element={<ExpenseAnalytics />} />
+            <Route path="/expense-analytics" element={<ExpenseAnalytics />} />
             <Route path="/login" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
