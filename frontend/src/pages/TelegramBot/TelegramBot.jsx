@@ -177,7 +177,7 @@ const TelegramBot = () => {
             <input
               type="text"
               className="form-input"
-              placeholder=""
+              placeholder="Telegram Bot tokenini kiriting"
               value={bot.token || ""}
               onChange={(e) =>
                 handleBotFieldChange(botKey, "token", e.target.value)
@@ -193,7 +193,7 @@ const TelegramBot = () => {
             <input
               type="text"
               className="form-input"
-              placeholder=""
+              placeholder="@BotUsername"
               value={bot.username || ""}
               onChange={(e) =>
                 handleBotFieldChange(botKey, "username", e.target.value)
@@ -301,7 +301,7 @@ const TelegramBot = () => {
             <input
               type="text"
               className="form-input"
-              placeholder=""
+              placeholder="Telegram Chat ID kiriting"
               value={botsConfig.adminBot?.adminChatId || ""}
               onChange={(e) =>
                 handleBotFieldChange("adminBot", "adminChatId", e.target.value)
@@ -416,7 +416,7 @@ const TelegramBot = () => {
               <textarea
                 className="form-textarea"
                 rows="3"
-                placeholder=""
+                placeholder="Ommaviy yuboriladigan xabar matnini kiriting..."
                 value={broadcastText}
                 onChange={(e) => setBroadcastText(e.target.value)}
                 required

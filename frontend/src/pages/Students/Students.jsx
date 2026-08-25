@@ -1004,7 +1004,7 @@ const Students = () => {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder=""
+                  placeholder="Guruh almashtirish sababi..."
                   value={transferReason}
                   onChange={(e) => setTransferReason(e.target.value)}
                   required
@@ -1055,7 +1055,7 @@ const Students = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder=""
+                    placeholder="O'quvchi to'liq ism-familiyasi"
                     value={formData.fullName}
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
@@ -1071,7 +1071,7 @@ const Students = () => {
                     <input
                       type="tel"
                       className="phone-input-field"
-                      placeholder=""
+                      placeholder="90 123 45 67"
                       value={formData.phone}
                       onChange={(e) =>
                         setFormData({ ...formData, phone: format9Digits(e.target.value) })
@@ -1091,7 +1091,7 @@ const Students = () => {
                     <input
                       type="tel"
                       className="phone-input-field"
-                      placeholder=""
+                      placeholder="90 123 45 67"
                       value={formData.parentPhone}
                       onChange={(e) =>
                         setFormData({ ...formData, parentPhone: format9Digits(e.target.value) })

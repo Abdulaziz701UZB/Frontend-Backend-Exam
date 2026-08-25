@@ -336,7 +336,7 @@ const Teachers = () => {
           <input
             type="text"
             className="form-input search-field"
-            placeholder=""
+            placeholder="O'qituvchi F.I.SH yoki fani bo'yicha qidirish"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -631,7 +631,7 @@ const Teachers = () => {
                   type="text"
                   required
                   className="form-input"
-                  placeholder=""
+                  placeholder="O'qituvchi to'liq ism-familiyasi"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
@@ -647,7 +647,7 @@ const Teachers = () => {
                     type="tel"
                     required
                     className="phone-input-field"
-                    placeholder=""
+                    placeholder="90 123 45 67"
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: format9Digits(e.target.value) })

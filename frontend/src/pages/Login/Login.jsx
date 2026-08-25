@@ -229,7 +229,7 @@ const Login = () => {
               <input
                 type="tel"
                 className="login-phone-input-field"
-                placeholder=""
+                placeholder="90 123 45 67"
                 value={phoneDigits}
                 onChange={handlePhoneChange}
                 onFocus={() => setIsPhoneFocused(true)}
@@ -250,7 +250,7 @@ const Login = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 className="login-form-input"
-                placeholder=""
+                placeholder="Parolingizni kiriting"
                 value={password}
                 onChange={(e) => {
                   setLocalError("");

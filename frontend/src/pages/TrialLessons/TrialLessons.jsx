@@ -269,7 +269,7 @@ const TrialLessons = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder=""
+                placeholder="Qiziquvchi F.I.SH yoki telefon bo'yicha qidirish..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -427,7 +427,7 @@ const TrialLessons = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder=""
+                    placeholder="Qiziquvchi to'liq ism-familiyasi"
                     value={formData.studentName}
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
@@ -443,7 +443,7 @@ const TrialLessons = () => {
                     <input
                       type="tel"
                       className="phone-input-field"
-                      placeholder=""
+                      placeholder="90 123 45 67"
                       value={formData.phone}
                       onChange={(e) =>
                         setFormData({ ...formData, phone: format9Digits(e.target.value) })
@@ -510,7 +510,7 @@ const TrialLessons = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder=""
+                    placeholder="14:00 - 15:30"
                     value={formData.time}
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
@@ -561,7 +561,7 @@ const TrialLessons = () => {
                 <textarea
                   className="form-textarea"
                   rows="2"
-                  placeholder=""
+                  placeholder="Dars bo'yicha izoh va qaydlar..."
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData({ ...formData, notes: e.target.value })

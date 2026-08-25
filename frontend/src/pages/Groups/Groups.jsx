@@ -367,7 +367,7 @@ const Groups = () => {
           <HiMagnifyingGlass className="search-icon" />
           <input
             type="text"
-            placeholder=""
+            placeholder="Guruh nomi yoki kurs bo'yicha qidirish"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -824,7 +824,7 @@ const Groups = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder=""
+                    placeholder="Guruh nomini kiriting"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })

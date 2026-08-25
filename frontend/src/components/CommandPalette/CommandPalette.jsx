@@ -105,7 +105,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
             ref={inputRef}
             type="text"
             className="cmd-input"
-            placeholder=""
+            placeholder="Buyruqlar, sahifalar yoki o'quvchilarni qidirish..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
