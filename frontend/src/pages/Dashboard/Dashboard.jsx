@@ -341,9 +341,9 @@ const Dashboard = () => {
       </div>
 
       {isAdmin && (
-        <div className="card financial-analytics-card">
-          <div className="analytics-header">
-            <div>
+        <div className="financial-analytics-section">
+          <div className="financial-section-header">
+            <div className="section-title-wrap">
               <h3 className="section-title">
                 <HiOutlineChartBar className="inline-icon-sm text-indigo" />
                 Moliyaviy Xavf & Xarajatlar Tahlili
@@ -354,43 +354,72 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="profit-badge-pill">
-              Sof Foyda:{" "}
-              <strong>{formatMoney(FINANCIAL_ANALYTICS.netProfit)}</strong> (
-              {FINANCIAL_ANALYTICS.profitMargin})
+              <HiOutlineBanknotes className="profit-badge-icon" />
+              <span>Oylik Sof Foyda:</span>
+              <strong>{formatMoney(FINANCIAL_ANALYTICS.netProfit)}</strong>
+              <span className="profit-margin-tag">({FINANCIAL_ANALYTICS.profitMargin})</span>
             </div>
           </div>
 
-          <div className="analytics-details-grid">
-            <div className="analytics-col">
-              <h4 className="sub-heading">
-                <HiOutlineChartBar className="inline-icon-xs text-indigo" />
-                Xarajatlar Taqsimoti:
-              </h4>
+          <div className="financial-cards-grid">
+            {/* 1. Xarajatlar Taqsimoti Card */}
+            <div className="card expense-breakdown-card">
+              <div className="analytics-card-header">
+                <div>
+                  <h4 className="analytics-card-title">
+                    <HiOutlineChartBar className="inline-icon-xs text-indigo" />
+                    Xarajatlar Taqsimoti
+                  </h4>
+                  <p className="analytics-card-desc">Asosiy operatsion xarajatlar va oylik byudjet sarfi</p>
+                </div>
+                <span className="total-expense-badge">
+                  Jami: {formatMoney(FINANCIAL_ANALYTICS.totalExpenses)}
+                </span>
+              </div>
+
               <div className="breakdown-list">
-                {FINANCIAL_ANALYTICS.expensesBreakdown.map((item, idx) => (
-                  <div key={idx} className="breakdown-item">
-                    <div className="breakdown-info">
-                      <span>{item.name}</span>
-                      <strong>
-                        {formatMoney(item.amount)} ({item.pct})
-                      </strong>
+                {FINANCIAL_ANALYTICS.expensesBreakdown.map((item, idx) => {
+                  const colorClasses = ["theme-indigo", "theme-blue", "theme-amber", "theme-purple"];
+                  const themeClass = colorClasses[idx % colorClasses.length];
+                  return (
+                    <div key={idx} className={`breakdown-item ${themeClass}`}>
+                      <div className="breakdown-info">
+                        <div className="breakdown-name-wrap">
+                          <span className="breakdown-bullet"></span>
+                          <span className="breakdown-name">{item.name}</span>
+                        </div>
+                        <div className="breakdown-numbers">
+                          <strong className="breakdown-amount">{formatMoney(item.amount)}</strong>
+                          <span className="breakdown-pct-tag">{item.pct}</span>
+                        </div>
+                      </div>
+                      <div className="breakdown-bar">
+                        <div
+                          className="breakdown-fill"
+                          style={{ width: item.pct }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="breakdown-bar">
-                      <div
-                        className="breakdown-fill"
-                        style={{ width: item.pct }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
-            <div className="analytics-col">
-              <h4 className="sub-heading">
-                <HiOutlineShieldCheck className="inline-icon-xs text-indigo" />
-                Moliyaviy Xavf & Xatar Indikatorlari:
-              </h4>
+            {/* 2. Moliyaviy Xavf & Xatar Indikatorlari Card */}
+            <div className="card risk-indicators-card">
+              <div className="analytics-card-header">
+                <div>
+                  <h4 className="analytics-card-title">
+                    <HiOutlineShieldCheck className="inline-icon-xs text-indigo" />
+                    Moliyaviy Xavf & Sifat Indikatorlari
+                  </h4>
+                  <p className="analytics-card-desc">Qarzdorlik, talabalar oqimi va xonalar unumdorligi</p>
+                </div>
+                <span className="system-health-badge">
+                  <HiOutlineCheckCircle className="health-icon" /> Barqaror
+                </span>
+              </div>
+
               <div className="risk-indicators-list">
                 {FINANCIAL_ANALYTICS.riskIndicators.map((risk, idx) => (
                   <div
@@ -398,11 +427,18 @@ const Dashboard = () => {
                     className={`risk-card-item risk-${risk.status}`}
                   >
                     <div className="risk-header">
-                      <strong className="risk-title">{risk.title}</strong>
-                      <span className="risk-level-badge">{risk.level}</span>
+                      <div className="risk-title-wrap">
+                        {risk.status === "amber" && <HiOutlineExclamationTriangle className="risk-icon text-amber" />}
+                        {risk.status === "emerald" && <HiOutlineCheckCircle className="risk-icon text-emerald" />}
+                        {risk.status === "indigo" && <HiOutlineBuildingLibrary className="risk-icon text-indigo" />}
+                        <strong className="risk-title">{risk.title}</strong>
+                      </div>
+                      <span className={`risk-level-badge level-${risk.status}`}>{risk.level}</span>
                     </div>
-                    <p className="risk-val">{risk.value}</p>
-                    <small className="risk-desc">{risk.desc}</small>
+                    <div className="risk-body">
+                      <span className="risk-val">{risk.value}</span>
+                      <p className="risk-desc">{risk.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>

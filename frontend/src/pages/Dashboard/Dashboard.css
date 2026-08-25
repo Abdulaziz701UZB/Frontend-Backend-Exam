@@ -161,87 +161,250 @@
   letter-spacing: -0.5px;
 }
 
-.analytics-details-grid {
+/* Professional Separated Financial Analytics Cards */
+.financial-analytics-section {
+  margin-top: 32px;
+}
+
+.financial-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profit-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.18) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #065f46;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.1);
+}
+
+.profit-badge-icon {
+  font-size: 20px;
+  color: #10b981;
+}
+
+.profit-margin-tag {
+  background: #10b981;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.financial-cards-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
 }
 
-.sub-heading {
-  font-size: 15px;
+.expense-breakdown-card,
+.risk-indicators-card {
+  padding: 26px 28px;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.analytics-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+  gap: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 16px;
+}
+
+.analytics-card-title {
+  font-size: 16.5px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
 }
 
+.analytics-card-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.total-expense-badge {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.system-health-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.health-icon {
+  font-size: 16px;
+  color: #10b981;
+}
+
+/* Individual Expense Item styling */
 .breakdown-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .breakdown-info {
   display: flex;
   justify-content: space-between;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 4px;
+  align-items: center;
+}
+
+.breakdown-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.breakdown-bullet {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.breakdown-item.theme-indigo .breakdown-bullet { background: #6366f1; }
+.breakdown-item.theme-blue .breakdown-bullet { background: #0284c7; }
+.breakdown-item.theme-amber .breakdown-bullet { background: #f59e0b; }
+.breakdown-item.theme-purple .breakdown-bullet { background: #a855f7; }
+
+.breakdown-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.breakdown-numbers {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.breakdown-amount {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.breakdown-pct-tag {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 6px;
 }
 
 .breakdown-bar {
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
+  height: 9px;
+  background: #f1f5f9;
+  border-radius: 6px;
   overflow: hidden;
 }
 
-.breakdown-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #6366f1, #a855f7);
-  border-radius: 4px;
-}
+.breakdown-item.theme-indigo .breakdown-fill { background: linear-gradient(90deg, #6366f1, #818cf8); }
+.breakdown-item.theme-blue .breakdown-fill { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.breakdown-item.theme-amber .breakdown-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.breakdown-item.theme-purple .breakdown-fill { background: linear-gradient(90deg, #a855f7, #c084fc); }
 
+/* Risk Cards */
 .risk-indicators-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .risk-card-item {
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 16px 18px;
+  border-radius: 14px;
   border: 1px solid #e2e8f0;
-  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.risk-card-item:hover {
+  transform: translateY(-2px);
 }
 
 .risk-card-item.risk-amber {
-  border-left: 4px solid #f59e0b;
-  background: #fffbeb;
+  border-left: 5px solid #f59e0b;
+  background: #fffdf5;
+  border-color: #fef3c7;
 }
 
 .risk-card-item.risk-emerald {
-  border-left: 4px solid #10b981;
-  background: #f0fdf4;
+  border-left: 5px solid #10b981;
+  background: #f4fdf8;
+  border-color: #d1fae5;
 }
 
 .risk-card-item.risk-indigo {
-  border-left: 4px solid #6366f1;
-  background: #e0e7ff;
+  border-left: 5px solid #6366f1;
+  background: #f6f7ff;
+  border-color: #e0e7ff;
 }
 
 .risk-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.risk-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.risk-icon {
+  font-size: 18px;
 }
 
 .risk-title {
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: #0f172a;
 }
 
@@ -249,21 +412,48 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.06);
+  letter-spacing: 0.3px;
+}
+
+.risk-level-badge.level-amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+
+.risk-level-badge.level-emerald {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.risk-level-badge.level-indigo {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4338ca;
+}
+
+.risk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .risk-val {
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 900;
   color: #0f172a;
-  margin: 2px 0 4px;
 }
 
 .risk-desc {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #64748b;
+  margin: 0;
+}
+
+@media (max-width: 992px) {
+  .financial-cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .dashboard-content-grid {
