@@ -473,8 +473,22 @@ const Landing = () => {
 
         <div className="footer-bottom-bar">
           <div className="landing-container footer-bottom-flex">
-            <span>© {new Date().getFullYear()} VELNEX. Barcha huquqlar himoyalangan.</span>
-            <span>Created by @Abdulaziz7o1</span>
+            <span className="footer-copyright-text">
+              © {new Date().getFullYear()} VELNEX SaaS Platform. Barcha huquqlar himoyalangan.
+            </span>
+            <a
+              href="https://t.me/Abdulaziz7o1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="creator-signature-badge"
+            >
+              <span className="creator-dot"></span>
+              <span className="creator-label">Bosh Dasturchi & Muallif:</span>
+              <span className="creator-handle">
+                <FaTelegram className="creator-tg-icon" />
+                @Abdulaziz7o1
+              </span>
+            </a>
           </div>
         </div>
       </footer>
