@@ -431,11 +431,13 @@ const Students = () => {
             <input
               type="text"
               className="filter-input-field"
-              placeholder=""
+              placeholder="O'quvchi qidirish (I.F)"
               value={searchInputs.name}
-              onChange={(e) =>
-                setSearchInputs({ ...searchInputs, name: e.target.value })
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchInputs({ ...searchInputs, name: val });
+                setAppliedFilters((prev) => ({ ...prev, name: val }));
+              }}
             />
           </div>
 
@@ -444,9 +446,11 @@ const Students = () => {
             <select
               className="filter-select-field"
               value={searchInputs.group}
-              onChange={(e) =>
-                setSearchInputs({ ...searchInputs, group: e.target.value })
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchInputs({ ...searchInputs, group: val });
+                setAppliedFilters((prev) => ({ ...prev, group: val }));
+              }}
             >
               <option value="All">Barcha Guruhlar</option>
               {groups.map((g) => (
@@ -462,11 +466,13 @@ const Students = () => {
             <input
               type="text"
               className="filter-input-field"
-              placeholder=""
+              placeholder="Nomer qidirish (oxirgi 4 ta raqami)"
               value={searchInputs.phone}
-              onChange={(e) =>
-                setSearchInputs({ ...searchInputs, phone: e.target.value })
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchInputs({ ...searchInputs, phone: val });
+                setAppliedFilters((prev) => ({ ...prev, phone: val }));
+              }}
             />
           </div>
 
@@ -475,9 +481,11 @@ const Students = () => {
             <select
               className="filter-select-field"
               value={searchInputs.teacher}
-              onChange={(e) =>
-                setSearchInputs({ ...searchInputs, teacher: e.target.value })
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchInputs({ ...searchInputs, teacher: val });
+                setAppliedFilters((prev) => ({ ...prev, teacher: val }));
+              }}
             >
               <option value="All">4. Barcha O'qituvchilar</option>
               {teachers.map((t) => (
