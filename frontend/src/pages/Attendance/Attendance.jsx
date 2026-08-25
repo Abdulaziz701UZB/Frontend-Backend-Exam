@@ -19,7 +19,10 @@ import {
   HiOutlineStar,
   HiOutlineSparkles,
   HiOutlineArrowLeft,
-  HiOutlineChevronDown
+  HiOutlineChevronDown,
+  HiOutlineLockClosed,
+  HiOutlineNoSymbol,
+  HiOutlineExclamationTriangle
 } from "react-icons/hi2";
 import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Attendance.css";
@@ -69,6 +72,7 @@ const Attendance = () => {
   const [activeTab, setActiveTab] = useState("attendance");
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedMonth, setSelectedMonth] = useState("08");
+  const [selectedGradeDate, setSelectedGradeDate] = useState("");
   const [studentFilter, setStudentFilter] = useState("all"); // all, debtors, trial, active, frozen
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -649,11 +653,37 @@ const Attendance = () => {
           {/* BAHOLASH TAB */}
           {activeTab === "grades" && (
             <div className="lc-grades-wrapper">
+              {/* Grades Toolbar */}
+              <div className="grades-header-toolbar">
+                <div className="grades-date-picker-wrap">
+                  <span className="grades-toolbar-label">
+                    <HiOutlineCalendarDays className="inline-icon-xs text-indigo" />
+                    Baholash Dars Sanasi:
+                  </span>
+                  <select
+                    value={selectedGradeDate || (lessonDates[0]?.fullDate || "")}
+                    onChange={(e) => setSelectedGradeDate(e.target.value)}
+                    className="lc-grade-date-select"
+                  >
+                    {lessonDates.map((d) => (
+                      <option key={d.fullDate} value={d.fullDate}>
+                        {d.dayStr} ({d.fullDate})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grades-lock-info-badge">
+                  <HiOutlineLockClosed className="inline-icon-xs text-amber" />
+                  <span>Darsga kelmagan o'quvchilarga baho qo'yish bloklangan</span>
+                </div>
+              </div>
+
               <table className="lc-grades-table">
                 <thead>
                   <tr>
                     <th>№</th>
                     <th>Talaba F.I.SH</th>
+                    <th>Davomat Holati</th>
                     <th>Ball (1-10)</th>
                     <th>Uy Vazifasi</th>
                     <th>Izoh / Baholash Qaydi</th>
@@ -661,65 +691,131 @@ const Attendance = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStudents.map((st, idx) => (
-                    <tr key={st.id}>
-                      <td>{idx + 1}</td>
-                      <td><strong>{st.fullName}</strong></td>
-                      <td>
-                        <input
-                          type="number"
-                          min="1"
-                          max="10"
-                          value={gradesData[st.id]?.score || 10}
-                          onChange={(e) =>
-                            setGradesData((prev) => ({
-                              ...prev,
-                              [st.id]: { ...prev[st.id], score: e.target.value }
-                            }))
-                          }
-                          className="lc-grade-input"
-                        />
-                      </td>
-                      <td>
-                        <label className="checkbox-wrap">
+                  {filteredStudents.map((st, idx) => {
+                    const activeDateStr = selectedGradeDate || (lessonDates[0]?.fullDate || "");
+                    const attCell = matrixData[`${st.id}_${activeDateStr}`];
+                    const isPresent = attCell?.status === "Present";
+                    const isAbsent = attCell?.status === "Absent";
+                    const isExcused = attCell?.status === "Excused";
+
+                    return (
+                      <tr key={st.id} className={!isPresent ? "row-student-absent" : ""}>
+                        <td>{idx + 1}</td>
+                        <td>
+                          <strong>{st.fullName}</strong>
+                        </td>
+                        <td>
+                          {isPresent && (
+                            <span className="badge-att-status badge-status-present">
+                              <HiOutlineCheck className="inline-icon-xs" /> Darsda qatnashgan
+                            </span>
+                          )}
+                          {isExcused && (
+                            <span className="badge-att-status badge-status-excused">
+                              <HiOutlineFlag className="inline-icon-xs" /> Sababli kelmagan
+                            </span>
+                          )}
+                          {isAbsent && (
+                            <span className="badge-att-status badge-status-absent">
+                              <HiOutlineXMark className="inline-icon-xs" /> Kelmagan
+                            </span>
+                          )}
+                          {!attCell?.status && (
+                            <span className="badge-att-status badge-status-none">
+                              • Belgilanmagan
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          {isPresent ? (
+                            <input
+                              type="number"
+                              min="1"
+                              max="10"
+                              value={gradesData[st.id]?.score || 10}
+                              onChange={(e) =>
+                                setGradesData((prev) => ({
+                                  ...prev,
+                                  [st.id]: { ...prev[st.id], score: e.target.value }
+                                }))
+                              }
+                              className="lc-grade-input"
+                            />
+                          ) : (
+                            <div
+                              className="locked-grade-cell"
+                              onClick={() =>
+                                toast.error(
+                                  `🚨 "${st.fullName}" ushbu darsga kelmagan! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`
+                                )
+                              }
+                              title="Darsda yo'q - baho qo'yib bo'lmaydi"
+                            >
+                              <span className="badge-absent-lock">
+                                <HiOutlineLockClosed className="inline-icon-xs" /> Bloklangan
+                              </span>
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <label className={`checkbox-wrap ${!isPresent ? "disabled-checkbox" : ""}`}>
+                            <input
+                              type="checkbox"
+                              disabled={!isPresent}
+                              checked={isPresent ? (gradesData[st.id]?.homework ?? true) : false}
+                              onChange={(e) =>
+                                isPresent &&
+                                setGradesData((prev) => ({
+                                  ...prev,
+                                  [st.id]: { ...prev[st.id], homework: e.target.checked }
+                                }))
+                              }
+                            />
+                            <span>{isPresent ? "Bajarilgan" : "Qatnashmagan"}</span>
+                          </label>
+                        </td>
+                        <td>
                           <input
-                            type="checkbox"
-                            checked={gradesData[st.id]?.homework ?? true}
+                            type="text"
+                            disabled={!isPresent}
+                            value={isPresent ? (gradesData[st.id]?.comment || "") : ""}
                             onChange={(e) =>
+                              isPresent &&
                               setGradesData((prev) => ({
                                 ...prev,
-                                [st.id]: { ...prev[st.id], homework: e.target.checked }
+                                [st.id]: { ...prev[st.id], comment: e.target.value }
                               }))
                             }
+                            placeholder={
+                              isPresent
+                                ? "Darsdagi faollik izohi..."
+                                : "Darsda qatnashmaganligi sababli baholanmaydi"
+                            }
+                            className={`lc-comment-input ${!isPresent ? "disabled-input" : ""}`}
                           />
-                          <span>Bajarilgan</span>
-                        </label>
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          value={gradesData[st.id]?.comment || ""}
-                          onChange={(e) =>
-                            setGradesData((prev) => ({
-                              ...prev,
-                              [st.id]: { ...prev[st.id], comment: e.target.value }
-                            }))
-                          }
-                          placeholder="Darsdagi faollik izohi..."
-                          className="lc-comment-input"
-                        />
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="btn-tg-grade"
-                          onClick={() => toast.success(`📲 "${st.fullName}" ota-onasiga baho bot orqali yuborildi!`)}
-                        >
-                          <FaTelegram /> Yuborish
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td>
+                          {isPresent ? (
+                            <button
+                              type="button"
+                              className="btn-tg-grade"
+                              onClick={() =>
+                                toast.success(
+                                  `📲 "${st.fullName}" ota-onasiga baho bot orqali yuborildi!`
+                                )
+                              }
+                            >
+                              <FaTelegram /> Yuborish
+                            </button>
+                          ) : (
+                            <span className="tg-disabled-tag">
+                              <HiOutlineNoSymbol className="inline-icon-xs" /> Darsda yo'q
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
