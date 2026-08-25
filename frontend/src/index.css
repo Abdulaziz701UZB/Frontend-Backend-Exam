@@ -51,6 +51,24 @@ body.dark-theme {
   box-sizing: border-box;
 }
 
+*:focus {
+  outline: none;
+}
+
+.student-name-text,
+button.student-name-text,
+.group-name-title,
+.group-teacher-name,
+.debtor-name-title,
+.font-bold {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
