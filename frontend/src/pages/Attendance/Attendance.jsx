@@ -233,14 +233,45 @@ const Attendance = () => {
     return false;
   };
 
-  // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch
+  // 5-Qoida: Bir vaqtda 2 ta guruhda bo'lishni bloklash (Double-booking prevention)
+  const checkDoubleBooking = (studentId, fullDate) => {
+    const studentObj = students.find((s) => String(s.id) === String(studentId));
+    if (!studentObj) return null;
+
+    // Boshqa guruhlarda xuddi shu vaqtda darsi borligini tekshirish
+    const otherGroups = groups.filter((g) => 
+      String(g.id) !== String(selectedGroup) &&
+      (String(studentObj.groupId || studentObj.group_id) === String(g.id) ||
+       String(studentObj.groupName || "").toLowerCase().includes(String(g.name || "").toLowerCase()))
+    );
+
+    for (const g of otherGroups) {
+      const curTime = currentGroupObj?.time || currentGroupObj?.scheduleTime || "14:00 - 16:00";
+      const otherTime = g.time || g.scheduleTime || "14:00 - 16:00";
+      if (curTime === otherTime) {
+        return g;
+      }
+    }
+    return null;
+  };
+
+  // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch (1, 5, 6-Qoidalar)
   const handleSelectStatus = async (studentId, fullDate, studentName, newStatus, e) => {
     if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
 
+    // 1-Qoida: 1 soatlik vaqt qulfi tekshiruvi
     if (isLessonTimeLocked(fullDate)) {
-      toast.error("⏱️ Ushbu dars davomati qulflangan! Qoida bo'yicha dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin. O'zgartirish uchun Adminga murojaat qiling.");
+      toast.error("⏱️ [1-Qoida] Ushbu dars davomati qulflangan! Dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin. O'zgartirish uchun Adminga murojaat qiling.");
       return;
+    }
+
+    // 5-Qoida: Double-booking tekshiruvi
+    if (newStatus === "Present") {
+      const conflictGroup = checkDoubleBooking(studentId, fullDate);
+      if (conflictGroup) {
+        toast.warning(`⚠️ [5-Qoida: Double-Booking] "${studentName}" xuddi shu vaqtda (${conflictGroup.time}) "${conflictGroup.name}" guruhida ham darsda deb qayd etilgan!`);
+      }
     }
 
     const cellKey = `${studentId}_${fullDate}`;
@@ -269,12 +300,13 @@ const Attendance = () => {
       console.warn("Auto-save sync:", err.message);
     }
 
+    // 6-Qoida: Real-vaqt Telegram Bot Ota-ona Xabarnomasi
     if (newStatus === "Present") {
-      toast.success(`"${studentName}" — Keldi ✅ (Avto-saqlandi & Botga yuborildi)`);
+      toast.success(`📲 [6-Qoida: Telegram Bot] "${studentName}" — Darsga kelganligi ota-onaga yuborildi ✅`);
     } else if (newStatus === "Absent") {
-      toast.error(`"${studentName}" — Kelmadi ❌ (Avto-saqlandi & Telegram bot ogohlantirildi)`);
+      toast.error(`📲 [6-Qoida: Telegram Bot] "${studentName}" — "Darsga qatnashmadi" deb ota-onasiga tezkor ogohlantirish yuborildi ❌`);
     } else if (newStatus === "Excused") {
-      toast.info(`"${studentName}" — Sababli dars qoldirdi 🚩 (Avto-saqlandi)`);
+      toast.info(`📲 [6-Qoida: Telegram Bot] "${studentName}" — "Sababli dars qoldirdi" deb ota-onasiga ma'lumot yuborildi 🚩`);
     } else {
       toast.info(`"${studentName}" davomati tozalandi • (Avto-saqlandi)`);
     }
