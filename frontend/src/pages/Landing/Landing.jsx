@@ -90,26 +90,6 @@ const Landing = () => {
               <HiOutlineChatBubbleLeftRight className="btn-icon" />
               <span>Biz bilan bog'lanish</span>
             </a>
-
-            {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => navigate("/dashboard")}
-                className="btn-landing-login"
-              >
-                <span>Boshqaruv Markazi</span>
-                <HiOutlineArrowRight className="btn-arrow" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                className="btn-landing-login"
-              >
-                <span>Tizimga kirish</span>
-                <HiOutlineArrowRight className="btn-arrow" />
-              </button>
-            )}
           </div>
         </div>
       </header>
