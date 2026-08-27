@@ -52,7 +52,7 @@ export const getAttendance = async (req, res) => {
 
     const records = await Attendance.findAll({
       where,
-      order: [["updatedAt", "DESC"], ["id", "DESC"]],
+      order: [["id", "DESC"]],
       include: [
         { model: Student, as: "student" },
         { model: Group, as: "group" },
