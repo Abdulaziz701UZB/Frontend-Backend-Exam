@@ -257,10 +257,15 @@ const Attendance = () => {
     return fullDate === todayStr;
   };
 
-  // 1-Qoida: Dars tugaganidan so'ng 1 soatgacha tahrirlash mumkin
+  // 1-Qoida: Bugungi dars har doim 100% ochiq, o'tgan va kelgusi darslar qulflangan
   const isLessonTimeLocked = (fullDate) => {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    // Bugungi dars har doim 100% ochiq va tahrirlanadigan bo'lsin
+    if (fullDate === todayStr) {
+      return false;
+    }
 
     // O'tib ketgan sana (kecha yoki oldingi kunlar)
     if (fullDate < todayStr) {
@@ -270,22 +275,6 @@ const Attendance = () => {
     // Kelajak sanasi
     if (fullDate > todayStr) {
       return true;
-    }
-
-    // Bugungi dars: dars tugashidan so'ng 1 soatgacha
-    const scheduleTimeStr = currentGroupObj?.time || currentGroupObj?.scheduleTime || "14:00 - 16:00";
-    const parts = scheduleTimeStr.split("-");
-    if (parts.length === 2) {
-      const endPart = parts[1].trim(); // "16:00"
-      const [endHour, endMin] = endPart.split(":").map(Number);
-      if (!isNaN(endHour)) {
-        const lockHour = endHour + 1; // 1 soatlik vaqt oynasi
-        const currentHour = today.getHours();
-        const currentMin = today.getMinutes();
-        if (currentHour > lockHour || (currentHour === lockHour && currentMin > (endMin || 0))) {
-          return true; // 1 soatdan ko'p vaqt o'tgan -> Qulflangan
-        }
-      }
     }
 
     return false;
