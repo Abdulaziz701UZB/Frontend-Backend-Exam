@@ -627,6 +627,26 @@
   color: #0284c7;
 }
 
+/* 15-Qoida: Kelajak Dars Ustuni & Katakchalari (Future Date UX) */
+.lc-matrix-table th.th-date-col.th-col-future {
+  background: #f8fafc;
+}
+
+.future-badge-pill {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 2px 5px;
+  border-radius: 8px;
+  margin: 0 auto 3px;
+  width: fit-content;
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+
 .lc-matrix-table td {
   padding: 10px 6px;
   border-bottom: 1px solid #f1f5f9;
@@ -643,6 +663,19 @@
 
 .lc-matrix-table tr:hover .td-attendance-cell.td-cell-today {
   background: #e0f2fe !important;
+}
+
+.td-attendance-cell.td-cell-future {
+  background: #fcfdfd;
+  opacity: 0.75;
+}
+
+.td-attendance-cell.td-cell-future:hover {
+  background: #f1f5f9 !important;
+}
+
+.td-attendance-cell.td-cell-future .empty-dot {
+  background: #e2e8f0;
 }
 
 /* 6-Qoida: Zen Mode To'liq Ekran (Distraction-free Fullscreen) */

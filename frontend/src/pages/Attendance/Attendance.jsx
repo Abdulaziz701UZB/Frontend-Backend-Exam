@@ -225,6 +225,13 @@ const Attendance = () => {
     return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
 
+  // 15-Qoida: Kelajakdagi dars sanasi tekshiruvi (faqat Admin ruxsati bilan)
+  const isFutureDate = (fullDate) => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return fullDate > todayStr;
+  };
+
   // 1-Qoida: Dars tugaganidan so'ng 1 soatgacha tahrirlash mumkin (faqat O'qituvchilar uchun). Admin esa istalgan payt o'zgartira oladi.
   const isLessonTimeLocked = (fullDate) => {
     if (currentRole === "admin") return false; // Admin cheklovsiz tahrirlaydi
@@ -283,10 +290,16 @@ const Attendance = () => {
     return null;
   };
 
-  // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch (1, 5, 6-Qoidalar)
+  // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch (1, 5, 6, 15-Qoidalar)
   const handleSelectStatus = async (studentId, fullDate, studentName, newStatus, e) => {
     if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
+
+    // 15-Qoida: Kelajakdagi dars sanasi tekshiruvi
+    if (isFutureDate(fullDate) && currentRole !== "admin") {
+      toast.info("⏳ [15-Qoida: Kelajak Sanasi] Ushbu dars kuni kelganda davomat ochiladi.");
+      return;
+    }
 
     // 1-Qoida: 1 soatlik vaqt qulfi tekshiruvi
     if (isLessonTimeLocked(fullDate)) {
@@ -789,9 +802,11 @@ const Attendance = () => {
                     <th className="th-talabalar">TALABALAR</th>
                     {lessonDates.map((d, idx) => {
                       const isToday = d.fullDate === todayDateStr;
+                      const isFuture = isFutureDate(d.fullDate);
                       return (
-                        <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""}`}>
+                        <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isFuture ? "th-col-future" : ""}`}>
                           {isToday && <span className="today-badge-pill">Bugun</span>}
+                          {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                           <span className="th-date-text">{d.dayStr}</span>
                         </th>
                       );
@@ -823,17 +838,18 @@ const Attendance = () => {
                           const cell = matrixData[cellKey];
                           const status = cell?.status;
                           const isToday = d.fullDate === todayDateStr;
+                          const isFuture = isFutureDate(d.fullDate);
 
                           return (
                             <td 
                               key={dIdx} 
-                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
+                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
                               onMouseDown={handleCellMouseDown}
                               onMouseUp={(e) => handleCellMouseUp(student.id, d.fullDate, student.fullName, e)}
                               onTouchStart={handleCellTouchStart}
                               onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
                               onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌ | O'ng tugma: tezkor | Drag/Swipe: o'ngga ✅, chapga ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || (isFuture ? "Kelgusi dars sanasi (Hali boshlanmadi)" : "Belgilanmagan (Bosing: ✅ ❌ | O'ng tugma: tezkor | Drag/Swipe: o'ngga ✅, chapga ❌)")} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
                             >
                               {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
                               {isLessonTimeLocked(d.fullDate) && (
