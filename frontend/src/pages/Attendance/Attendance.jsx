@@ -164,8 +164,8 @@ const Attendance = () => {
     loadInitialData();
   }, []);
 
-  const currentGroupObj = groups.find((g) => g.id === selectedGroup) || groups[0];
-  const activeGroupStudents = students.filter((s) => s.groupId === selectedGroup);
+  const currentGroupObj = groups.find((g) => String(g.id) === String(selectedGroup)) || groups[0];
+  const activeGroupStudents = students.filter((s) => String(s.groupId || s.group_id) === String(selectedGroup));
 
   // Generate lesson dates for selected year & month based on group schedule
   const getMonthLessonDates = () => {
@@ -675,7 +675,7 @@ const Attendance = () => {
         <>
           {/* 2. GURUH TANLANGAN HOLAT: YAGONA BIR QATORLI TOP BAR & DAVOMAT JURNALI */}
           <div className="lc-top-controls-bar">
-            {/* Left: Guruhlarga qaytish tugmasi + Guruh nomi + Nav Tabs */}
+            {/* Left: Guruhlarga qaytish tugmasi + Nav Tabs */}
             <div className="lc-top-left-group">
               <button 
                 type="button" 
@@ -688,10 +688,6 @@ const Attendance = () => {
               >
                 <HiOutlineArrowLeft /> Guruhlar
               </button>
-
-              <div className="lc-active-group-pill">
-                <strong>{currentGroupObj?.name}</strong>
-              </div>
 
               <div className="lc-tabs-navigation">
                 {LC_UP_TABS.map((t) => (
