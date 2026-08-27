@@ -225,11 +225,23 @@ const Attendance = () => {
     return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
 
-  // 15-Qoida: Kelajakdagi dars sanasi tekshiruvi (faqat Admin ruxsati bilan)
+  // 15-Qoida: O'tgan va Kelajak sanalarini tekshirish
+  const isPastDate = (fullDate) => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return fullDate < todayStr;
+  };
+
   const isFutureDate = (fullDate) => {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     return fullDate > todayStr;
+  };
+
+  const isTodayDate = (fullDate) => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return fullDate === todayStr;
   };
 
   // 1-Qoida: Dars tugaganidan so'ng 1 soatgacha tahrirlash mumkin (faqat O'qituvchilar uchun). Admin esa istalgan payt o'zgartira oladi.
@@ -246,7 +258,7 @@ const Attendance = () => {
 
     // Kelajak sanasi
     if (fullDate > todayStr) {
-      return false;
+      return true;
     }
 
     // Bugungi dars: dars tugashidan so'ng 1 soatgacha
@@ -295,14 +307,20 @@ const Attendance = () => {
     if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
 
-    // 15-Qoida: Kelajakdagi dars sanasi tekshiruvi
+    // O'tgan darslarni tekshirish (Faqat Admin tahrirlay oladi)
+    if (isPastDate(fullDate) && currentRole !== "admin") {
+      toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi! Faqat bugungi dars uchun ruxsat berilgan.");
+      return;
+    }
+
+    // Kelajakdagi dars sanasi tekshiruvi (Faqat Admin ruxsati bilan)
     if (isFutureDate(fullDate) && currentRole !== "admin") {
-      toast.info("⏳ [15-Qoida: Kelajak Sanasi] Ushbu dars kuni kelganda davomat ochiladi.");
+      toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
 
     // 1-Qoida: 1 soatlik vaqt qulfi tekshiruvi
-    if (isLessonTimeLocked(fullDate)) {
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
       toast.error("⏱️ [1-Qoida] Ushbu dars davomati qulflangan! Dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin. O'zgartirish uchun Adminga murojaat qiling.");
       return;
     }
@@ -358,23 +376,34 @@ const Attendance = () => {
   const mouseDragCoords = useRef({ x: 0, y: 0, isDragging: false });
 
   // Touch Swipe (Mobile / Tablet)
-  const handleCellTouchStart = (e) => {
+  const handleCellTouchStart = (fullDate, e) => {
+    if (isPastDate(fullDate) && currentRole !== "admin") return;
+    if (isFutureDate(fullDate) && currentRole !== "admin") return;
     if (e.touches && e.touches[0]) {
       touchStartCoords.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
   };
 
   const handleCellTouchEnd = (studentId, fullDate, studentName, e) => {
+    if (isPastDate(fullDate) && currentRole !== "admin") {
+      toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi!");
+      return;
+    }
+    if (isFutureDate(fullDate) && currentRole !== "admin") {
+      toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
+      return;
+    }
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+      toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+      return;
+    }
+
     if (e.changedTouches && e.changedTouches[0]) {
       const deltaX = e.changedTouches[0].clientX - touchStartCoords.current.x;
       const deltaY = e.changedTouches[0].clientY - touchStartCoords.current.y;
       
       // Horizontal swipe detected (> 35px horizontally)
       if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-          toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
-          return;
-        }
         if (deltaX > 35) {
           // Swipe Right -> Keldi ✅
           handleSelectStatus(studentId, fullDate, studentName, "Present", e);
@@ -394,8 +423,10 @@ const Attendance = () => {
   };
 
   // Mouse Drag & Click (Desktop / Laptop)
-  const handleCellMouseDown = (e) => {
+  const handleCellMouseDown = (fullDate, e) => {
     if (e.button !== 0) return; // Faqat chap tugma
+    if (isPastDate(fullDate) && currentRole !== "admin") return;
+    if (isFutureDate(fullDate) && currentRole !== "admin") return;
     mouseDragCoords.current = {
       x: e.clientX,
       y: e.clientY,
@@ -404,6 +435,19 @@ const Attendance = () => {
   };
 
   const handleCellMouseUp = (studentId, fullDate, studentName, e) => {
+    if (isPastDate(fullDate) && currentRole !== "admin") {
+      toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi! Faqat bugungi dars uchun ruxsat berilgan.");
+      return;
+    }
+    if (isFutureDate(fullDate) && currentRole !== "admin") {
+      toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
+      return;
+    }
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+      toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+      return;
+    }
+
     if (!mouseDragCoords.current.isDragging) return;
     const deltaX = e.clientX - mouseDragCoords.current.x;
     const deltaY = e.clientY - mouseDragCoords.current.y;
@@ -411,10 +455,6 @@ const Attendance = () => {
 
     // Sichqonchani surish (Mouse Drag > 30px)
     if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-        toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
-        return;
-      }
       if (deltaX > 30) {
         // Drag Right -> Keldi ✅
         handleSelectStatus(studentId, fullDate, studentName, "Present", e);
@@ -431,13 +471,9 @@ const Attendance = () => {
       }
     } else {
       // Surmasdan shunchaki bosish (Oddiy Click)
-      // Talab: Faqat ekran 800px dan katta bo'lsa suzuvchi tanlagich ochilsin, kichikda ochilmasin
+      // Faqat ekran 800px dan katta bo'lsa va faqat bugungi dars bo'lsa dock ochilsin
       const isDesktop = window.innerWidth > 800;
       if (isDesktop) {
-        if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-          toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
-          return;
-        }
         const cellKey = `${studentId}_${fullDate}`;
         setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
       }
@@ -447,6 +483,14 @@ const Attendance = () => {
   // Right-Click (Sichqoncha o'ng tugmasi bilan tezkor aylantirib belgilash)
   const handleCellContextMenu = (studentId, fullDate, studentName, currentStatus, e) => {
     e.preventDefault();
+    if (isPastDate(fullDate) && currentRole !== "admin") {
+      toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi!");
+      return;
+    }
+    if (isFutureDate(fullDate) && currentRole !== "admin") {
+      toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
+      return;
+    }
     if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
       toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
       return;
@@ -839,17 +883,18 @@ const Attendance = () => {
                           const status = cell?.status;
                           const isToday = d.fullDate === todayDateStr;
                           const isFuture = isFutureDate(d.fullDate);
+                          const isPast = isPastDate(d.fullDate);
 
                           return (
                             <td 
                               key={dIdx} 
-                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
-                              onMouseDown={handleCellMouseDown}
+                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isPast ? "td-cell-past" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
+                              onMouseDown={(e) => handleCellMouseDown(d.fullDate, e)}
                               onMouseUp={(e) => handleCellMouseUp(student.id, d.fullDate, student.fullName, e)}
-                              onTouchStart={handleCellTouchStart}
+                              onTouchStart={(e) => handleCellTouchStart(d.fullDate, e)}
                               onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
                               onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || (isFuture ? "Kelgusi dars sanasi (Hali boshlanmadi)" : "Belgilanmagan (Bosing: ✅ ❌ | O'ng tugma: tezkor | Drag/Swipe: o'ngga ✅, chapga ❌)")} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || (isFuture ? "Kelgusi dars sanasi (Hali boshlanmadi)" : isPast ? "O'tib ketgan dars (Qulflangan)" : "Bugungi dars (Drag/Swipe: ✅ ❌)")} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan)" : ""}`}
                             >
                               {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
                               {isLessonTimeLocked(d.fullDate) && (
