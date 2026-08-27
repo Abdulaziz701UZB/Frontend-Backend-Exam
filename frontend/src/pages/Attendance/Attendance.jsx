@@ -384,21 +384,26 @@ const Attendance = () => {
       const deltaX = e.changedTouches[0].clientX - touchStartCoords.current.x;
       const deltaY = e.changedTouches[0].clientY - touchStartCoords.current.y;
       
-      // Horizontal swipe detected (> 35px horizontally)
-      if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 35) {
-          // Swipe Right -> Keldi ✅
-          handleSelectStatus(studentId, fullDate, studentName, "Present", e);
-        } else if (deltaX < -35) {
-          // Swipe Left -> Kelmadi ❌ + Tepadan Smart Card tushishi
-          handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
-          setActiveReasonCard({
-            studentId,
-            fullDate,
-            studentName,
-            reason: ABSENT_REASONS[0].label,
-            customNote: ""
-          });
+      // Swipe detection (> 30px)
+      if (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30) {
+        if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY < -30) {
+          // Swipe UP (Tepaga tortish) -> Kechikdi / Kech qolmoqda 🕒
+          handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
+        } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          if (deltaX > 30) {
+            // Swipe Right -> Keldi ✅
+            handleSelectStatus(studentId, fullDate, studentName, "Present", e);
+          } else if (deltaX < -30) {
+            // Swipe Left -> Kelmadi ❌ + Tepadan Smart Card tushishi
+            handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
+            setActiveReasonCard({
+              studentId,
+              fullDate,
+              studentName,
+              reason: ABSENT_REASONS[0].label,
+              customNote: ""
+            });
+          }
         }
       }
     }
@@ -435,20 +440,25 @@ const Attendance = () => {
     mouseDragCoords.current.isDragging = false;
 
     // Sichqonchani surish (Mouse Drag > 30px)
-    if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 30) {
-        // Drag Right -> Keldi ✅
-        handleSelectStatus(studentId, fullDate, studentName, "Present", e);
-      } else if (deltaX < -30) {
-        // Drag Left -> Kelmadi ❌ + Tepadan Smart Card tushishi
-        handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
-        setActiveReasonCard({
-          studentId,
-          fullDate,
-          studentName,
-          reason: ABSENT_REASONS[0].label,
-          customNote: ""
-        });
+    if (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30) {
+      if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY < -30) {
+        // Drag UP (Tepaga tortish) -> Kechikdi / Kech qolmoqda 🕒
+        handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
+      } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 30) {
+          // Drag Right (O'ngga tortish) -> Keldi ✅
+          handleSelectStatus(studentId, fullDate, studentName, "Present", e);
+        } else if (deltaX < -30) {
+          // Drag Left (Chapga tortish) -> Kelmadi ❌ + Tepadan Smart Card tushishi
+          handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
+          setActiveReasonCard({
+            studentId,
+            fullDate,
+            studentName,
+            reason: ABSENT_REASONS[0].label,
+            customNote: ""
+          });
+        }
       }
     } else {
       // Surmasdan shunchaki bosish (Oddiy Click)
