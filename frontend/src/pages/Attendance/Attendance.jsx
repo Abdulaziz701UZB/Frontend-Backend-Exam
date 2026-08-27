@@ -338,7 +338,7 @@ const Attendance = () => {
       ...prev,
       [cellKey]: {
         status: newStatus,
-        note: newStatus === "Excused" ? "Salomatlik / Uzrli" : newStatus === "Absent" ? "Sababsiz" : ""
+        note: newStatus === "Excused" ? "Darsga kechikdi" : newStatus === "Absent" ? "Sababsiz" : ""
       }
     }));
 
@@ -352,7 +352,7 @@ const Attendance = () => {
           student_id: studentId,
           date: fullDate,
           status: newStatus,
-          note: newStatus === "Excused" ? "Salomatlik / Uzrli" : newStatus === "Absent" ? "Sababsiz" : ""
+          note: newStatus === "Excused" ? "Darsga kechikdi" : newStatus === "Absent" ? "Sababsiz" : ""
         });
       }
     } catch (err) {
@@ -361,11 +361,11 @@ const Attendance = () => {
 
     // 6-Qoida: Real-vaqt Telegram Bot Ota-ona Xabarnomasi
     if (newStatus === "Present") {
-      toast.success(`📲 [6-Qoida: Telegram Bot] "${studentName}" — Darsga kelganligi ota-onaga yuborildi ✅`);
+      toast.success(`📲 [Telegram Bot] "${studentName}" — Darsga kelganligi ota-onasiga yuborildi ✅`);
     } else if (newStatus === "Absent") {
-      toast.error(`📲 [6-Qoida: Telegram Bot] "${studentName}" — "Darsga qatnashmadi" deb ota-onasiga tezkor ogohlantirish yuborildi ❌`);
+      toast.error(`📲 [Telegram Bot] "${studentName}" — "Darsga qatnashmadi" deb ota-onasiga tezkor ogohlantirish yuborildi ❌`);
     } else if (newStatus === "Excused") {
-      toast.info(`📲 [6-Qoida: Telegram Bot] "${studentName}" — "Sababli dars qoldirdi" deb ota-onasiga ma'lumot yuborildi 🚩`);
+      toast.info(`📲 [Telegram Bot] "${studentName}" — Darsga kechikib kelganligi ("Kech qoldi") ota-onasiga ma'lumot sifatida yuborildi 🕒`);
     } else {
       toast.info(`"${studentName}" davomati tozalandi • (Avto-saqlandi)`);
     }
