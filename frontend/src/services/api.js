@@ -171,6 +171,16 @@ export const studentsApi = {
     const res = await api.post(`/students/${id}/transfer`, data);
     return res.data;
   },
+  transferGroup: async (id, newGroupId, transferReason, oldGroupId, oldGroupName, newGroupName) => {
+    const res = await api.post(`/students/${id}/transfer`, {
+      newGroupId,
+      newGroupName: newGroupName || newGroupId,
+      transferReason,
+      oldGroupId,
+      oldGroupName,
+    });
+    return res.data;
+  },
 };
 
 export const teachersApi = {

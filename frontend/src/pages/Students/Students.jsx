@@ -298,7 +298,8 @@ const Students = () => {
 
     const oldGroupId = transferringStudent.groupId;
     const oldGroupName = transferringStudent.groupName;
-    const targetGroup = groups.find((g) => g.id === targetGroupId);
+    const targetGroup = groups.find((g) => String(g.id) === String(targetGroupId));
+    const newGroupName = targetGroup?.name || targetGroupId;
 
     try {
       await studentsApi.transferGroup(
@@ -307,10 +308,11 @@ const Students = () => {
         transferReason,
         oldGroupId,
         oldGroupName,
+        newGroupName,
       );
 
       toast.success(
-        `${transferringStudent.fullName} muvaffaqiyatli "${targetGroup?.name || targetGroupId}" guruhiga o'tkazildi!`,
+        `${transferringStudent.fullName} muvaffaqiyatli "${newGroupName}" guruhiga o'tkazildi!`,
       );
       setIsTransferModalOpen(false);
       setTransferringStudent(null);
