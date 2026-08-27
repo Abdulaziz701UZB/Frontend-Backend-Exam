@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { attendanceApi, groupsApi, studentsApi } from "../../services/api";
@@ -328,6 +328,48 @@ const Attendance = () => {
     } else {
       toast.info(`"${studentName}" davomati tozalandi • (Avto-saqlandi)`);
     }
+  };
+
+  // 1-Dizayn: Swipe & Right-click Quick Mark Gestures
+  const touchStartCoords = useRef({ x: 0, y: 0 });
+
+  const handleCellTouchStart = (e) => {
+    if (e.touches && e.touches[0]) {
+      touchStartCoords.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+  };
+
+  const handleCellTouchEnd = (studentId, fullDate, studentName, e) => {
+    if (e.changedTouches && e.changedTouches[0]) {
+      const deltaX = e.changedTouches[0].clientX - touchStartCoords.current.x;
+      const deltaY = e.changedTouches[0].clientY - touchStartCoords.current.y;
+      
+      // Horizontal swipe detected (> 35px horizontally)
+      if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+          toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+          return;
+        }
+        if (deltaX > 35) {
+          // Swipe Right -> Keldi ✅
+          handleSelectStatus(studentId, fullDate, studentName, "Present", e);
+        } else if (deltaX < -35) {
+          // Swipe Left -> Kelmadi ❌
+          handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
+        }
+      }
+    }
+  };
+
+  // Right-Click (Sichqoncha o'ng tugmasi bilan tezkor aylantirib belgilash)
+  const handleCellContextMenu = (studentId, fullDate, studentName, currentStatus, e) => {
+    e.preventDefault();
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+      toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+      return;
+    }
+    const nextStatus = !currentStatus ? "Present" : currentStatus === "Present" ? "Absent" : currentStatus === "Absent" ? "Excused" : null;
+    handleSelectStatus(studentId, fullDate, studentName, nextStatus, e);
   };
 
   // Mark all students Present for all dates with instant auto-save
@@ -689,7 +731,10 @@ const Attendance = () => {
                                 }
                                 setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
                               }}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
+                              onTouchStart={handleCellTouchStart}
+                              onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
+                              onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌ | O'ng tugma: tezkor | Swipe: o'ngga ✅, chapga ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
                             >
                               {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
                               {isLessonTimeLocked(d.fullDate) && (
