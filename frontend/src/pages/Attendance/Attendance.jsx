@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { attendanceApi, groupsApi, studentsApi } from "../../services/api";
@@ -71,6 +72,8 @@ const ABSENT_REASONS = [
 ];
 
 const Attendance = () => {
+  const { id: routeGroupId } = useParams();
+  const navigate = useNavigate();
   const { currentRole, user, canMarkAttendance } = useEduAuth();
   const toast = useToast();
 
@@ -79,7 +82,16 @@ const Attendance = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(routeGroupId || null);
+
+  useEffect(() => {
+    if (routeGroupId) {
+      setSelectedGroup(routeGroupId);
+    } else {
+      setSelectedGroup(null);
+    }
+  }, [routeGroupId]);
+
   const [selectedProfileStudent, setSelectedProfileStudent] = useState(null);
   const [activeTab, setActiveTab] = useState("attendance");
   const [selectedYear, setSelectedYear] = useState("2026");
@@ -137,8 +149,8 @@ const Attendance = () => {
       setStudents(sData);
       setAttendanceRecords(aData);
 
-      if (gData.length > 0 && !selectedGroup) {
-        setSelectedGroup(gData[0].id);
+      if (routeGroupId) {
+        setSelectedGroup(routeGroupId);
       }
     } catch (err) {
       console.error("Attendance initial load error:", err.message);
@@ -591,7 +603,10 @@ const Attendance = () => {
                 <div
                   key={g.id}
                   className="lc-group-card-item"
-                  onClick={() => setSelectedGroup(g.id)}
+                  onClick={() => {
+                    setSelectedGroup(g.id);
+                    navigate(`/attendance/${g.id}`);
+                  }}
                 >
                   <div className="group-card-top">
                     <span className="group-card-badge">{g.courseName || "Frontend ReactJS"}</span>
@@ -629,7 +644,10 @@ const Attendance = () => {
               <button 
                 type="button" 
                 className="btn-back-to-groups" 
-                onClick={() => setSelectedGroup(null)}
+                onClick={() => {
+                  setSelectedGroup(null);
+                  navigate('/attendance');
+                }}
                 title="Boshqa guruhni tanlash"
               >
                 <HiOutlineArrowLeft /> Guruhlar

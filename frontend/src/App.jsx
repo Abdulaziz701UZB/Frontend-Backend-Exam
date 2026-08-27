@@ -76,6 +76,7 @@ function ProtectedApp() {
             <Route path="/students" element={<Students />} />
             <Route path="/students/:id" element={<Students />} />
             <Route path="/attendance" element={<Attendance />} />
+            <Route path="/attendance/:id" element={<Attendance />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/payments/:id" element={<Payments />} />
             <Route path="/teachers" element={<Teachers />} />
