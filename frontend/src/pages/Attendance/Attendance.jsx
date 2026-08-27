@@ -383,17 +383,17 @@ const Attendance = () => {
     if (e.changedTouches && e.changedTouches[0]) {
       const deltaX = e.changedTouches[0].clientX - touchStartCoords.current.x;
       const deltaY = e.changedTouches[0].clientY - touchStartCoords.current.y;
-      
-      // Swipe detection (> 30px)
-      if (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30) {
-        if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY < -30) {
+      const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      if (dist > 15) {
+        if (deltaY < -15 && Math.abs(deltaY) >= Math.abs(deltaX)) {
           // Swipe UP (Tepaga tortish) -> Kechikdi / Kech qolmoqda 🕒
           handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
         } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          if (deltaX > 30) {
+          if (deltaX > 15) {
             // Swipe Right -> Keldi ✅
             handleSelectStatus(studentId, fullDate, studentName, "Present", e);
-          } else if (deltaX < -30) {
+          } else if (deltaX < -15) {
             // Swipe Left -> Kelmadi ❌ + Tepadan Smart Card tushishi
             handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
             setActiveReasonCard({
@@ -405,71 +405,74 @@ const Attendance = () => {
             });
           }
         }
+      } else {
+        const cellKey = `${studentId}_${fullDate}`;
+        setActivePickerCell((prev) => (prev === cellKey ? null : cellKey));
       }
     }
   };
 
   // Mouse Drag & Click (Desktop / Laptop) - Faqat Bugungi dars uchun ishlaydi
-  const handleCellMouseDown = (fullDate, e) => {
+  const handleCellMouseDown = (studentId, fullDate, studentName, e) => {
     if (e.button !== 0) return; // Faqat chap tugma
     if (!isTodayDate(fullDate)) return;
     mouseDragCoords.current = {
       x: e.clientX,
       y: e.clientY,
-      isDragging: true
+      isDragging: true,
+      studentId,
+      fullDate,
+      studentName
     };
   };
 
-  const handleCellMouseUp = (studentId, fullDate, studentName, e) => {
-    if (isPastDate(fullDate)) {
-      toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi! Faqat bugungi dars uchun ruxsat berilgan.");
-      return;
-    }
-    if (isFutureDate(fullDate)) {
-      toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
-      return;
-    }
-    if (isLessonTimeLocked(fullDate)) {
-      toast.error("🔒 Ushbu dars davomati qulflangan!");
-      return;
-    }
+  // Global Window MouseUp Listener for Smooth Reliable Dragging in Any Direction
+  useEffect(() => {
+    const handleGlobalMouseUp = (e) => {
+      if (!mouseDragCoords.current.isDragging) return;
+      const { x, y, studentId, fullDate, studentName } = mouseDragCoords.current;
+      mouseDragCoords.current.isDragging = false;
 
-    if (!mouseDragCoords.current.isDragging) return;
-    const deltaX = e.clientX - mouseDragCoords.current.x;
-    const deltaY = e.clientY - mouseDragCoords.current.y;
-    mouseDragCoords.current.isDragging = false;
+      if (!studentId || !fullDate) return;
 
-    // Sichqonchani surish (Mouse Drag > 30px)
-    if (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30) {
-      if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY < -30) {
-        // Drag UP (Tepaga tortish) -> Kechikdi / Kech qolmoqda 🕒
-        handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
-      } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 30) {
-          // Drag Right (O'ngga tortish) -> Keldi ✅
-          handleSelectStatus(studentId, fullDate, studentName, "Present", e);
-        } else if (deltaX < -30) {
-          // Drag Left (Chapga tortish) -> Kelmadi ❌ + Tepadan Smart Card tushishi
-          handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
-          setActiveReasonCard({
-            studentId,
-            fullDate,
-            studentName,
-            reason: ABSENT_REASONS[0].label,
-            customNote: ""
-          });
+      const deltaX = e.clientX - x;
+      const deltaY = e.clientY - y;
+      const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      // Agar sichqoncha surilgan bo'lsa (drag masofasi > 15px)
+      if (dist > 15) {
+        // Tepaga tortish (deltaY manfiy va |deltaY| >= |deltaX|)
+        if (deltaY < -15 && Math.abs(deltaY) >= Math.abs(deltaX)) {
+          // Tepaga -> Kechikdi / Kech qolmoqda 🕒
+          handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
+        } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          if (deltaX > 15) {
+            // O'ngga -> Keldi ✅
+            handleSelectStatus(studentId, fullDate, studentName, "Present", e);
+          } else if (deltaX < -15) {
+            // Chapga -> Kelmadi ❌ + Smart Card
+            handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
+            setActiveReasonCard({
+              studentId,
+              fullDate,
+              studentName,
+              reason: ABSENT_REASONS[0].label,
+              customNote: ""
+            });
+          }
+        }
+      } else {
+        // Joyida oddiy bosish (Click) -> faqat bugungi dars bo'lsa popover ochilsin
+        if (isTodayDate(fullDate)) {
+          const cellKey = `${studentId}_${fullDate}`;
+          setActivePickerCell((prev) => (prev === cellKey ? null : cellKey));
         }
       }
-    } else {
-      // Surmasdan shunchaki bosish (Oddiy Click)
-      // Faqat ekran 800px dan katta bo'lsa va faqat bugungi dars bo'lsa dock ochilsin
-      const isDesktop = window.innerWidth > 800;
-      if (isDesktop && isTodayDate(fullDate)) {
-        const cellKey = `${studentId}_${fullDate}`;
-        setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
-      }
-    }
-  };
+    };
+
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
+  }, [selectedGroup, groups, students, attendanceRecords]);
 
   // Right-Click (Sichqoncha o'ng tugmasi bilan tezkor aylantirib belgilash)
   const handleCellContextMenu = (studentId, fullDate, studentName, currentStatus, e) => {
@@ -834,8 +837,7 @@ const Attendance = () => {
                             <td 
                               key={dIdx} 
                               className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isPast ? "td-cell-past" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
-                              onMouseDown={(e) => handleCellMouseDown(d.fullDate, e)}
-                              onMouseUp={(e) => handleCellMouseUp(student.id, d.fullDate, student.fullName, e)}
+                              onMouseDown={(e) => handleCellMouseDown(student.id, d.fullDate, student.fullName, e)}
                               onTouchStart={(e) => handleCellTouchStart(d.fullDate, e)}
                               onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
                               onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
