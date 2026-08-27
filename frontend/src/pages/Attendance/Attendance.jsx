@@ -386,8 +386,8 @@ const Attendance = () => {
       const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (dist > 15) {
-        if (deltaY < -15 && Math.abs(deltaY) >= Math.abs(deltaX)) {
-          // Swipe UP (Tepaga tortish) -> Kechikdi / Kech qolmoqda 🕒
+        if ((deltaY > 15 || deltaY < -15) && Math.abs(deltaY) >= Math.abs(deltaX)) {
+          // Swipe DOWN / Vertical (Pastga tortish) -> Kechikdi / Kech qolmoqda 🕒
           handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
         } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
           if (deltaX > 15) {
@@ -441,9 +441,9 @@ const Attendance = () => {
 
       // Agar sichqoncha surilgan bo'lsa (drag masofasi > 15px)
       if (dist > 15) {
-        // Tepaga tortish (deltaY manfiy va |deltaY| >= |deltaX|)
-        if (deltaY < -15 && Math.abs(deltaY) >= Math.abs(deltaX)) {
-          // Tepaga -> Kechikdi / Kech qolmoqda 🕒
+        // Pastga (yoki vertikal) tortish (deltaY musbat / vertikal va |deltaY| >= |deltaX|)
+        if ((deltaY > 15 || deltaY < -15) && Math.abs(deltaY) >= Math.abs(deltaX)) {
+          // Pastga tortish -> Kechikdi / Kech qolmoqda 🕒
           handleSelectStatus(studentId, fullDate, studentName, "Excused", e);
         } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
           if (deltaX > 15) {
