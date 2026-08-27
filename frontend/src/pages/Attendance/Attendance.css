@@ -632,8 +632,63 @@
   box-shadow: 0 4px 14px rgba(29, 114, 254, 0.4);
 }
 
-.lc-tab-button.active::after {
-  display: none;
+/* Sokin Avto-Saqlash Indikatori */
+.lc-sync-indicator-pill {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.sync-status.status-saved {
+  color: #22c55e;
+}
+
+.sync-status.status-saving {
+  color: #eab308;
+}
+
+.sync-status.status-error {
+  color: #ef4444;
+}
+
+.sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.sync-dot.dot-green {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+
+.sync-dot.dot-yellow {
+  background: #eab308;
+  box-shadow: 0 0 6px rgba(234, 179, 8, 0.8);
+  animation: pulseDot 1s infinite alternate;
+}
+
+.sync-dot.dot-red {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+}
+
+@keyframes pulseDot {
+  from { opacity: 0.4; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1.15); }
 }
 
 /* Right Select Pills (Year, Month, Actions) */

@@ -97,16 +97,15 @@ const Attendance = () => {
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedMonth, setSelectedMonth] = useState("08");
   const [selectedGradeDate, setSelectedGradeDate] = useState("");
-  const [studentFilter, setStudentFilter] = useState("all"); // all, debtors, trial, active, frozen
+  const [studentFilter, setStudentFilter] = useState("all");
   const [sortAsc, setSortAsc] = useState(true);
-  const [isZenMode, setIsZenMode] = useState(false); // 6-Qoida: To'liq ekran Zen Mode
-  const [activeReasonCard, setActiveReasonCard] = useState(null); // Smart Card popup for absence reason
+  const [isZenMode, setIsZenMode] = useState(false);
+  const [activeReasonCard, setActiveReasonCard] = useState(null);
+  const [saveStatus, setSaveStatus] = useState("saved");
 
-  // 1-Qoida: Bugungi sana hisobi
   const now = new Date();
   const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-  // Escape tugmasi bilan Zen rejimdan chiqish
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && isZenMode) {
@@ -117,7 +116,6 @@ const Attendance = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isZenMode]);
 
-  // Local Attendance Matrix: { [studentId_dateKey]: { status: 'Present'|'Excused'|'Absent'|'Trial'|null, note: '' } }
   const [matrixData, setMatrixData] = useState({});
   const [gradesData, setGradesData] = useState({});
 
@@ -167,12 +165,10 @@ const Attendance = () => {
   const currentGroupObj = groups.find((g) => String(g.id) === String(selectedGroup)) || groups[0];
   const activeGroupStudents = students.filter((s) => String(s.groupId || s.group_id) === String(selectedGroup));
 
-  // Generate lesson dates for selected year & month based on group schedule
   const getMonthLessonDates = () => {
     const monthObj = MONTHS_LIST.find((m) => m.key === selectedMonth) || MONTHS_LIST[3];
     const monthShort = monthObj.short;
     
-    // Generates realistic schedule dates for odd/even days
     const isOddDays = (currentGroupObj?.scheduleDays || "").toLowerCase().includes("dushanba") || (currentGroupObj?.name || "").includes("Toq");
     const dayNumbers = isOddDays 
       ? ["03", "05", "07", "10", "12", "14", "17", "19", "21", "24", "26", "28", "31"]
@@ -187,7 +183,6 @@ const Attendance = () => {
 
   const lessonDates = getMonthLessonDates();
 
-  // Populate matrix when group, month, or attendance records change
   useEffect(() => {
     if (!selectedGroup) return;
 
@@ -203,13 +198,12 @@ const Attendance = () => {
                  r.date === d.fullDate
         );
 
-        if (found) {
+        if (found && found.status) {
           newMatrix[cellKey] = {
             status: found.status,
             note: found.note || ""
           };
         } else {
-          // Default is unmarked (dot .)
           newMatrix[cellKey] = { status: null, note: "" };
         }
       });
@@ -225,7 +219,6 @@ const Attendance = () => {
     setGradesData(newGrades);
   }, [selectedGroup, selectedMonth, selectedYear, activeGroupStudents.length, attendanceRecords.length]);
 
-  // Active cell picker state (shows ✅ ❌ on two sides when clicked)
   const [activePickerCell, setActivePickerCell] = useState(null);
 
   useEffect(() => {
@@ -238,7 +231,6 @@ const Attendance = () => {
     return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
 
-  // 15-Qoida: O'tgan va Kelajak sanalarini tekshirish
   const isPastDate = (fullDate) => {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
@@ -257,79 +249,63 @@ const Attendance = () => {
     return fullDate === todayStr;
   };
 
-  // 1-Qoida: Bugungi dars har doim 100% ochiq, o'tgan va kelgusi darslar qulflangan
   const isLessonTimeLocked = (fullDate) => {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-    // Bugungi dars har doim 100% ochiq va tahrirlanadigan bo'lsin
     if (fullDate === todayStr) {
       return false;
     }
-
-    // O'tib ketgan sana (kecha yoki oldingi kunlar)
-    if (fullDate < todayStr) {
+    if (fullDate < todayStr || fullDate > todayStr) {
       return true;
     }
-
-    // Kelajak sanasi
-    if (fullDate > todayStr) {
-      return true;
-    }
-
     return false;
   };
 
-  // 5-Qoida: Bir vaqtda 2 ta guruhda bo'lishni bloklash (Double-booking prevention)
   const checkDoubleBooking = (studentId, fullDate) => {
-    const studentObj = students.find((s) => String(s.id) === String(studentId));
-    if (!studentObj) return null;
-
-    // Boshqa guruhlarda xuddi shu vaqtda darsi borligini tekshirish
-    const otherGroups = groups.filter((g) => 
-      String(g.id) !== String(selectedGroup) &&
-      (String(studentObj.groupId || studentObj.group_id) === String(g.id) ||
-       String(studentObj.groupName || "").toLowerCase().includes(String(g.name || "").toLowerCase()))
-    );
+    const otherGroups = groups.filter((g) => g.id !== selectedGroup);
+    const scheduleTimeStr = currentGroupObj?.time || currentGroupObj?.scheduleTime || "14:00 - 16:00";
 
     for (const g of otherGroups) {
-      const curTime = currentGroupObj?.time || currentGroupObj?.scheduleTime || "14:00 - 16:00";
-      const otherTime = g.time || g.scheduleTime || "14:00 - 16:00";
-      if (curTime === otherTime) {
-        return g;
+      const gTime = g.time || g.scheduleTime || "";
+      if (gTime === scheduleTimeStr) {
+        const studentInOtherGroup = students.some((s) => s.groupId === g.id && s.id === studentId);
+        if (studentInOtherGroup) {
+          const rec = attendanceRecords.find(
+            (r) => r.groupId === g.id && r.studentId === studentId && r.date === fullDate && r.status === "Present"
+          );
+          if (rec) {
+            return { name: g.name, time: gTime };
+          }
+        }
       }
     }
     return null;
   };
 
-  // Set status directly from ✅ ❌ picker with Instant Auto-Save & Bot Dispatch (1, 5, 6, 15-Qoidalar)
   const handleSelectStatus = async (studentId, fullDate, studentName, newStatus, e) => {
-    if (e) e.stopPropagation();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!canMarkAttendance) return;
 
-    // O'tgan darslarni qat'iy tekshirish (Umuman ruxsat berilmaydi)
     if (isPastDate(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi! Faqat bugungi dars uchun ruxsat berilgan.");
       return;
     }
 
-    // Kelajakdagi dars sanasini qat'iy tekshirish (Umuman ruxsat berilmaydi)
     if (isFutureDate(fullDate)) {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
 
-    // 1-Qoida: 1 soatlik vaqt qulfi tekshiruvi
     if (isLessonTimeLocked(fullDate)) {
-      toast.error("⏱️ [1-Qoida] Ushbu dars davomati qulflangan! Dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin.");
+      toast.error("⏱️ Ushbu dars davomati qulflangan!");
       return;
     }
 
-    // 5-Qoida: Double-booking tekshiruvi
     if (newStatus === "Present") {
       const conflictGroup = checkDoubleBooking(studentId, fullDate);
       if (conflictGroup) {
-        toast.warning(`⚠️ [5-Qoida: Double-Booking] "${studentName}" xuddi shu vaqtda (${conflictGroup.time}) "${conflictGroup.name}" guruhida ham darsda deb qayd etilgan!`);
+        toast.warning(`⚠️ [Double-Booking] "${studentName}" xuddi shu vaqtda (${conflictGroup.time}) "${conflictGroup.name}" guruhida ham darsda deb qayd etilgan!`);
       }
     }
 
@@ -359,8 +335,8 @@ const Attendance = () => {
     });
 
     setActivePickerCell(null);
+    setSaveStatus("saving");
 
-    // Instant Backend Auto-Save
     try {
       if (newStatus) {
         await attendanceApi.create({
@@ -371,23 +347,14 @@ const Attendance = () => {
           note: newStatus === "Excused" ? "Darsga kechikdi" : newStatus === "Absent" ? "Sababsiz" : ""
         });
       }
+      setSaveStatus("saved");
     } catch (err) {
       console.warn("Auto-save sync:", err.message);
-    }
-
-    // 6-Qoida: Real-vaqt Telegram Bot Ota-ona Xabarnomasi
-    if (newStatus === "Present") {
-      toast.success(`📲 [Telegram Bot] "${studentName}" — Darsga kelganligi ota-onasiga yuborildi ✅`);
-    } else if (newStatus === "Absent") {
-      toast.error(`📲 [Telegram Bot] "${studentName}" — "Darsga qatnashmadi" deb ota-onasiga tezkor ogohlantirish yuborildi ❌`);
-    } else if (newStatus === "Excused") {
-      toast.info(`📲 [Telegram Bot] "${studentName}" — Darsga kechikib kelganligi ("Kech qoldi") ota-onasiga ma'lumot sifatida yuborildi 🕒`);
-    } else {
-      toast.info(`"${studentName}" davomati tozalandi • (Avto-saqlandi)`);
+      setSaveStatus("error");
+      toast.error("Internet yoki server bilan aloqa uzildi!");
     }
   };
 
-  // 1-Dizayn: Swipe & Mouse Drag & Right-click Quick Mark Gestures
   const touchStartCoords = useRef({ x: 0, y: 0 });
   const mouseDragCoords = useRef({ x: 0, y: 0, isDragging: false });
 
@@ -547,6 +514,9 @@ const Attendance = () => {
       return [{ groupId: selectedGroup, studentId: activeReasonCard.studentId, date: activeReasonCard.fullDate, ...newEntry }, ...prev];
     });
 
+    setSaveStatus("saving");
+    setActiveReasonCard(null);
+
     try {
       await attendanceApi.create({
         group_id: selectedGroup,
@@ -555,13 +525,12 @@ const Attendance = () => {
         status: "Absent",
         note: finalReason
       });
+      setSaveStatus("saved");
     } catch (err) {
       console.warn("Auto-save sync:", err.message);
+      setSaveStatus("error");
+      toast.error("Internet yoki server bilan aloqa uzildi!");
     }
-
-    // 4-Qoida: Yangi formatdagi Telegram Bot xabarnomasi
-    toast.error(`📲 [Telegram Bot] "${activeReasonCard.studentName}" — Darsga qatnashmadi. Qayd etilgan sabab: [${finalReason}] ❌. Shu sabab bo'yicha kelmaganidan xabaringiz bormi?`);
-    setActiveReasonCard(null);
   };
 
   // Mark all students Present ONLY for TODAY's lesson date with instant auto-save
@@ -703,8 +672,25 @@ const Attendance = () => {
               </div>
             </div>
 
-            {/* Right: Year Dropdown, Month Dropdown, Barchasi Keldi, Fullscreen */}
+            {/* Right: Sync Indicator, Year Dropdown, Month Dropdown, Barchasi Keldi, Fullscreen */}
             <div className="lc-top-right-actions">
+              {/* Sokin Avto-Saqlash Indikatori (Google Docs / Notion uslubida) */}
+              <div className="lc-sync-indicator-pill">
+                {saveStatus === "saving" ? (
+                  <span className="sync-status status-saving">
+                    <span className="sync-dot dot-yellow"></span> Saqlanmoqda...
+                  </span>
+                ) : saveStatus === "error" ? (
+                  <span className="sync-status status-error">
+                    <span className="sync-dot dot-red"></span> Saqlanmadi
+                  </span>
+                ) : (
+                  <span className="sync-status status-saved">
+                    <span className="sync-dot dot-green"></span> ✓ Saqlandi
+                  </span>
+                )}
+              </div>
+
               <div className="lc-select-pill year-select-pill">
                 <select
                   value={selectedYear}
