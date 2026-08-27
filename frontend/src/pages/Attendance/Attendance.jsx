@@ -334,13 +334,29 @@ const Attendance = () => {
     }
 
     const cellKey = `${studentId}_${fullDate}`;
+    const newEntry = {
+      status: newStatus,
+      note: newStatus === "Excused" ? "Darsga kechikdi" : newStatus === "Absent" ? "Sababsiz" : ""
+    };
+
     setMatrixData((prev) => ({
       ...prev,
-      [cellKey]: {
-        status: newStatus,
-        note: newStatus === "Excused" ? "Darsga kechikdi" : newStatus === "Absent" ? "Sababsiz" : ""
-      }
+      [cellKey]: newEntry
     }));
+
+    setAttendanceRecords((prev) => {
+      const idx = prev.findIndex(
+        (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
+               String(r.studentId || r.student_id) === String(studentId) &&
+               r.date === fullDate
+      );
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], ...newEntry, date: fullDate, groupId: selectedGroup, studentId };
+        return copy;
+      }
+      return [{ groupId: selectedGroup, studentId, date: fullDate, ...newEntry }, ...prev];
+    });
 
     setActivePickerCell(null);
 
@@ -507,13 +523,29 @@ const Attendance = () => {
       : activeReasonCard.reason;
 
     const cellKey = `${activeReasonCard.studentId}_${activeReasonCard.fullDate}`;
+    const newEntry = {
+      status: "Absent",
+      note: finalReason
+    };
+
     setMatrixData((prev) => ({
       ...prev,
-      [cellKey]: {
-        status: "Absent",
-        note: finalReason
-      }
+      [cellKey]: newEntry
     }));
+
+    setAttendanceRecords((prev) => {
+      const idx = prev.findIndex(
+        (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
+               String(r.studentId || r.student_id) === String(activeReasonCard.studentId) &&
+               r.date === activeReasonCard.fullDate
+      );
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], ...newEntry, date: activeReasonCard.fullDate, groupId: selectedGroup, studentId: activeReasonCard.studentId };
+        return copy;
+      }
+      return [{ groupId: selectedGroup, studentId: activeReasonCard.studentId, date: activeReasonCard.fullDate, ...newEntry }, ...prev];
+    });
 
     try {
       await attendanceApi.create({
@@ -554,6 +586,23 @@ const Attendance = () => {
     });
 
     setMatrixData(updated);
+    setAttendanceRecords((prev) => {
+      let copy = [...prev];
+      activeGroupStudents.forEach((student) => {
+        const idx = copy.findIndex(
+          (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
+                 String(r.studentId || r.student_id) === String(student.id) &&
+                 r.date === todayDateStr
+        );
+        if (idx >= 0) {
+          copy[idx] = { ...copy[idx], status: "Present", note: "" };
+        } else {
+          copy.unshift({ groupId: selectedGroup, studentId: student.id, date: todayDateStr, status: "Present", note: "" });
+        }
+      });
+      return copy;
+    });
+
     await Promise.all(promises);
     toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
   };

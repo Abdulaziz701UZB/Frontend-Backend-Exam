@@ -71,7 +71,7 @@ export const normalizeAttendance = (a) => ({
   groupId: a.group_id || a.groupId,
   studentId: a.student_id || a.studentId,
   date: a.date,
-  status: a.status || "Present",
+  status: a.status,
   note: a.note || "",
   reasonCategory: a.reason_category || a.reasonCategory || "",
 });
