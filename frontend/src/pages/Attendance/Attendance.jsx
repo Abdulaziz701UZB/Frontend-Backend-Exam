@@ -602,6 +602,122 @@ const Attendance = () => {
     return b.fullName.localeCompare(a.fullName);
   });
 
+  // 1, 2, 3, 6, 7, 8, 9, 10-Qoidalar: Guruhlar Hubi Uchun Professional Helperlar
+
+  // 7-Qoida: Bugun guruhning darsi bormi?
+  const isGroupLessonToday = (group) => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0: Yakshanba, 1: Dush, 2: Sesh, 3: Chor, 4: Pay, 5: Juma, 6: Shanba
+    const daysStr = (group.scheduleDays || "").toLowerCase();
+    const groupName = (group.name || "").toLowerCase();
+
+    // Toq kunlar: Dushanba (1), Chorshanba (3), Juma (5)
+    if ([1, 3, 5].includes(dayOfWeek)) {
+      if (daysStr.includes("dushanba") || daysStr.includes("toq") || groupName.includes("toq")) return true;
+    }
+    // Juft kunlar: Seshanba (2), Payshanba (4), Shanba (6)
+    if ([2, 4, 6].includes(dayOfWeek)) {
+      if (daysStr.includes("seshanba") || daysStr.includes("payshanba") || daysStr.includes("juft") || groupName.includes("juft")) return true;
+    }
+
+    const uzbekDays = ["yakshanba", "dushanba", "seshanba", "chorshanba", "payshanba", "juma", "shanba"];
+    const todayName = uzbekDays[dayOfWeek];
+    return daysStr.includes(todayName);
+  };
+
+  // 8-Qoida: Hozir ayni vaqtda jonli dars ketmoqdami?
+  const isLessonLiveNow = (group) => {
+    if (!isGroupLessonToday(group)) return false;
+    const timeStr = group.scheduleTime || group.time || "14:00 - 16:00";
+    const parts = timeStr.split("-");
+    if (parts.length !== 2) return false;
+
+    const [startH, startM] = parts[0].trim().split(":").map(Number);
+    const [endH, endM] = parts[1].trim().split(":").map(Number);
+    if (isNaN(startH) || isNaN(endH)) return false;
+
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const startMins = startH * 60 + (startM || 0);
+    const endMins = endH * 60 + (endM || 0);
+
+    return currentMins >= startMins && currentMins <= endMins;
+  };
+
+  // 10-Qoida: Dars vaqti va countdown hisobi
+  const getLessonTimingStatus = (group) => {
+    if (!isGroupLessonToday(group)) {
+      return { status: "no_lesson", text: "Bugun dars yo'q" };
+    }
+    if (isLessonLiveNow(group)) {
+      return { status: "live", text: "⚡ Dars ketmoqda" };
+    }
+
+    const timeStr = group.scheduleTime || group.time || "14:00 - 16:00";
+    const parts = timeStr.split("-");
+    if (parts.length === 2) {
+      const [startH, startM] = parts[0].trim().split(":").map(Number);
+      if (!isNaN(startH)) {
+        const now = new Date();
+        const currentMins = now.getHours() * 60 + now.getMinutes();
+        const startMins = startH * 60 + (startM || 0);
+        const diff = startMins - currentMins;
+
+        if (diff > 0 && diff <= 180) {
+          const h = Math.floor(diff / 60);
+          const m = diff % 60;
+          const leftStr = h > 0 ? `${h}s ${m}m` : `${m}m`;
+          return { status: "upcoming", text: `⏳ ${leftStr} qoldi` };
+        } else if (diff > 180) {
+          return { status: "upcoming", text: `⏰ ${parts[0].trim()} da` };
+        } else {
+          return { status: "ended", text: "🏁 Dars tugagan" };
+        }
+      }
+    }
+    return { status: "today", text: "Bugun dars bor" };
+  };
+
+  // 9-Qoida: Davomat topshirilganlik statusi
+  const getGroupAttendanceStatus = (groupId, gStudents) => {
+    if (gStudents.length === 0) return { type: "empty", label: "Talabalar yo'q" };
+
+    const markedCount = gStudents.filter((s) =>
+      attendanceRecords.some(
+        (r) => String(r.groupId || r.group_id) === String(groupId) &&
+               String(r.studentId || r.student_id) === String(s.id) &&
+               r.date === todayDateStr &&
+               r.status
+      )
+    ).length;
+
+    if (markedCount === gStudents.length && gStudents.length > 0) {
+      return { type: "done", label: `✓ Davomat Qilingan (${markedCount}/${gStudents.length})` };
+    }
+    if (markedCount > 0) {
+      return { type: "partial", label: `⏳ Qisman Qilingan (${markedCount}/${gStudents.length})` };
+    }
+    return { type: "pending", label: `⚠️ Davomat Qilinmagan (0/${gStudents.length})` };
+  };
+
+  // 3-Qoida: Kurslar bo'yicha rangli gradient mavzular
+  const getCourseTheme = (courseName = "") => {
+    const c = courseName.toLowerCase();
+    if (c.includes("react") || c.includes("front") || c.includes("js") || c.includes("web")) {
+      return "theme-react";
+    }
+    if (c.includes("python") || c.includes("django") || c.includes("data") || c.includes("ai")) {
+      return "theme-python";
+    }
+    if (c.includes("node") || c.includes("back") || c.includes("net") || c.includes("c#")) {
+      return "theme-backend";
+    }
+    if (c.includes("design") || c.includes("ui") || c.includes("grafik") || c.includes("figma")) {
+      return "theme-design";
+    }
+    return "theme-default";
+  };
+
   return (
     <div className="lc-up-attendance-container">
       {/* 1. AGAR GURUH TANLANMAGAN BO'LSA: GURUHLARNI TANLASH KARTALARI (HUB) */}
@@ -616,37 +732,86 @@ const Attendance = () => {
 
           <div className="lc-groups-cards-grid">
             {accessibleGroups.map((g) => {
-              const gStudents = students.filter((s) => s.groupId === g.id);
+              const gStudents = students.filter((s) => String(s.groupId || s.group_id) === String(g.id));
+              const hasLessonToday = isGroupLessonToday(g);
+              const isLive = isLessonLiveNow(g);
+              const timing = getLessonTimingStatus(g);
+              const attStatus = getGroupAttendanceStatus(g.id, gStudents);
+              const courseTheme = getCourseTheme(g.courseName || g.course_name || "");
+
               return (
                 <div
                   key={g.id}
-                  className="lc-group-card-item"
+                  className={`lc-group-card-item ${courseTheme} ${hasLessonToday ? "card-has-today-lesson" : "card-no-lesson-today"} ${isLive ? "card-is-live-now" : ""}`}
                   onClick={() => {
                     setSelectedGroup(g.id);
                     navigate(`/attendance/${g.id}`);
                   }}
                 >
+                  {/* Top Decorative Gradient Accent */}
+                  <div className="card-top-gradient-bar"></div>
+
                   <div className="group-card-top">
-                    <span className="group-card-badge">{g.courseName || "Frontend ReactJS"}</span>
+                    <span className={`group-card-badge ${courseTheme}`}>{g.courseName || "Frontend ReactJS"}</span>
+                    
+                    {/* 7 & 8-Qoida: Jonli Pulslanuvchi Badge */}
+                    {isLive ? (
+                      <span className="live-status-pill badge-live-pulse">
+                        <span className="pulse-dot blue"></span> ⚡ JONLI DARS
+                      </span>
+                    ) : hasLessonToday ? (
+                      <span className="live-status-pill badge-today-pulse">
+                        <span className="pulse-dot green"></span> ● BUGUN DARSI BOR
+                      </span>
+                    ) : (
+                      <span className="live-status-pill badge-no-lesson">
+                        Bugun dars yo'q
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="group-card-title-row">
+                    <h3 className="group-card-title">{g.name}</h3>
                     <span className="group-card-count">👥 {gStudents.length} ta o'quvchi</span>
                   </div>
-                  <h3 className="group-card-title">{g.name}</h3>
+
+                  {/* 9-Qoida: Bugungi Davomat Statusi */}
+                  {hasLessonToday && (
+                    <div className={`card-attendance-status-pill status-${attStatus.type}`}>
+                      {attStatus.label}
+                    </div>
+                  )}
+
                   <div className="group-card-info">
                     <div className="info-row">
                       <span className="info-label">👨‍🏫 O'qituvchi:</span>
-                      <span className="info-val">{g.teacherName || "Tayinlanmagan"}</span>
+                      <span className="info-val teacher-val">
+                        <span className="teacher-mini-avatar">{(g.teacherName || "O").charAt(0)}</span>
+                        {g.teacherName || "Tayinlanmagan"}
+                      </span>
                     </div>
+
                     <div className="info-row">
-                      <span className="info-label">⏰ Vaqt:</span>
-                      <span className="info-val">{g.scheduleTime || "14:00 - 16:00"}</span>
+                      <span className="info-label">⏰ Dars Vaqti:</span>
+                      <div className="time-val-wrapper">
+                        <span className="info-val">{g.scheduleTime || "14:00 - 16:00"}</span>
+                        {/* 10-Qoida: Countdown badge */}
+                        {hasLessonToday && (
+                          <span className={`timing-pill timing-${timing.status}`}>
+                            {timing.text}
+                          </span>
+                        )}
+                      </div>
                     </div>
+
                     <div className="info-row">
-                      <span className="info-label">📅 Kunlar:</span>
-                      <span className="info-val">{g.scheduleDays || "Dushanba - Chorshanba - Juma"}</span>
+                      <span className="info-label">📅 Dars Kunlari:</span>
+                      <span className="info-val days-val">{g.scheduleDays || "Dushanba - Chorshanba - Juma"}</span>
                     </div>
                   </div>
+
                   <button type="button" className="btn-enter-group-attendance">
-                    Davomatni Ochish →
+                    Davomat Jurnalini Ochish →
                   </button>
                 </div>
               );

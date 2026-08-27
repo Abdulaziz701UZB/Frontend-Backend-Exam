@@ -447,101 +447,304 @@
 
 .lc-groups-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 22px;
 }
 
+/* Glassmorphic Base Card */
 .lc-group-card-item {
-  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1.5px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 22px;
+  border-radius: 22px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
+/* 3D Smooth Lift & Glow Effect */
 .lc-group-card-item:hover {
-  transform: translateY(-4px);
-  border-color: #1d72fe;
-  box-shadow: 0 16px 32px rgba(29, 114, 254, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -10px rgba(29, 114, 254, 0.16), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
 }
 
+/* Top Decorative Course Accent Ribbon */
+.card-top-gradient-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: #cbd5e1;
+  transition: all 0.3s ease;
+}
+
+/* Course Theme Color Gradients */
+.lc-group-card-item.theme-react .card-top-gradient-bar {
+  background: linear-gradient(90deg, #38bdf8, #2563eb);
+}
+.lc-group-card-item.theme-python .card-top-gradient-bar {
+  background: linear-gradient(90deg, #a855f7, #6366f1);
+}
+.lc-group-card-item.theme-backend .card-top-gradient-bar {
+  background: linear-gradient(90deg, #10b981, #0d9488);
+}
+.lc-group-card-item.theme-design .card-top-gradient-bar {
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+}
+
+.lc-group-card-item.theme-react:hover { border-color: #38bdf8; }
+.lc-group-card-item.theme-python:hover { border-color: #a855f7; }
+.lc-group-card-item.theme-backend:hover { border-color: #10b981; }
+.lc-group-card-item.theme-design:hover { border-color: #f59e0b; }
+
+/* Group Card Top Row */
 .group-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
+/* Course Theme Badges */
 .group-card-badge {
-  background: #eff6ff;
-  color: #1d72fe;
   font-size: 12px;
   font-weight: 800;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 9px;
+  letter-spacing: 0.2px;
+}
+.group-card-badge.theme-react { background: #eff6ff; color: #0284c7; }
+.group-card-badge.theme-python { background: #faf5ff; color: #7c3aed; }
+.group-card-badge.theme-backend { background: #ecfdf5; color: #059669; }
+.group-card-badge.theme-design { background: #fffbeb; color: #d97706; }
+.group-card-badge.theme-default { background: #f1f5f9; color: #475569; }
+
+/* Live Status & Pulse Badges */
+.live-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.badge-live-pulse {
+  background: #eff6ff;
+  color: #1d72fe;
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 0 12px rgba(29, 114, 254, 0.25);
+  animation: liveCardPulse 2s infinite;
+}
+
+.badge-today-pulse {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-no-lesson {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.pulse-dot.blue {
+  background: #1d72fe;
+  box-shadow: 0 0 6px #1d72fe;
+  animation: pulseDotAnim 1.2s infinite alternate;
+}
+.pulse-dot.green {
+  background: #16a34a;
+  box-shadow: 0 0 6px #16a34a;
+  animation: pulseDotAnim 1.5s infinite alternate;
+}
+
+@keyframes pulseDotAnim {
+  from { opacity: 0.5; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes liveCardPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(29, 114, 254, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(29, 114, 254, 0); }
+}
+
+/* Card Title Row */
+.group-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.group-card-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.3px;
 }
 
 .group-card-count {
   font-size: 12.5px;
   font-weight: 700;
   color: #64748b;
+  background: #f1f5f9;
+  padding: 4px 9px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
-.group-card-title {
-  font-size: 18px;
+/* 9-Qoida: Card Attendance Status Pill */
+.card-attendance-status-pill {
+  font-size: 12.5px;
   font-weight: 800;
-  color: #0f172a;
-  margin: 0;
+  padding: 6px 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+.card-attendance-status-pill.status-done {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+.card-attendance-status-pill.status-partial {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+.card-attendance-status-pill.status-pending {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+.card-attendance-status-pill.status-empty {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
 }
 
+/* Info Box */
 .group-card-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   background: #f8fafc;
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
   border: 1px solid #f1f5f9;
 }
 
 .info-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
   font-size: 13px;
 }
 
 .info-label {
   color: #64748b;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .info-val {
   color: #0f172a;
   font-weight: 700;
+  text-align: right;
 }
 
+.teacher-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.teacher-mini-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1d72fe;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-val-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 10-Qoida: Countdown timing pill */
+.timing-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.timing-pill.timing-live {
+  background: #eff6ff;
+  color: #1d72fe;
+  border: 1px solid #bfdbfe;
+}
+.timing-pill.timing-upcoming {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+.timing-pill.timing-ended {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.days-val {
+  font-size: 12.5px;
+  color: #334155;
+}
+
+/* Button CTA */
 .btn-enter-group-attendance {
   margin-top: auto;
   width: 100%;
-  padding: 11px;
+  padding: 12px;
   background: #1d72fe;
   color: #ffffff;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
 }
 
 .lc-group-card-item:hover .btn-enter-group-attendance {
   background: #155bd5;
-  box-shadow: 0 4px 14px rgba(29, 114, 254, 0.4);
+  box-shadow: 0 4px 16px rgba(29, 114, 254, 0.4);
+  transform: translateY(-1px);
 }
 
 /* ---------------- LC-UP Top Navigation & Date Bar ---------------- */
