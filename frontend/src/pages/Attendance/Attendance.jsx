@@ -683,21 +683,26 @@ const Attendance = () => {
                               className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (isLessonTimeLocked(d.fullDate)) {
-                                  toast.error("⏱️ Ushbu dars davomati qulflangan (Dars tugaganiga 1 soatdan ko'p vaqt o'tgan). O'zgartirish uchun Adminga murojaat qiling!");
+                                if (isLessonTimeLocked(d.fullDate) && currentRole !== "admin") {
+                                  toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
                                   return;
                                 }
                                 setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
                               }}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan ⏱️)" : ""}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
                             >
+                              {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
+                              {isLessonTimeLocked(d.fullDate) && (
+                                <HiOutlineLockClosed className="locked-watermark-icon" title="Qulflangan — Faqat Admin o'zgartira oladi" />
+                              )}
+
                               {activePickerCell === cellKey ? (
-                                <div className="inline-action-picker" onClick={(e) => e.stopPropagation()}>
+                                <div className="inline-action-picker macos-dock-picker" onClick={(e) => e.stopPropagation()}>
                                   <button
                                     type="button"
                                     className="action-btn-choice btn-choice-present"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Present", e)}
-                                    title="Keldi"
+                                    title="Keldi (✔)"
                                   >
                                     <HiOutlineCheck className="choice-icon text-emerald" />
                                   </button>
@@ -705,7 +710,7 @@ const Attendance = () => {
                                     type="button"
                                     className="action-btn-choice btn-choice-absent"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Absent", e)}
-                                    title="Kelmadi"
+                                    title="Kelmadi (✖)"
                                   >
                                     <HiOutlineXMark className="choice-icon text-rose" />
                                   </button>
@@ -713,7 +718,7 @@ const Attendance = () => {
                                     type="button"
                                     className="action-btn-choice btn-choice-excused"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e)}
-                                    title="Sababli"
+                                    title="Sababli (⚑)"
                                   >
                                     <HiOutlineFlag className="choice-icon text-amber" />
                                   </button>
@@ -742,7 +747,7 @@ const Attendance = () => {
 
                                   {status === "Absent" && (
                                     <div className="cell-circle circle-absent">
-                                      <HiOutlineFlag className="circle-flag-red" />
+                                      <HiOutlineXMark className="circle-flag-red" />
                                     </div>
                                   )}
 
