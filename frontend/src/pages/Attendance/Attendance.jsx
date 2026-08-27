@@ -244,10 +244,8 @@ const Attendance = () => {
     return fullDate === todayStr;
   };
 
-  // 1-Qoida: Dars tugaganidan so'ng 1 soatgacha tahrirlash mumkin (faqat O'qituvchilar uchun). Admin esa istalgan payt o'zgartira oladi.
+  // 1-Qoida: Dars tugaganidan so'ng 1 soatgacha tahrirlash mumkin
   const isLessonTimeLocked = (fullDate) => {
-    if (currentRole === "admin") return false; // Admin cheklovsiz tahrirlaydi
-
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
@@ -307,21 +305,21 @@ const Attendance = () => {
     if (e) e.stopPropagation();
     if (!canMarkAttendance) return;
 
-    // O'tgan darslarni tekshirish (Faqat Admin tahrirlay oladi)
-    if (isPastDate(fullDate) && currentRole !== "admin") {
+    // O'tgan darslarni qat'iy tekshirish (Umuman ruxsat berilmaydi)
+    if (isPastDate(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi! Faqat bugungi dars uchun ruxsat berilgan.");
       return;
     }
 
-    // Kelajakdagi dars sanasi tekshiruvi (Faqat Admin ruxsati bilan)
-    if (isFutureDate(fullDate) && currentRole !== "admin") {
+    // Kelajakdagi dars sanasini qat'iy tekshirish (Umuman ruxsat berilmaydi)
+    if (isFutureDate(fullDate)) {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
 
     // 1-Qoida: 1 soatlik vaqt qulfi tekshiruvi
-    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-      toast.error("⏱️ [1-Qoida] Ushbu dars davomati qulflangan! Dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin. O'zgartirish uchun Adminga murojaat qiling.");
+    if (isLessonTimeLocked(fullDate)) {
+      toast.error("⏱️ [1-Qoida] Ushbu dars davomati qulflangan! Dars tugaganidan so'ng faqat 1 soatgacha o'zgartirish mumkin.");
       return;
     }
 
@@ -375,26 +373,25 @@ const Attendance = () => {
   const touchStartCoords = useRef({ x: 0, y: 0 });
   const mouseDragCoords = useRef({ x: 0, y: 0, isDragging: false });
 
-  // Touch Swipe (Mobile / Tablet)
+  // Touch Swipe (Mobile / Tablet) - Faqat Bugungi dars uchun ishlaydi
   const handleCellTouchStart = (fullDate, e) => {
-    if (isPastDate(fullDate) && currentRole !== "admin") return;
-    if (isFutureDate(fullDate) && currentRole !== "admin") return;
+    if (!isTodayDate(fullDate)) return;
     if (e.touches && e.touches[0]) {
       touchStartCoords.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
   };
 
   const handleCellTouchEnd = (studentId, fullDate, studentName, e) => {
-    if (isPastDate(fullDate) && currentRole !== "admin") {
+    if (isPastDate(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi!");
       return;
     }
-    if (isFutureDate(fullDate) && currentRole !== "admin") {
+    if (isFutureDate(fullDate)) {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
-    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-      toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+    if (isLessonTimeLocked(fullDate)) {
+      toast.error("🔒 Ushbu dars davomati qulflangan!");
       return;
     }
 
@@ -422,11 +419,10 @@ const Attendance = () => {
     }
   };
 
-  // Mouse Drag & Click (Desktop / Laptop)
+  // Mouse Drag & Click (Desktop / Laptop) - Faqat Bugungi dars uchun ishlaydi
   const handleCellMouseDown = (fullDate, e) => {
     if (e.button !== 0) return; // Faqat chap tugma
-    if (isPastDate(fullDate) && currentRole !== "admin") return;
-    if (isFutureDate(fullDate) && currentRole !== "admin") return;
+    if (!isTodayDate(fullDate)) return;
     mouseDragCoords.current = {
       x: e.clientX,
       y: e.clientY,
@@ -435,16 +431,16 @@ const Attendance = () => {
   };
 
   const handleCellMouseUp = (studentId, fullDate, studentName, e) => {
-    if (isPastDate(fullDate) && currentRole !== "admin") {
+    if (isPastDate(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi! Faqat bugungi dars uchun ruxsat berilgan.");
       return;
     }
-    if (isFutureDate(fullDate) && currentRole !== "admin") {
+    if (isFutureDate(fullDate)) {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
-    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-      toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+    if (isLessonTimeLocked(fullDate)) {
+      toast.error("🔒 Ushbu dars davomati qulflangan!");
       return;
     }
 
@@ -473,7 +469,7 @@ const Attendance = () => {
       // Surmasdan shunchaki bosish (Oddiy Click)
       // Faqat ekran 800px dan katta bo'lsa va faqat bugungi dars bo'lsa dock ochilsin
       const isDesktop = window.innerWidth > 800;
-      if (isDesktop) {
+      if (isDesktop && isTodayDate(fullDate)) {
         const cellKey = `${studentId}_${fullDate}`;
         setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
       }
@@ -483,16 +479,16 @@ const Attendance = () => {
   // Right-Click (Sichqoncha o'ng tugmasi bilan tezkor aylantirib belgilash)
   const handleCellContextMenu = (studentId, fullDate, studentName, currentStatus, e) => {
     e.preventDefault();
-    if (isPastDate(fullDate) && currentRole !== "admin") {
+    if (isPastDate(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi!");
       return;
     }
-    if (isFutureDate(fullDate) && currentRole !== "admin") {
+    if (isFutureDate(fullDate)) {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
-    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
-      toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+    if (isLessonTimeLocked(fullDate)) {
+      toast.error("🔒 Ushbu dars davomati qulflangan!");
       return;
     }
     const nextStatus = !currentStatus ? "Present" : currentStatus === "Present" ? "Absent" : currentStatus === "Absent" ? "Excused" : null;

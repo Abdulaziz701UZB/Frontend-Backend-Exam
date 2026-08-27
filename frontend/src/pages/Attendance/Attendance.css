@@ -656,10 +656,11 @@
 }
 
 .td-attendance-cell.td-cell-today {
-  background: rgba(240, 249, 255, 0.7) !important;
+  background: rgba(240, 249, 255, 0.75) !important;
   border-left: 2px dashed #0ea5e9 !important;
   border-right: 2px dashed #0ea5e9 !important;
   cursor: pointer !important;
+  pointer-events: auto !important;
 }
 
 .lc-matrix-table tr:hover .td-attendance-cell.td-cell-today {
@@ -667,23 +668,19 @@
 }
 
 .td-attendance-cell.td-cell-past {
-  background: #fafbfc;
+  background: #f8fafc !important;
   cursor: not-allowed !important;
-  opacity: 0.9;
-}
-
-.td-attendance-cell.td-cell-past:hover {
-  background: #f1f5f9 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  opacity: 0.85;
 }
 
 .td-attendance-cell.td-cell-future {
-  background: #f8fafc;
-  opacity: 0.65;
+  background: #f8fafc !important;
+  opacity: 0.55 !important;
   cursor: not-allowed !important;
-}
-
-.td-attendance-cell.td-cell-future:hover {
-  background: #f1f5f9 !important;
+  pointer-events: none !important;
+  user-select: none !important;
 }
 
 .td-attendance-cell.td-cell-future .empty-dot {
