@@ -24,7 +24,8 @@ import {
   HiOutlineLockClosed,
   HiOutlineNoSymbol,
   HiOutlineExclamationTriangle,
-  HiOutlinePhone
+  HiOutlinePhone,
+  HiOutlineClock
 } from "react-icons/hi2";
 import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Attendance.css";
@@ -839,15 +840,16 @@ const Attendance = () => {
               <table className="lc-matrix-table">
                 <thead>
                   <tr>
-                    <th className="th-talabalar">TALABALAR</th>
+                    <th className="th-talabalar">Talabalar</th>
                     {lessonDates.map((d, idx) => {
                       const isToday = d.fullDate === todayDateStr;
                       const isFuture = isFutureDate(d.fullDate);
+                      const isPast = isPastDate(d.fullDate);
                       return (
-                        <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isFuture ? "th-col-future" : ""}`}>
+                        <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                           {isToday && <span className="today-badge-pill">Bugun</span>}
                           {isFuture && <span className="future-badge-pill">Kelgusi</span>}
-                          <span className="th-date-text">{d.dayStr}</span>
+                          <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                         </th>
                       );
                     })}
@@ -862,15 +864,23 @@ const Attendance = () => {
                     </tr>
                   ) : (
                     filteredStudents.map((student, sIdx) => (
-                      <tr key={student.id}>
+                      <tr key={student.id} className="lc-matrix-student-row">
                         <td className="td-student-info">
-                          <span className="td-student-num">{sIdx + 1}</span>
-                          <span 
-                            className="td-student-name"
-                            onClick={() => setSelectedProfileStudent(student)}
-                          >
-                            {student.fullName}
-                          </span>
+                          <div className="lc-student-row-flex">
+                            <div className="lc-student-avatar-wrap">
+                              {student.avatar && student.avatar.length > 5 ? (
+                                <img src={student.avatar} alt="" className="lc-student-avatar-img" />
+                              ) : (
+                                <span className="lc-avatar-initials">{(student.fullName || "T").charAt(0)}</span>
+                              )}
+                            </div>
+                            <span 
+                              className="td-student-name"
+                              onClick={() => setSelectedProfileStudent(student)}
+                            >
+                              {student.fullName}
+                            </span>
+                          </div>
                         </td>
 
                         {lessonDates.map((d, dIdx) => {
@@ -890,80 +900,81 @@ const Attendance = () => {
                               onTouchStart={(e) => handleCellTouchStart(d.fullDate, e)}
                               onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
                               onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || (isFuture ? "Kelgusi dars sanasi (Hali boshlanmadi)" : isPast ? "O'tib ketgan dars (Qulflangan)" : "Bugungi dars (Drag/Swipe: ✅ ❌)")} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan)" : ""}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || (isFuture ? "Kelgusi dars sanasi (Hali boshlanmadi)" : isPast ? "O'tib ketgan dars (Qulflangan)" : "Bugungi dars (Bosing / Drag: ✅ ❌)")} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan)" : ""}`}
                             >
                               {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
                               {isLessonTimeLocked(d.fullDate) && (
                                 <HiOutlineLockClosed className="locked-watermark-icon" title="Qulflangan — Faqat Admin o'zgartira oladi" />
                               )}
 
-                              {activePickerCell === cellKey ? (
-                                <div className="inline-action-picker macos-dock-picker" onClick={(e) => e.stopPropagation()}>
+                              {/* LC-UP Usulidagi Tepada Ochiluvchi Tanlagich (Floating Top Popover) */}
+                              {activePickerCell === cellKey && (
+                                <div className="lc-floating-popover-card" onClick={(e) => e.stopPropagation()}>
                                   <button
                                     type="button"
-                                    className="action-btn-choice btn-choice-present"
+                                    className="lc-pop-btn lc-pop-absent"
+                                    onClick={(e) => {
+                                      handleSelectStatus(student.id, d.fullDate, student.fullName, "Absent", e);
+                                      setActiveReasonCard({
+                                        studentId: student.id,
+                                        fullDate: d.fullDate,
+                                        studentName: student.fullName,
+                                        reason: ABSENT_REASONS[0].label,
+                                        customNote: ""
+                                      });
+                                    }}
+                                    title="Kelmadi (❌)"
+                                  >
+                                    <HiOutlineXMark />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="lc-pop-btn lc-pop-excused"
+                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e)}
+                                    title="Kechikdi / Sababli (🕒)"
+                                  >
+                                    <HiOutlineClock />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="lc-pop-btn lc-pop-present"
                                     onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Present", e)}
                                     title="Keldi (✔)"
                                   >
-                                    <HiOutlineCheck className="choice-icon text-emerald" />
+                                    <HiOutlineCheck />
                                   </button>
-                                  <button
-                                    type="button"
-                                    className="action-btn-choice btn-choice-absent"
-                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Absent", e)}
-                                    title="Kelmadi (✖)"
-                                  >
-                                    <HiOutlineXMark className="choice-icon text-rose" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="action-btn-choice btn-choice-excused"
-                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e)}
-                                    title="Sababli (⚑)"
-                                  >
-                                    <HiOutlineFlag className="choice-icon text-amber" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="action-btn-choice btn-choice-clear"
-                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, null, e)}
-                                    title="Tozalash"
-                                  >
-                                    <span className="choice-dot">•</span>
-                                  </button>
+                                  <div className="lc-popover-arrow"></div>
                                 </div>
-                              ) : (
-                                <>
-                                  {status === "Present" && (
-                                    <div className="cell-circle circle-present">
-                                      <HiOutlineCheck className="circle-icon" />
-                                    </div>
-                                  )}
+                              )}
 
-                                  {status === "Excused" && (
-                                    <div className="cell-circle circle-excused">
-                                      <HiOutlineFlag className="circle-flag-green" />
-                                    </div>
-                                  )}
+                              {status === "Present" && (
+                                <div className="cell-circle circle-present">
+                                  <HiOutlineCheck className="circle-icon" />
+                                </div>
+                              )}
 
-                                  {status === "Absent" && (
-                                    <div className="cell-circle circle-absent">
-                                      <HiOutlineXMark className="circle-flag-red" />
-                                    </div>
-                                  )}
+                              {status === "Excused" && (
+                                <div className="cell-circle circle-excused">
+                                  <HiOutlineClock className="circle-flag-yellow" />
+                                </div>
+                              )}
 
-                                  {status === "Trial" && (
-                                    <div className="cell-circle circle-trial">
-                                      <HiOutlineInformationCircle className="circle-icon" />
-                                    </div>
-                                  )}
+                              {status === "Absent" && (
+                                <div className="cell-circle circle-absent">
+                                  <HiOutlineFlag className="circle-flag-red" />
+                                </div>
+                              )}
 
-                                  {!status && (
-                                    <div className="cell-empty-dash">
-                                      <span className="empty-dot"></span>
-                                    </div>
-                                  )}
-                                </>
+                              {status === "Trial" && (
+                                <div className="cell-circle circle-trial">
+                                  <HiOutlineInformationCircle className="circle-icon" />
+                                </div>
+                              )}
+
+                              {!status && (
+                                <div className="cell-empty-dash">
+                                  <span className="empty-dot"></span>
+                                </div>
                               )}
                             </td>
                           );
