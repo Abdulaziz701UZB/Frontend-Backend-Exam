@@ -14,6 +14,7 @@ import {
   HiOutlineEllipsisVertical,
   HiOutlineArrowsUpDown,
   HiOutlineArrowsPointingOut,
+  HiOutlineArrowsPointingIn,
   HiOutlineUserGroup,
   HiOutlineCalendarDays,
   HiOutlineStar,
@@ -75,6 +76,22 @@ const Attendance = () => {
   const [selectedGradeDate, setSelectedGradeDate] = useState("");
   const [studentFilter, setStudentFilter] = useState("all"); // all, debtors, trial, active, frozen
   const [sortAsc, setSortAsc] = useState(true);
+  const [isZenMode, setIsZenMode] = useState(false); // 6-Qoida: To'liq ekran Zen Mode
+
+  // 1-Qoida: Bugungi sana hisobi
+  const now = new Date();
+  const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  // Escape tugmasi bilan Zen rejimdan chiqish
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isZenMode) {
+        setIsZenMode(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isZenMode]);
 
   // Local Attendance Matrix: { [studentId_dateKey]: { status: 'Present'|'Excused'|'Absent'|'Trial'|null, note: '' } }
   const [matrixData, setMatrixData] = useState({});
@@ -531,7 +548,25 @@ const Attendance = () => {
         </div>
 
         {/* RIGHT COLUMN: LC-UP Tabbed Matrix Grid */}
-        <div className="lc-right-panel">
+        <div className={`lc-right-panel ${isZenMode ? "zen-fullscreen-mode" : ""}`}>
+          {/* Zen Mode Floating Control Bar */}
+          {isZenMode && (
+            <div className="zen-exit-floating-bar">
+              <div className="zen-title-info">
+                <span className="zen-live-dot"></span>
+                <strong>{currentGroupObj?.name || "Guruh"}</strong> — Davomat & Baholash (Zen Mode)
+              </div>
+              <button 
+                type="button" 
+                className="btn-exit-zen" 
+                onClick={() => setIsZenMode(false)}
+                title="To'liq ekrandan chiqish"
+              >
+                <HiOutlineArrowsPointingIn className="inline-icon-xs" /> To'liq ekrandan chiqish (Esc)
+              </button>
+            </div>
+          )}
+
           {/* LC-UP Nav Tabs */}
           <div className="lc-tabs-navigation">
             {LC_UP_TABS.map((t) => (
@@ -574,8 +609,13 @@ const Attendance = () => {
             </div>
 
             <div className="ribbon-right-controls">
-              <button className="ribbon-fullscreen-btn" title="To'liq ekranga yoyish">
-                <HiOutlineArrowsPointingOut />
+              <button 
+                type="button"
+                className={`ribbon-fullscreen-btn ${isZenMode ? "active-zen" : ""}`} 
+                onClick={() => setIsZenMode(!isZenMode)}
+                title={isZenMode ? "To'liq ekrandan chiqish (Esc)" : "To'liq ekranga yoyish (Zen Mode)"}
+              >
+                {isZenMode ? <HiOutlineArrowsPointingIn /> : <HiOutlineArrowsPointingOut />}
               </button>
             </div>
           </div>
@@ -587,11 +627,15 @@ const Attendance = () => {
                 <thead>
                   <tr>
                     <th className="th-talabalar">TALABALAR</th>
-                    {lessonDates.map((d, idx) => (
-                      <th key={idx} className="th-date-col">
-                        {d.dayStr}
-                      </th>
-                    ))}
+                    {lessonDates.map((d, idx) => {
+                      const isToday = d.fullDate === todayDateStr;
+                      return (
+                        <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""}`}>
+                          {isToday && <span className="today-badge-pill">Bugun</span>}
+                          <span className="th-date-text">{d.dayStr}</span>
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody>
@@ -618,11 +662,12 @@ const Attendance = () => {
                           const cellKey = `${student.id}_${d.fullDate}`;
                           const cell = matrixData[cellKey];
                           const status = cell?.status;
+                          const isToday = d.fullDate === todayDateStr;
 
                           return (
                             <td 
                               key={dIdx} 
-                              className={`td-attendance-cell ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
+                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (isLessonTimeLocked(d.fullDate)) {
@@ -631,7 +676,7 @@ const Attendance = () => {
                                 }
                                 setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
                               }}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan ⏱️)" : ""}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan ⏱️)" : ""}`}
                             >
                               {activePickerCell === cellKey ? (
                                 <div className="inline-action-picker" onClick={(e) => e.stopPropagation()}>
