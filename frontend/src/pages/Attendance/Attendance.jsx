@@ -574,154 +574,207 @@ const Attendance = () => {
 
   return (
     <div className="lc-up-attendance-container">
-      {/* LC-UP Top Navigation & Date Bar (Single Unified Top Row) */}
-      <div className="lc-top-controls-bar">
-        {/* Left: LC-UP Nav Tabs */}
-        <div className="lc-tabs-navigation">
-          {LC_UP_TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`lc-tab-button ${activeTab === t.id ? "active" : ""}`}
-              onClick={() => setActiveTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Right: Group Dropdown, Year Dropdown, Month Dropdown & Actions */}
-        <div className="lc-top-right-actions">
-          <div className="lc-select-pill group-select-pill">
-            <select
-              className="lc-clean-select"
-              value={selectedGroup || ""}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-            >
-              {accessibleGroups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name} — {g.courseName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="lc-select-pill year-select-pill">
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="lc-clean-select"
-            >
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-            </select>
-          </div>
-
-          <div className="lc-select-pill month-select-pill">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="lc-clean-select"
-            >
-              {MONTHS_LIST.map((m) => (
-                <option key={m.key} value={m.key}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {canMarkAttendance && (
-            <button
-              type="button"
-              className="lc-btn-mark-all"
-              onClick={handleMarkAllPresent}
-              title="Barcha talabalarni 'Keldi' qilish"
-            >
-              <HiOutlineCheck className="btn-icon" /> Barchasi Keldi
-            </button>
-          )}
-
-          <button 
-            type="button"
-            className={`ribbon-fullscreen-btn ${isZenMode ? "active-zen" : ""}`} 
-            onClick={() => setIsZenMode(!isZenMode)}
-            title={isZenMode ? "To'liq ekrandan chiqish (Esc)" : "To'liq ekranga yoyish (Zen Mode)"}
-          >
-            {isZenMode ? <HiOutlineArrowsPointingIn /> : <HiOutlineArrowsPointingOut />}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Full-Width Matrix Grid */}
-      <div className={`lc-fullwidth-matrix-panel ${isZenMode ? "zen-fullscreen-mode" : ""}`}>
-        {/* Zen Mode Floating Control Bar */}
-        {isZenMode && (
-          <div className="zen-exit-floating-bar">
-            <div className="zen-title-info">
-              <span className="zen-live-dot"></span>
-              <strong>{currentGroupObj?.name || "Guruh"}</strong> — Davomat & Baholash (Zen Mode)
+      {/* 1. AGAR GURUH TANLANMAGAN BO'LSA: GURUHLARNI TANLASH KARTALARI (HUB) */}
+      {!selectedGroup ? (
+        <div className="lc-group-selection-view">
+          <div className="lc-group-selection-header">
+            <div>
+              <h2 className="lc-group-selection-title">📋 Davomat Uchun Guruhni Tanlang</h2>
+              <p className="lc-group-selection-subtitle">Davomat va baholash jurnalini ochish uchun quyidagi guruhlardan birini bosing</p>
             </div>
-            <button 
-              type="button" 
-              className="btn-exit-zen" 
-              onClick={() => setIsZenMode(false)}
-              title="To'liq ekrandan chiqish"
-            >
-              <HiOutlineArrowsPointingIn className="inline-icon-xs" /> To'liq ekrandan chiqish (Esc)
-            </button>
           </div>
-        )}
 
-        {/* ATTENDANCE MATRIX TABLE */}
-        {activeTab === "attendance" && (
-          <div className="lc-matrix-wrapper">
-            <table className="lc-matrix-table">
-                <thead>
-                  <tr>
-                    <th className="th-talabalar">Talabalar</th>
-                    {lessonDates.map((d, idx) => {
-                      const isToday = d.fullDate === todayDateStr;
-                      const isFuture = isFutureDate(d.fullDate);
-                      const isPast = isPastDate(d.fullDate);
-                      return (
-                        <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
-                          {isToday && <span className="today-badge-pill">Bugun</span>}
-                          {isFuture && <span className="future-badge-pill">Kelgusi</span>}
-                          <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.length === 0 ? (
+          <div className="lc-groups-cards-grid">
+            {accessibleGroups.map((g) => {
+              const gStudents = students.filter((s) => s.groupId === g.id);
+              return (
+                <div
+                  key={g.id}
+                  className="lc-group-card-item"
+                  onClick={() => setSelectedGroup(g.id)}
+                >
+                  <div className="group-card-top">
+                    <span className="group-card-badge">{g.courseName || "Frontend ReactJS"}</span>
+                    <span className="group-card-count">👥 {gStudents.length} ta o'quvchi</span>
+                  </div>
+                  <h3 className="group-card-title">{g.name}</h3>
+                  <div className="group-card-info">
+                    <div className="info-row">
+                      <span className="info-label">👨‍🏫 O'qituvchi:</span>
+                      <span className="info-val">{g.teacherName || "Tayinlanmagan"}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">⏰ Vaqt:</span>
+                      <span className="info-val">{g.scheduleTime || "14:00 - 16:00"}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">📅 Kunlar:</span>
+                      <span className="info-val">{g.scheduleDays || "Dushanba - Chorshanba - Juma"}</span>
+                    </div>
+                  </div>
+                  <button type="button" className="btn-enter-group-attendance">
+                    Davomatni Ochish →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* 2. GURUH TANLANGAN HOLAT: YAGONA BIR QATORLI TOP BAR & DAVOMAT JURNALI */}
+          <div className="lc-top-controls-bar">
+            {/* Left: Guruhlarga qaytish tugmasi + Guruh nomi + Nav Tabs */}
+            <div className="lc-top-left-group">
+              <button 
+                type="button" 
+                className="btn-back-to-groups" 
+                onClick={() => setSelectedGroup(null)}
+                title="Boshqa guruhni tanlash"
+              >
+                <HiOutlineArrowLeft /> Guruhlar
+              </button>
+
+              <div className="lc-active-group-pill">
+                <strong>{currentGroupObj?.name}</strong>
+              </div>
+
+              <div className="lc-tabs-navigation">
+                {LC_UP_TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className={`lc-tab-button ${activeTab === t.id ? "active" : ""}`}
+                    onClick={() => setActiveTab(t.id)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Year Dropdown, Month Dropdown, Barchasi Keldi, Fullscreen */}
+            <div className="lc-top-right-actions">
+              <div className="lc-select-pill year-select-pill">
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="lc-clean-select"
+                >
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                </select>
+              </div>
+
+              <div className="lc-select-pill month-select-pill">
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="lc-clean-select"
+                >
+                  {MONTHS_LIST.map((m) => (
+                    <option key={m.key} value={m.key}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {canMarkAttendance && (
+                <button
+                  type="button"
+                  className="lc-btn-mark-all"
+                  onClick={handleMarkAllPresent}
+                  title="Barcha talabalarni 'Keldi' qilish"
+                >
+                  <HiOutlineCheck className="btn-icon" /> Barchasi Keldi
+                </button>
+              )}
+
+              <button 
+                type="button"
+                className={`ribbon-fullscreen-btn ${isZenMode ? "active-zen" : ""}`} 
+                onClick={() => setIsZenMode(!isZenMode)}
+                title={isZenMode ? "To'liq ekrandan chiqish (Esc)" : "To'liq ekranga yoyish (Zen Mode)"}
+              >
+                {isZenMode ? <HiOutlineArrowsPointingIn /> : <HiOutlineArrowsPointingOut />}
+              </button>
+            </div>
+          </div>
+
+          {/* Main Full-Width Matrix Grid */}
+          <div className={`lc-fullwidth-matrix-panel ${isZenMode ? "zen-fullscreen-mode" : ""}`}>
+            {/* Zen Mode Floating Control Bar */}
+            {isZenMode && (
+              <div className="zen-exit-floating-bar">
+                <div className="zen-title-info">
+                  <span className="zen-live-dot"></span>
+                  <strong>{currentGroupObj?.name || "Guruh"}</strong> — Davomat & Baholash (Zen Mode)
+                </div>
+                <button 
+                  type="button" 
+                  className="btn-exit-zen" 
+                  onClick={() => setIsZenMode(false)}
+                  title="To'liq ekrandan chiqish"
+                >
+                  <HiOutlineArrowsPointingIn className="inline-icon-xs" /> To'liq ekrandan chiqish (Esc)
+                </button>
+              </div>
+            )}
+
+            {/* ATTENDANCE MATRIX TABLE */}
+            {activeTab === "attendance" && (
+              <div className="lc-matrix-wrapper">
+                <table className="lc-matrix-table">
+                  <thead>
                     <tr>
-                      <td colSpan={lessonDates.length + 1} className="empty-matrix-msg">
-                        Guruhda o'quvchilar mavjud emas
-                      </td>
+                      <th className="th-talabalar">Talabalar</th>
+                      {lessonDates.map((d, idx) => {
+                        const isToday = d.fullDate === todayDateStr;
+                        const isFuture = isFutureDate(d.fullDate);
+                        const isPast = isPastDate(d.fullDate);
+                        return (
+                          <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
+                            {isToday && <span className="today-badge-pill">Bugun</span>}
+                            {isFuture && <span className="future-badge-pill">Kelgusi</span>}
+                            <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
+                          </th>
+                        );
+                      })}
                     </tr>
-                  ) : (
-                    filteredStudents.map((student, sIdx) => (
-                      <tr key={student.id} className="lc-matrix-student-row">
-                        <td className="td-student-info">
-                          <div className="lc-student-row-flex">
-                            <div className="lc-student-avatar-wrap">
-                              {student.avatar && student.avatar.length > 5 ? (
-                                <img src={student.avatar} alt="" className="lc-student-avatar-img" />
-                              ) : (
-                                <span className="lc-avatar-initials">{(student.fullName || "T").charAt(0)}</span>
-                              )}
-                            </div>
-                            <span 
-                              className="td-student-name"
-                              onClick={() => setSelectedProfileStudent(student)}
-                            >
-                              {student.fullName}
-                            </span>
-                          </div>
+                  </thead>
+                  <tbody>
+                    {filteredStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan={lessonDates.length + 1} className="empty-matrix-msg">
+                          Guruhda o'quvchilar mavjud emas
                         </td>
+                      </tr>
+                    ) : (
+                      filteredStudents.map((student, sIdx) => {
+                        const isDebtor = (student.balance || 0) < 0 || student.paymentStatus === "Overdue" || student.paymentStatus === "Unpaid";
+                        const paymentClass = isDebtor ? "student-row-debtor" : "student-row-paid";
+
+                        return (
+                          <tr key={student.id} className={`lc-matrix-student-row ${paymentClass}`}>
+                            <td className={`td-student-info ${paymentClass}`}>
+                              <div className="lc-student-row-flex">
+                                <div className="lc-student-avatar-wrap">
+                                  {student.avatar && student.avatar.length > 5 ? (
+                                    <img src={student.avatar} alt="" className="lc-student-avatar-img" />
+                                  ) : (
+                                    <span className="lc-avatar-initials">{(student.fullName || "T").charAt(0)}</span>
+                                  )}
+                                </div>
+                                <span 
+                                  className="td-student-name"
+                                  onClick={() => setSelectedProfileStudent(student)}
+                                >
+                                  {student.fullName}
+                                </span>
+                              </div>
+                            </td>
 
                         {lessonDates.map((d, dIdx) => {
                           const cellKey = `${student.id}_${d.fullDate}`;
@@ -820,7 +873,8 @@ const Attendance = () => {
                           );
                         })}
                       </tr>
-                    ))
+                    );
+                  })
                   )}
                 </tbody>
               </table>
@@ -1023,6 +1077,8 @@ const Attendance = () => {
             </div>
           )}
         </div>
+        </>
+      )}
 
       {/* Reason Smart Card Modal Overlay */}
       {activeReasonCard && (
