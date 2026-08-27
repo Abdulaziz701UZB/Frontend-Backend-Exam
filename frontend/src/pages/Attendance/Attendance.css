@@ -892,133 +892,174 @@
 }
 
 /* ---------------- 3-Qoida: Tepadan sirg'alib tushuvchi Ixcham Smart Card ---------------- */
-.reason-smart-card-popup {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 250px;
-  background: #ffffff;
-  border: 1.5px solid #0ea5e9;
-  border-radius: 16px;
-  box-shadow: 0 14px 35px -5px rgba(15, 23, 42, 0.25), 0 8px 16px -6px rgba(14, 165, 233, 0.2);
-  padding: 14px;
-  z-index: 100;
-  text-align: left;
-  animation: slideInCard 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+.reason-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: backdropFadeIn 0.2s ease-out;
 }
 
-@keyframes slideInCard {
-  from { opacity: 0; transform: translate(-50%, -10px) scale(0.95); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reason-smart-card-popup {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff !important;
+  border: 1.5px solid #0ea5e9;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(14, 165, 233, 0.1);
+  padding: 20px;
+  z-index: 100000;
+  text-align: left;
+  animation: modalDropIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalDropIn {
+  from { opacity: 0; transform: translateY(-24px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .reason-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  padding-bottom: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #f1f5f9;
 }
 
+.reason-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reason-badge-icon {
+  font-size: 16px;
+}
+
 .reason-card-title {
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: 800;
   color: #e11d48;
 }
 
 .btn-close-reason-card {
-  background: transparent;
+  background: #f1f5f9;
   border: none;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
-  color: #94a3b8;
+  color: #64748b;
   cursor: pointer;
-  padding: 2px 5px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.15s ease;
 }
 
 .btn-close-reason-card:hover {
   color: #0f172a;
-  background: #f1f5f9;
+  background: #e2e8f0;
 }
 
 .reason-card-student {
-  font-size: 12px;
-  color: #475569;
-  margin-bottom: 10px;
-  white-space: normal;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
 }
 
-.reason-card-student strong {
+.student-name-highlight {
+  font-weight: 800;
   color: #0f172a;
+}
+
+.date-highlight {
+  color: #0284c7;
+  font-weight: 700;
 }
 
 .reason-input-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: #64748b;
-  margin-bottom: 4px;
+  color: #475569;
+  margin-bottom: 6px;
 }
 
 .reason-select-dropdown {
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 13px;
   font-weight: 600;
   color: #1e293b;
-  background: #f8fafc;
+  background: #ffffff;
   outline: none;
   cursor: pointer;
-  margin-bottom: 8px;
-  transition: border-color 0.2s ease;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
 }
 
 .reason-select-dropdown:focus {
   border-color: #0ea5e9;
-  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
 .reason-custom-input {
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 13px;
   color: #1e293b;
   background: #ffffff;
   outline: none;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   box-sizing: border-box;
 }
 
 .reason-custom-input:focus {
   border-color: #0ea5e9;
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
 .btn-submit-reason-card {
   width: 100%;
-  padding: 8px;
+  padding: 11px;
   background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
   color: #ffffff;
   border: none;
-  border-radius: 9px;
-  font-size: 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
 }
 
 .btn-submit-reason-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4);
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45);
 }
 
 /* 8-Qoida: Locked Watermark Padlock */

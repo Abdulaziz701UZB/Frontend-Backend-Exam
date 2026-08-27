@@ -901,53 +901,6 @@ const Attendance = () => {
                                 <HiOutlineLockClosed className="locked-watermark-icon" title="Qulflangan — Faqat Admin o'zgartira oladi" />
                               )}
 
-                              {/* 3-Qoida: Tepadan sirg'alib tushuvchi Ixcham Smart Card */}
-                              {activeReasonCard && activeReasonCard.studentId === student.id && activeReasonCard.fullDate === d.fullDate && (
-                                <div className="reason-smart-card-popup" onClick={(e) => e.stopPropagation()}>
-                                  <div className="reason-card-header">
-                                    <span className="reason-card-title">❌ Dars qoldirish sababi</span>
-                                    <button 
-                                      type="button" 
-                                      className="btn-close-reason-card" 
-                                      onClick={() => setActiveReasonCard(null)}
-                                      title="Yopish"
-                                    >
-                                      ✕
-                                    </button>
-                                  </div>
-                                  <div className="reason-card-student">
-                                    <strong>{student.fullName}</strong> • {d.dayStr}
-                                  </div>
-                                  <div className="reason-card-body">
-                                    <label className="reason-input-label">Sababni tanlang:</label>
-                                    <select
-                                      className="reason-select-dropdown"
-                                      value={activeReasonCard.reason}
-                                      onChange={(e) => setActiveReasonCard({ ...activeReasonCard, reason: e.target.value })}
-                                    >
-                                      {ABSENT_REASONS.map((r) => (
-                                        <option key={r.id} value={r.label}>{r.label}</option>
-                                      ))}
-                                    </select>
-
-                                    {activeReasonCard.reason === "✍️ Boshqa sabab (qo'lda yozish)" && (
-                                      <input
-                                        type="text"
-                                        className="reason-custom-input"
-                                        placeholder="Sababni yozing..."
-                                        value={activeReasonCard.customNote}
-                                        onChange={(e) => setActiveReasonCard({ ...activeReasonCard, customNote: e.target.value })}
-                                        autoFocus
-                                      />
-                                    )}
-
-                                    <button type="button" className="btn-submit-reason-card" onClick={handleConfirmReason}>
-                                      Tasdiqlash & Botga Yuborish 📲
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-
                               {activePickerCell === cellKey ? (
                                 <div className="inline-action-picker macos-dock-picker" onClick={(e) => e.stopPropagation()}>
                                   <button
@@ -1224,6 +1177,61 @@ const Attendance = () => {
           )}
         </div>
       </div>
+
+      {/* Reason Smart Card Modal Overlay */}
+      {activeReasonCard && (
+        <div className="reason-modal-backdrop" onClick={() => setActiveReasonCard(null)}>
+          <div className="reason-smart-card-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="reason-card-header">
+              <div className="reason-header-left">
+                <span className="reason-badge-icon">❌</span>
+                <span className="reason-card-title">Dars qoldirish sababi</span>
+              </div>
+              <button 
+                type="button" 
+                className="btn-close-reason-card" 
+                onClick={() => setActiveReasonCard(null)}
+                title="Yopish"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="reason-card-student">
+              <span className="student-name-highlight">{activeReasonCard.studentName}</span>
+              <span className="date-highlight">• {activeReasonCard.fullDate}</span>
+            </div>
+
+            <div className="reason-card-body">
+              <label className="reason-input-label">Sababni tanlang:</label>
+              <select
+                className="reason-select-dropdown"
+                value={activeReasonCard.reason}
+                onChange={(e) => setActiveReasonCard({ ...activeReasonCard, reason: e.target.value })}
+              >
+                {ABSENT_REASONS.map((r) => (
+                  <option key={r.id} value={r.label}>{r.label}</option>
+                ))}
+              </select>
+
+              {activeReasonCard.reason === "✍️ Boshqa sabab (qo'lda yozish)" && (
+                <input
+                  type="text"
+                  className="reason-custom-input"
+                  placeholder="Sababni yozing..."
+                  value={activeReasonCard.customNote}
+                  onChange={(e) => setActiveReasonCard({ ...activeReasonCard, customNote: e.target.value })}
+                  autoFocus
+                />
+              )}
+
+              <button type="button" className="btn-submit-reason-card" onClick={handleConfirmReason}>
+                Tasdiqlash & Botga Yuborish 📲
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Student Profile Modal */}
       {selectedProfileStudent && (
