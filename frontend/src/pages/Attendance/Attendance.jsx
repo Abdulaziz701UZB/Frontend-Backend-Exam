@@ -532,32 +532,30 @@ const Attendance = () => {
     setActiveReasonCard(null);
   };
 
-  // Mark all students Present for all dates with instant auto-save
+  // Mark all students Present ONLY for TODAY's lesson date with instant auto-save
   const handleMarkAllPresent = async () => {
+    if (!selectedGroup || activeGroupStudents.length === 0) return;
+
     const updated = { ...matrixData };
     const promises = [];
 
     activeGroupStudents.forEach((student) => {
-      lessonDates.forEach((d) => {
-        if (parseInt(d.dayNum, 10) <= 25) {
-          const cellKey = `${student.id}_${d.fullDate}`;
-          updated[cellKey] = { status: "Present", note: "" };
-          promises.push(
-            attendanceApi.create({
-              group_id: selectedGroup,
-              student_id: student.id,
-              date: d.fullDate,
-              status: "Present",
-              note: ""
-            }).catch(() => null)
-          );
-        }
-      });
+      const cellKey = `${student.id}_${todayDateStr}`;
+      updated[cellKey] = { status: "Present", note: "" };
+      promises.push(
+        attendanceApi.create({
+          group_id: selectedGroup,
+          student_id: student.id,
+          date: todayDateStr,
+          status: "Present",
+          note: ""
+        }).catch(() => null)
+      );
     });
 
     setMatrixData(updated);
     await Promise.all(promises);
-    toast.success("Barcha talabalar 'Keldi' qilindi va avtomatik ravishda saqlandi! ⚡");
+    toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
   };
 
   // Filter students based on legend
