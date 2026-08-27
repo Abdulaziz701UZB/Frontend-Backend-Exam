@@ -809,11 +809,23 @@ const Attendance = () => {
 
                               {/* LC-UP Usulidagi Tepada Ochiluvchi Tanlagich (Floating Top Popover) */}
                               {activePickerCell === cellKey && (
-                                <div className="lc-floating-popover-card" onClick={(e) => e.stopPropagation()}>
+                                <div 
+                                  className="lc-floating-popover-card" 
+                                  onClick={(e) => e.stopPropagation()}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  onMouseUp={(e) => e.stopPropagation()}
+                                  onTouchStart={(e) => e.stopPropagation()}
+                                  onTouchEnd={(e) => e.stopPropagation()}
+                                >
                                   <button
                                     type="button"
                                     className="lc-pop-btn lc-pop-absent"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onMouseUp={(e) => e.stopPropagation()}
+                                    onTouchStart={(e) => e.stopPropagation()}
+                                    onTouchEnd={(e) => e.stopPropagation()}
                                     onClick={(e) => {
+                                      e.stopPropagation();
                                       handleSelectStatus(student.id, d.fullDate, student.fullName, "Absent", e);
                                       setActiveReasonCard({
                                         studentId: student.id,
@@ -830,7 +842,14 @@ const Attendance = () => {
                                   <button
                                     type="button"
                                     className="lc-pop-btn lc-pop-excused"
-                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e)}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onMouseUp={(e) => e.stopPropagation()}
+                                    onTouchStart={(e) => e.stopPropagation()}
+                                    onTouchEnd={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectStatus(student.id, d.fullDate, student.fullName, "Excused", e);
+                                    }}
                                     title="Kechikdi / Sababli (🕒)"
                                   >
                                     <HiOutlineClock />
@@ -838,7 +857,14 @@ const Attendance = () => {
                                   <button
                                     type="button"
                                     className="lc-pop-btn lc-pop-present"
-                                    onClick={(e) => handleSelectStatus(student.id, d.fullDate, student.fullName, "Present", e)}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onMouseUp={(e) => e.stopPropagation()}
+                                    onTouchStart={(e) => e.stopPropagation()}
+                                    onTouchEnd={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectStatus(student.id, d.fullDate, student.fullName, "Present", e);
+                                    }}
                                     title="Keldi (✔)"
                                   >
                                     <HiOutlineCheck />
