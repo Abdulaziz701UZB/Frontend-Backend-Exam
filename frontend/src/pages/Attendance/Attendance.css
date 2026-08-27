@@ -357,6 +357,29 @@
   white-space: nowrap;
 }
 
+.roster-call-btn {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  font-size: 13px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.roster-call-btn:hover {
+  background: #16a34a;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
 .roster-item-menu {
   background: transparent;
   border: none;

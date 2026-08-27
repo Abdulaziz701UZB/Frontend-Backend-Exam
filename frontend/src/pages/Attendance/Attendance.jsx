@@ -23,7 +23,8 @@ import {
   HiOutlineChevronDown,
   HiOutlineLockClosed,
   HiOutlineNoSymbol,
-  HiOutlineExclamationTriangle
+  HiOutlineExclamationTriangle,
+  HiOutlinePhone
 } from "react-icons/hi2";
 import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Attendance.css";
@@ -530,12 +531,24 @@ const Attendance = () => {
                           return st.phone || "(90) 599-06-00";
                         })()}
                       </span>
+                      <a
+                        href={`tel:${st.phone ? st.phone.replace(/\D/g, "") : "998905990600"}`}
+                        className="roster-call-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast.info(`📞 "${st.fullName}" raqamiga qo'ng'iroq ochilmoqda: ${st.phone || "(90) 599-06-00"}`);
+                        }}
+                        title={`Qo'ng'iroq qilish: ${st.phone || "(90) 599-06-00"}`}
+                      >
+                        <HiOutlinePhone />
+                      </a>
                       <button 
                         className="roster-item-menu"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedProfileStudent(st);
                         }}
+                        title="Profilni ochish"
                       >
                         <HiOutlineEllipsisVertical />
                       </button>
