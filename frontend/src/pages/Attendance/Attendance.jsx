@@ -60,6 +60,15 @@ const EXCUSED_REASONS = [
   { id: "other_excused", label: "Boshqa Uzrli Sabab", tag: "Uzrli" }
 ];
 
+const ABSENT_REASONS = [
+  { id: "health", label: "🩺 Salomatligi / Kasallik tufayli" },
+  { id: "family", label: "👨‍👩‍👧 Oilaviy sabab / Marosim" },
+  { id: "travel", label: "🚗 Sayohat / Shaharda yo'q" },
+  { id: "unreachable", label: "📞 Sababsiz (Telefoni ko'tarmadi)" },
+  { id: "medical_note", label: "📑 Tibbiy ma'lumotnoma (Spravka) taqdim etiladi" },
+  { id: "other", label: "✍️ Boshqa sabab (qo'lda yozish)" }
+];
+
 const Attendance = () => {
   const { currentRole, user, canMarkAttendance } = useEduAuth();
   const toast = useToast();
@@ -78,6 +87,7 @@ const Attendance = () => {
   const [studentFilter, setStudentFilter] = useState("all"); // all, debtors, trial, active, frozen
   const [sortAsc, setSortAsc] = useState(true);
   const [isZenMode, setIsZenMode] = useState(false); // 6-Qoida: To'liq ekran Zen Mode
+  const [activeReasonCard, setActiveReasonCard] = useState(null); // Smart Card popup for absence reason
 
   // 1-Qoida: Bugungi sana hisobi
   const now = new Date();
@@ -330,9 +340,11 @@ const Attendance = () => {
     }
   };
 
-  // 1-Dizayn: Swipe & Right-click Quick Mark Gestures
+  // 1-Dizayn: Swipe & Mouse Drag & Right-click Quick Mark Gestures
   const touchStartCoords = useRef({ x: 0, y: 0 });
+  const mouseDragCoords = useRef({ x: 0, y: 0, isDragging: false });
 
+  // Touch Swipe (Mobile / Tablet)
   const handleCellTouchStart = (e) => {
     if (e.touches && e.touches[0]) {
       touchStartCoords.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -354,9 +366,67 @@ const Attendance = () => {
           // Swipe Right -> Keldi ✅
           handleSelectStatus(studentId, fullDate, studentName, "Present", e);
         } else if (deltaX < -35) {
-          // Swipe Left -> Kelmadi ❌
+          // Swipe Left -> Kelmadi ❌ + Tepadan Smart Card tushishi
           handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
+          setActiveReasonCard({
+            studentId,
+            fullDate,
+            studentName,
+            reason: ABSENT_REASONS[0].label,
+            customNote: ""
+          });
         }
+      }
+    }
+  };
+
+  // Mouse Drag & Click (Desktop / Laptop)
+  const handleCellMouseDown = (e) => {
+    if (e.button !== 0) return; // Faqat chap tugma
+    mouseDragCoords.current = {
+      x: e.clientX,
+      y: e.clientY,
+      isDragging: true
+    };
+  };
+
+  const handleCellMouseUp = (studentId, fullDate, studentName, e) => {
+    if (!mouseDragCoords.current.isDragging) return;
+    const deltaX = e.clientX - mouseDragCoords.current.x;
+    const deltaY = e.clientY - mouseDragCoords.current.y;
+    mouseDragCoords.current.isDragging = false;
+
+    // Sichqonchani surish (Mouse Drag > 30px)
+    if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+        toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+        return;
+      }
+      if (deltaX > 30) {
+        // Drag Right -> Keldi ✅
+        handleSelectStatus(studentId, fullDate, studentName, "Present", e);
+      } else if (deltaX < -30) {
+        // Drag Left -> Kelmadi ❌ + Tepadan Smart Card tushishi
+        handleSelectStatus(studentId, fullDate, studentName, "Absent", e);
+        setActiveReasonCard({
+          studentId,
+          fullDate,
+          studentName,
+          reason: ABSENT_REASONS[0].label,
+          customNote: ""
+        });
+      }
+    } else {
+      // Surmasdan shunchaki bosish (Oddiy Click)
+      // Talab: Faqat ekran 800px dan katta bo'lsa suzuvchi tanlagich ochilsin, kichikda ochilmasin
+      const isDesktop = window.innerWidth > 800;
+      if (isDesktop) {
+        if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+          toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
+          return;
+        }
+        const cellKey = `${studentId}_${fullDate}`;
+        setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
       }
     }
   };
@@ -370,6 +440,41 @@ const Attendance = () => {
     }
     const nextStatus = !currentStatus ? "Present" : currentStatus === "Present" ? "Absent" : currentStatus === "Absent" ? "Excused" : null;
     handleSelectStatus(studentId, fullDate, studentName, nextStatus, e);
+  };
+
+  // Smart Card: Sababni tasdiqlash va Telegram Botga yuborish
+  const handleConfirmReason = async (e) => {
+    if (e) e.preventDefault();
+    if (!activeReasonCard) return;
+
+    const finalReason = activeReasonCard.reason === "✍️ Boshqa sabab (qo'lda yozish)" && activeReasonCard.customNote.trim()
+      ? activeReasonCard.customNote.trim()
+      : activeReasonCard.reason;
+
+    const cellKey = `${activeReasonCard.studentId}_${activeReasonCard.fullDate}`;
+    setMatrixData((prev) => ({
+      ...prev,
+      [cellKey]: {
+        status: "Absent",
+        note: finalReason
+      }
+    }));
+
+    try {
+      await attendanceApi.create({
+        group_id: selectedGroup,
+        student_id: activeReasonCard.studentId,
+        date: activeReasonCard.fullDate,
+        status: "Absent",
+        note: finalReason
+      });
+    } catch (err) {
+      console.warn("Auto-save sync:", err.message);
+    }
+
+    // 4-Qoida: Yangi formatdagi Telegram Bot xabarnomasi
+    toast.error(`📲 [Telegram Bot] "${activeReasonCard.studentName}" — Darsga qatnashmadi. Qayd etilgan sabab: [${finalReason}] ❌. Shu sabab bo'yicha kelmaganidan xabaringiz bormi?`);
+    setActiveReasonCard(null);
   };
 
   // Mark all students Present for all dates with instant auto-save
@@ -723,22 +828,63 @@ const Attendance = () => {
                             <td 
                               key={dIdx} 
                               className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (isLessonTimeLocked(d.fullDate) && currentRole !== "admin") {
-                                  toast.error("🔒 Ushbu dars davomati qulflangan! Faqat Administrator o'zgartirish huquqiga ega.");
-                                  return;
-                                }
-                                setActivePickerCell(activePickerCell === cellKey ? null : cellKey);
-                              }}
+                              onMouseDown={handleCellMouseDown}
+                              onMouseUp={(e) => handleCellMouseUp(student.id, d.fullDate, student.fullName, e)}
                               onTouchStart={handleCellTouchStart}
                               onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
                               onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌ | O'ng tugma: tezkor | Swipe: o'ngga ✅, chapga ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${status || "Belgilanmagan (Bosing: ✅ ❌ | O'ng tugma: tezkor | Drag/Swipe: o'ngga ✅, chapga ❌)"} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan — Faqat Admin tahrirlay oladi)" : ""}`}
                             >
                               {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
                               {isLessonTimeLocked(d.fullDate) && (
                                 <HiOutlineLockClosed className="locked-watermark-icon" title="Qulflangan — Faqat Admin o'zgartira oladi" />
+                              )}
+
+                              {/* 3-Qoida: Tepadan sirg'alib tushuvchi Ixcham Smart Card */}
+                              {activeReasonCard && activeReasonCard.studentId === student.id && activeReasonCard.fullDate === d.fullDate && (
+                                <div className="reason-smart-card-popup" onClick={(e) => e.stopPropagation()}>
+                                  <div className="reason-card-header">
+                                    <span className="reason-card-title">❌ Dars qoldirish sababi</span>
+                                    <button 
+                                      type="button" 
+                                      className="btn-close-reason-card" 
+                                      onClick={() => setActiveReasonCard(null)}
+                                      title="Yopish"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                  <div className="reason-card-student">
+                                    <strong>{student.fullName}</strong> • {d.dayStr}
+                                  </div>
+                                  <div className="reason-card-body">
+                                    <label className="reason-input-label">Sababni tanlang:</label>
+                                    <select
+                                      className="reason-select-dropdown"
+                                      value={activeReasonCard.reason}
+                                      onChange={(e) => setActiveReasonCard({ ...activeReasonCard, reason: e.target.value })}
+                                    >
+                                      {ABSENT_REASONS.map((r) => (
+                                        <option key={r.id} value={r.label}>{r.label}</option>
+                                      ))}
+                                    </select>
+
+                                    {activeReasonCard.reason === "✍️ Boshqa sabab (qo'lda yozish)" && (
+                                      <input
+                                        type="text"
+                                        className="reason-custom-input"
+                                        placeholder="Sababni yozing..."
+                                        value={activeReasonCard.customNote}
+                                        onChange={(e) => setActiveReasonCard({ ...activeReasonCard, customNote: e.target.value })}
+                                        autoFocus
+                                      />
+                                    )}
+
+                                    <button type="button" className="btn-submit-reason-card" onClick={handleConfirmReason}>
+                                      Tasdiqlash & Botga Yuborish 📲
+                                    </button>
+                                  </div>
+                                </div>
                               )}
 
                               {activePickerCell === cellKey ? (
