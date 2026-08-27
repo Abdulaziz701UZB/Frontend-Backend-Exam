@@ -161,7 +161,6 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               title="Tizimdan chiqish"
             >
               <HiOutlineArrowRightOnRectangle className="logout-icon" />
-              <span className="logout-text">Chiqish</span>
             </button>
           </div>
         </div>

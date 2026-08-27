@@ -203,14 +203,12 @@
 .crm-logout-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: center;
+  padding: 8px 11px;
   background: #fef2f2;
   border: 1.5px solid #fecaca;
   color: #ef4444;
   border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -223,7 +221,7 @@
 }
 
 .crm-logout-btn .logout-icon {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .header-mobile-roles-row {
