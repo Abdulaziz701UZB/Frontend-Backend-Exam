@@ -66,12 +66,12 @@ const EXCUSED_REASONS = [
 ];
 
 const ABSENT_REASONS = [
-  { id: "health", label: "🩺 Salomatligi / Kasallik tufayli" },
-  { id: "family", label: "👨‍👩‍👧 Oilaviy sabab / Marosim" },
-  { id: "travel", label: "🚗 Sayohat / Shaharda yo'q" },
-  { id: "unreachable", label: "📞 Sababsiz (Telefoni ko'tarmadi)" },
-  { id: "medical_note", label: "📑 Tibbiy ma'lumotnoma (Spravka) taqdim etiladi" },
-  { id: "other", label: "✍️ Boshqa sabab (qo'lda yozish)" }
+  { id: "health", label: "Salomatligi / Kasallik tufayli" },
+  { id: "family", label: "Oilaviy sabab / Marosim" },
+  { id: "travel", label: "Sayohat / Shaharda yo'q" },
+  { id: "unreachable", label: "Sababsiz (Telefoni ko'tarmadi)" },
+  { id: "medical_note", label: "Tibbiy ma'lumotnoma (Spravka) taqdim etiladi" },
+  { id: "other", label: "Boshqa sabab (qo'lda yozish)" }
 ];
 
 const Attendance = () => {
@@ -1137,7 +1137,7 @@ const Attendance = () => {
                   </span>
                 ) : (
                   <span className="sync-status status-saved">
-                    <span className="sync-dot dot-green"></span> ✓ Saqlandi
+                    <HiOutlineCheck className="sync-check-svg" /> Saqlandi
                   </span>
                 )}
               </div>
@@ -1671,7 +1671,7 @@ const Attendance = () => {
                 ))}
               </select>
 
-              {activeReasonCard.reason === "✍️ Boshqa sabab (qo'lda yozish)" && (
+              {activeReasonCard.reason === "Boshqa sabab (qo'lda yozish)" && (
                 <input
                   type="text"
                   className="reason-custom-input"
