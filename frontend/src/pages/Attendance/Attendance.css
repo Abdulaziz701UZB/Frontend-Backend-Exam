@@ -1305,8 +1305,9 @@
 .lc-btn-mark-all {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   background: rgba(34, 197, 94, 0.12);
   border: 1.5px solid #22c55e;
   border-radius: 12px;
@@ -1318,11 +1319,41 @@
   white-space: nowrap;
 }
 
+.lc-btn-mark-all.lc-btn-icon-only {
+  padding: 8px 12px;
+}
+
+.lc-btn-mark-all.lc-btn-icon-only .btn-icon {
+  font-size: 16px;
+}
+
 .lc-btn-mark-all:hover {
   background: #22c55e;
   color: #ffffff;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+.lc-btn-grade-ten {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 13px;
+  background: #10b981;
+  border: 1.5px solid #059669;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.lc-btn-grade-ten:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
 }
 
 .lc-fullwidth-matrix-panel {

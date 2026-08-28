@@ -601,6 +601,38 @@ const Attendance = () => {
     toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
   };
 
+  // Bugungi dars uchun barcha o'quvchilarga 10 ball qo'yish
+  const handleMarkAllGradesTen = () => {
+    if (activeGroupStudents.length === 0) {
+      toast.warning("Guruhda faol talabalar mavjud emas!");
+      return;
+    }
+
+    setGradesMatrixData((prev) => {
+      let copy = { ...prev };
+      activeGroupStudents.forEach((student) => {
+        const cellKey = `${student.id}_${todayDateStr}`;
+        copy[cellKey] = {
+          score: 10,
+          date: todayDateStr,
+          studentId: student.id,
+          updatedAt: new Date().toISOString()
+        };
+      });
+      try {
+        localStorage.setItem("velnex_grades_matrix", JSON.stringify(copy));
+      } catch {}
+      return copy;
+    });
+
+    setSaveStatus("saving");
+    setTimeout(() => {
+      setSaveStatus("saved");
+    }, 300);
+
+    toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilarga 10 ball qo'yildi va saqlandi! 🟢💯`);
+  };
+
   // Baholash (1-10 Ball) Ball qo'yish va saqlash
   const handleSetGradeScore = (studentId, fullDate, score, studentName) => {
     // Admin bo'lmagan foydalanuvchilar (O'qituvchi) o'tib ketgan darslarga baho qo'ya olmaydi
@@ -969,14 +1001,25 @@ const Attendance = () => {
               </div>
 
               {canMarkAttendance && (
-                <button
-                  type="button"
-                  className="lc-btn-mark-all"
-                  onClick={handleMarkAllPresent}
-                  title="Barcha talabalarni 'Keldi' qilish"
-                >
-                  <HiOutlineCheck className="btn-icon" /> Barchasi Keldi
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="lc-btn-mark-all lc-btn-icon-only"
+                    onClick={handleMarkAllPresent}
+                    title="Barcha talabalarni 'Keldi' qilish"
+                  >
+                    <HiOutlineCheck className="btn-icon" />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="lc-btn-grade-ten"
+                    onClick={handleMarkAllGradesTen}
+                    title="Bugungi barcha talabalarga 10 ball qo'yish"
+                  >
+                    10
+                  </button>
+                </>
               )}
 
               <button 
