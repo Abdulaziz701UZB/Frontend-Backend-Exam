@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { 
@@ -8,7 +8,10 @@ import {
   HiLockClosed, 
   HiXMark, 
   HiKey,
-  HiOutlineArrowRightOnRectangle
+  HiOutlineArrowRightOnRectangle,
+  HiOutlineBell,
+  HiOutlineCurrencyDollar,
+  HiOutlineClock
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
@@ -16,6 +19,7 @@ import "./Header.css";
 
 const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const navigate = useNavigate();
+  const notifRef = useRef(null);
   const {
     currentRole,
     switchRoleWithPassword,
@@ -32,6 +36,48 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const [targetRole, setTargetRole] = useState("admin");
   const [targetUserId, setTargetUserId] = useState(201);
   const [passwordInput, setPasswordInput] = useState("");
+
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: "unlock",
+      title: "Davomat So'rovi",
+      message: "F-12 guruhi o'qituvchisi 03-Avgust darsini ochishni so'radi",
+      time: "5 daqiqa oldin",
+      read: false
+    },
+    {
+      id: 2,
+      type: "payment",
+      title: "Yangi To'lov",
+      message: "Abdulaziz Abdulhayev 450,000 so'm to'lov qildi",
+      time: "25 daqiqa oldin",
+      read: false
+    },
+    {
+      id: 3,
+      type: "schedule",
+      title: "Dars Eslatmasi",
+      message: "14:00 da Frontend ReactJS guruhi darsi boshlanadi",
+      time: "1 soat oldin",
+      read: true
+    }
+  ]);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotificationsOpen(false);
+      }
+    };
+    if (notificationsOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [notificationsOpen]);
 
   const getFormattedDate = () => {
     const d = new Date();
@@ -153,6 +199,77 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   <FaGraduationCap /> <span>O'quvchi</span>
                 </button>
               </div>
+            </div>
+
+            <div className="crm-notif-wrapper" ref={notifRef}>
+              <button
+                type="button"
+                className={`crm-notif-btn ${notificationsOpen ? "active" : ""}`}
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                title="Bildirishnomalar"
+              >
+                <HiOutlineBell className="notif-icon" />
+                {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
+              </button>
+
+              {notificationsOpen && (
+                <div className="crm-notif-dropdown" onClick={(e) => e.stopPropagation()}>
+                  <div className="crm-notif-header">
+                    <div className="notif-header-left">
+                      <span className="notif-title">Bildirishnomalar</span>
+                      {unreadCount > 0 && <span className="notif-unread-pill">{unreadCount} yangi</span>}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        className="notif-mark-read-btn"
+                        onClick={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+                      >
+                        Barchasi o'qildi
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="crm-notif-list">
+                    {notifications.length === 0 ? (
+                      <div className="notif-empty-state">
+                        <HiOutlineBell className="notif-empty-icon" />
+                        <p>Yangi bildirishnomalar yo'q</p>
+                      </div>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`notif-item ${!notif.read ? "unread" : ""}`}
+                          onClick={() => {
+                            setNotifications((prev) =>
+                              prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))
+                            );
+                          }}
+                        >
+                          <div className={`notif-type-icon icon-${notif.type}`}>
+                            {notif.type === "unlock" ? (
+                              <HiLockClosed />
+                            ) : notif.type === "payment" ? (
+                              <HiOutlineCurrencyDollar />
+                            ) : (
+                              <HiOutlineClock />
+                            )}
+                          </div>
+                          <div className="notif-content">
+                            <div className="notif-item-top">
+                              <span className="notif-item-title">{notif.title}</span>
+                              <span className="notif-time">{notif.time}</span>
+                            </div>
+                            <p className="notif-desc">{notif.message}</p>
+                          </div>
+                          {!notif.read && <span className="notif-blue-dot"></span>}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <button
