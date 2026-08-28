@@ -703,12 +703,9 @@ const Attendance = () => {
           const student = students.find((s) => String(s.id) === String(studentId));
           const studentName = student?.fullName || "Talaba";
 
-          if (e.key >= "1" && e.key <= "9") {
+          if (e.key >= "0" && e.key <= "9") {
             e.preventDefault();
             handleSetGradeScore(studentId, fullDate, parseInt(e.key, 10), studentName);
-          } else if (e.key === "0") {
-            e.preventDefault();
-            handleSetGradeScore(studentId, fullDate, 10, studentName);
           } else if (e.key === "Backspace" || e.key === "Delete") {
             e.preventDefault();
             handleSetGradeScore(studentId, fullDate, null, studentName);
@@ -1357,10 +1354,10 @@ const Attendance = () => {
                                       onMouseUp={(e) => e.stopPropagation()}
                                     >
                                       <div className="grade-picker-hint">
-                                        Ballni tanlang (yoki klaviaturada 1-10 bosing):
+                                        Ballni tanlang (yoki klaviaturada 0-9 bosing):
                                       </div>
                                       <div className="grade-numbers-grid">
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                                           <button
                                             key={num}
                                             type="button"
@@ -1401,11 +1398,11 @@ const Attendance = () => {
                                   {!isPresent ? (
                                     <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
                                   ) : score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
+                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : score >= 1 ? "low" : "zero"}`}>
                                       {score}
                                     </div>
                                   ) : (
-                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing (1-10)"></div>
+                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing (0-10)"></div>
                                   )}
                                 </td>
                               );
