@@ -883,36 +883,451 @@
   align-self: center;
 }
 
-/* Empty state */
-.notif-modal-empty {
-  text-align: center;
-  padding: 48px 20px;
-}
-
-.empty-bell-circle {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: #f1f5f9;
-  color: #94a3b8;
+/* Audio Toggle Button (Feature 19) */
+.btn-sound-toggle {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  margin: 0 auto 16px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
 
-.notif-modal-empty h4 {
-  font-size: 15px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 6px 0;
+.btn-sound-toggle.sound-on {
+  color: #0284c7;
+  background: #e0f2fe;
+  border-color: #bae6fd;
 }
 
-.notif-modal-empty p {
-  font-size: 13px;
+.btn-sound-toggle:hover {
+  transform: scale(1.06);
+}
+
+/* Date Filter Row (Feature 10) */
+.crm-notif-date-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.date-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-filter-label {
+  font-size: 11.5px;
+  font-weight: 700;
   color: #64748b;
-  margin: 0;
+}
+
+.date-chip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.date-chip:hover {
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.date-chip.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.btn-toggle-digest {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin-left: auto;
+}
+
+.btn-toggle-digest:hover,
+.btn-toggle-digest.active {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+/* Weekly Digest Summary Banner (Feature 18) */
+.crm-weekly-digest-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-bottom: 1.5px solid #bae6fd;
+  animation: digestSlide 0.2s ease;
+}
+
+@keyframes digestSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.digest-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.digest-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.digest-val {
+  font-size: 14px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.digest-val.text-green {
+  color: #16a34a;
+}
+
+.digest-val.text-blue {
+  color: #0284c7;
+}
+
+/* Header badge flex inside notification card */
+.notif-title-badge-flex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-pill.pill-pending {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.status-pill.pill-approved {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.status-pill.pill-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* 14. Live Lesson Countdown Badge */
+.countdown-pill-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #0284c7;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  animation: countdownPulse 2s infinite ease-in-out;
+}
+
+@keyframes countdownPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(2, 132, 199, 0); }
+  50% { transform: scale(1.03); box-shadow: 0 0 8px rgba(2, 132, 199, 0.3); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(2, 132, 199, 0); }
+}
+
+/* 15. Conflict Warning Alert Badge */
+.conflict-pill-badge {
+  font-size: 10px;
+  font-weight: 900;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* Action button rows inside cards (Features 1, 2, 3, 15) */
+.notif-action-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* 1. Direct Quick Approve & Reject Buttons */
+.btn-quick-approve {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+  transition: all 0.18s ease;
+}
+
+.btn-quick-approve:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+.btn-quick-reject {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-quick-reject:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+.btn-quick-reply-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-quick-reply-toggle:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* 3. Quick Reply Input Box */
+.notif-quick-reply-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-reply-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reply-chip {
+  font-size: 10.5px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0284c7;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reply-chip:hover {
+  background: #e0f2fe;
+  border-color: #0284c7;
+}
+
+.quick-reply-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-reply-input {
+  flex: 1;
+  height: 32px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+}
+
+.quick-reply-input:focus {
+  border-color: #0284c7;
+}
+
+.btn-send-reply {
+  width: 32px;
+  height: 32px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-send-reply:hover {
+  background: #0369a1;
+}
+
+/* 2. Direct Telegram & SMS Action Buttons */
+.btn-action-tg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+  transition: all 0.18s ease;
+}
+
+.btn-action-tg:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4);
+}
+
+.btn-action-sms {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1.5px solid #cbd5e1;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-action-sms:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* 15. Resolve Conflict Button */
+.btn-resolve-conflict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+  transition: all 0.18s ease;
+}
+
+.btn-resolve-conflict:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.4);
+}
+
+/* Type Card Border Accents */
+.notif-modal-card-item.type-unlock {
+  border-left: 4px solid #f59e0b;
+}
+
+.notif-modal-card-item.type-conflict {
+  border-left: 4px solid #ef4444;
+  background: #fff5f5;
+}
+
+.notif-modal-card-item.type-conflict:hover {
+  background: #fee2e2;
+}
+
+.notif-modal-card-item.type-schedule {
+  border-left: 4px solid #0284c7;
+}
+
+.notif-modal-card-item.type-payment {
+  border-left: 4px solid #10b981;
+}
+
+.notif-modal-card-item.type-student {
+  border-left: 4px solid #8b5cf6;
+}
+
+.notif-card-icon-wrap.type-conflict {
+  background: #fee2e2;
+  color: #ef4444;
 }
 
 /* Footer */
