@@ -528,7 +528,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                 {/* 19. Ovozli Signal Toggle */}
                 <button
                   type="button"
-                  className={`btn-sound-toggle ${soundEnabled ? "sound-on" : "sound-off"}`}
+                  className={`btn-header-action-icon btn-sound-toggle ${soundEnabled ? "sound-on" : "sound-off"}`}
                   onClick={() => {
                     setSoundEnabled(!soundEnabled);
                     if (!soundEnabled) playChime();
@@ -541,30 +541,32 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                 {/* Demo Data Reload Button */}
                 <button
                   type="button"
-                  className="btn-reload-demo"
+                  className="btn-header-action-icon btn-reload-demo"
                   onClick={handleReloadDemoData}
-                  title="8 ta sinov bildirishnomalarini qayta yuklash"
+                  title="8 ta sinov bildirishnomasini qayta yuklash"
                 >
-                  <HiOutlineArrowPath /> Sinov
+                  <HiOutlineArrowPath />
                 </button>
 
+                {/* Faqat Tick (Barchasi o'qildi) */}
                 {unreadCount > 0 && (
                   <button
                     type="button"
-                    className="btn-mark-all-read"
+                    className="btn-header-action-icon btn-mark-all-read"
                     onClick={() => {
                       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
                       playChime();
                     }}
                     title="Barcha xabarlarni o'qilgan deb belgilash"
                   >
-                    <HiOutlineCheck /> Barchasi o'qildi
+                    <HiOutlineCheck />
                   </button>
                 )}
+
                 {notifications.length > 0 && (
                   <button
                     type="button"
-                    className="btn-clear-notifs"
+                    className="btn-header-action-icon btn-clear-notifs"
                     onClick={() => {
                       setNotifications([]);
                       playChime();
@@ -574,9 +576,10 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                     <HiOutlineTrash />
                   </button>
                 )}
+
                 <button
                   type="button"
-                  className="btn-close-notif-modal"
+                  className="btn-header-action-icon btn-close-notif-modal"
                   onClick={() => setIsNotifModalOpen(false)}
                   title="Yopish (Esc)"
                 >
