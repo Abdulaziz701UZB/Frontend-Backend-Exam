@@ -117,18 +117,42 @@ const Attendance = () => {
 
   const gradeInputRef = useRef({ buffer: "", lastKeyTime: 0 });
 
+  const [isTableLoading, setIsTableLoading] = useState(false);
+  const [unlockRequestModal, setUnlockRequestModal] = useState({
+    isOpen: false,
+    fullDate: "",
+    reason: "Baho kiritish unutilgan",
+    note: ""
+  });
+  const [unlockRequests, setUnlockRequests] = useState(() => {
+    try {
+      const saved = localStorage.getItem("velnex_unlock_requests");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [mobileBottomSheet, setMobileBottomSheet] = useState({
+    isOpen: false,
+    student: null,
+    fullDate: ""
+  });
+
   const now = new Date();
   const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isZenMode) {
-        setIsZenMode(false);
+      if (e.key === "Escape") {
+        if (isZenMode) setIsZenMode(false);
+        if (unlockRequestModal.isOpen) setUnlockRequestModal((prev) => ({ ...prev, isOpen: false }));
+        if (mobileBottomSheet.isOpen) setMobileBottomSheet((prev) => ({ ...prev, isOpen: false }));
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isZenMode]);
+  }, [isZenMode, unlockRequestModal.isOpen, mobileBottomSheet.isOpen]);
 
   const [matrixData, setMatrixData] = useState({});
   const [gradesData, setGradesData] = useState({});
@@ -645,6 +669,48 @@ const Attendance = () => {
     toast.success(`Bugungi darsda qatnashgan (${presentStudents.length} ta) o'quvchiga 10 ball qo'yildi va saqlandi! 🟢💯`);
   };
 
+  // 17-Qoida: O'tgan darsni ochish uchun Administratorga ruxsat so'rovi yuborish
+  const handleSendUnlockRequest = (e) => {
+    if (e) e.preventDefault();
+    if (!unlockRequestModal.fullDate) return;
+    const reqKey = `${selectedGroup}_${unlockRequestModal.fullDate}`;
+    const newReq = {
+      groupId: selectedGroup,
+      groupName: currentGroupObj?.name || "Guruh",
+      date: unlockRequestModal.fullDate,
+      teacherName: user?.fullName || user?.name || "O'qituvchi",
+      teacherId: user?.id,
+      reason: unlockRequestModal.reason,
+      note: unlockRequestModal.note,
+      status: "pending",
+      createdAt: new Date().toISOString()
+    };
+
+    setUnlockRequests((prev) => {
+      const copy = { ...prev, [reqKey]: newReq };
+      try {
+        localStorage.setItem("velnex_unlock_requests", JSON.stringify(copy));
+      } catch {}
+      return copy;
+    });
+
+    toast.success(`📩 "${unlockRequestModal.fullDate}" darsi uchun qulfni ochish so'rovi Administratorga yuborildi! Kutilmoqda... ⏳`);
+    setUnlockRequestModal({ isOpen: false, fullDate: "", reason: "Baho kiritish unutilgan", note: "" });
+  };
+
+  // 12-Qoida: Skeleton Shimmer bilan silliq yuklanish
+  const handleMonthChangeWithShimmer = (m) => {
+    setIsTableLoading(true);
+    setSelectedMonth(m);
+    setTimeout(() => setIsTableLoading(false), 240);
+  };
+
+  const handleYearChangeWithShimmer = (y) => {
+    setIsTableLoading(true);
+    setSelectedYear(y);
+    setTimeout(() => setIsTableLoading(false), 240);
+  };
+
   // Filter students based on legend
   const filteredStudents = activeGroupStudents.filter((s) => {
     const isDebtor = (s.balance || 0) < 0 || s.paymentStatus === "Overdue" || s.paymentStatus === "Unpaid";
@@ -1076,7 +1142,7 @@ const Attendance = () => {
               <div className="lc-select-pill year-select-pill">
                 <select
                   value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
+                  onChange={(e) => handleYearChangeWithShimmer(e.target.value)}
                   className="lc-clean-select"
                 >
                   <option value="2025">2025</option>
@@ -1088,7 +1154,7 @@ const Attendance = () => {
               <div className="lc-select-pill month-select-pill">
                 <select
                   value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  onChange={(e) => handleMonthChangeWithShimmer(e.target.value)}
                   className="lc-clean-select"
                 >
                   {MONTHS_LIST.map((m) => (
@@ -1155,24 +1221,45 @@ const Attendance = () => {
             {/* ATTENDANCE MATRIX TABLE */}
             {activeTab === "attendance" && (
               <div className="lc-matrix-wrapper">
-                <table className="lc-matrix-table">
-                  <thead>
-                    <tr>
-                      <th className="th-talabalar">Talabalar</th>
-                      {lessonDates.map((d, idx) => {
-                        const isToday = d.fullDate === todayDateStr;
-                        const isFuture = isFutureDate(d.fullDate);
-                        const isPast = isPastDate(d.fullDate);
-                        return (
-                          <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
-                            {isToday && <span className="today-badge-pill">Bugun</span>}
-                            {isFuture && <span className="future-badge-pill">Kelgusi</span>}
-                            <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
+                {isTableLoading ? (
+                  <div className="lc-matrix-skeleton-table">
+                    {[1, 2, 3, 4, 5, 6].map((row) => (
+                      <div key={row} className="lc-sk-row">
+                        <div className="lc-sk-student-cell">
+                          <div className="lc-sk-avatar shimmer-box"></div>
+                          <div className="lc-sk-name shimmer-box"></div>
+                        </div>
+                        <div className="lc-sk-dates-cells">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((col) => (
+                            <div key={col} className="lc-sk-cell-pill shimmer-box"></div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <table className="lc-matrix-table">
+                    <thead>
+                      <tr>
+                        <th className="th-talabalar">Talabalar</th>
+                        {lessonDates.map((d, idx) => {
+                          const isToday = d.fullDate === todayDateStr;
+                          const isFuture = isFutureDate(d.fullDate);
+                          const isPast = isPastDate(d.fullDate);
+                          const reqKey = `${selectedGroup}_${d.fullDate}`;
+                          const isPendingUnlock = unlockRequests[reqKey]?.status === "pending";
+
+                          return (
+                            <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
+                              {isToday && <span className="today-badge-pill">Bugun</span>}
+                              {isFuture && <span className="future-badge-pill">Kelgusi</span>}
+                              {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">⏳ So'rov</span>}
+                              <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
                   <tbody>
                     {filteredStudents.length === 0 ? (
                       <tr>
@@ -1328,8 +1415,9 @@ const Attendance = () => {
                     );
                   })
                   )}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              )}
             </div>
           )}
 
@@ -1337,87 +1425,119 @@ const Attendance = () => {
           {activeTab === "grades" && (
             <div className="lc-grades-wrapper">
               <div className="lc-matrix-wrapper">
-                <table className="lc-matrix-table lc-grades-matrix-table">
-                  <thead>
-                    <tr>
-                      <th className="th-talabalar">Talabalar</th>
-                      {lessonDates.map((d, idx) => {
-                        const isToday = d.fullDate === todayDateStr;
-                        const isFuture = isFutureDate(d.fullDate);
-                        const isPast = isPastDate(d.fullDate);
-                        return (
-                          <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
-                            {isToday && <span className="today-badge-pill">Bugun</span>}
-                            {isFuture && <span className="future-badge-pill">Kelgusi</span>}
-                            <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStudents.length === 0 ? (
+                {isTableLoading ? (
+                  <div className="lc-matrix-skeleton-table">
+                    {[1, 2, 3, 4, 5, 6].map((row) => (
+                      <div key={row} className="lc-sk-row">
+                        <div className="lc-sk-student-cell">
+                          <div className="lc-sk-avatar shimmer-box"></div>
+                          <div className="lc-sk-name shimmer-box"></div>
+                        </div>
+                        <div className="lc-sk-dates-cells">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((col) => (
+                            <div key={col} className="lc-sk-cell-pill shimmer-box"></div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <table className="lc-matrix-table lc-grades-matrix-table">
+                    <thead>
                       <tr>
-                        <td colSpan={lessonDates.length + 1} className="empty-matrix-msg">
-                          Guruhda o'quvchilar mavjud emas
-                        </td>
+                        <th className="th-talabalar">Talabalar</th>
+                        {lessonDates.map((d, idx) => {
+                          const isToday = d.fullDate === todayDateStr;
+                          const isFuture = isFutureDate(d.fullDate);
+                          const isPast = isPastDate(d.fullDate);
+                          const reqKey = `${selectedGroup}_${d.fullDate}`;
+                          const isPendingUnlock = unlockRequests[reqKey]?.status === "pending";
+
+                          return (
+                            <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
+                              {isToday && <span className="today-badge-pill">Bugun</span>}
+                              {isFuture && <span className="future-badge-pill">Kelgusi</span>}
+                              {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">⏳ So'rov</span>}
+                              <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
+                            </th>
+                          );
+                        })}
                       </tr>
-                    ) : (
-                      filteredStudents.map((student) => {
-                        const isDebtor = (student.balance || 0) < 0 || student.paymentStatus === "Overdue" || student.paymentStatus === "Unpaid";
-                        const paymentClass = isDebtor ? "student-row-debtor" : "student-row-paid";
+                    </thead>
+                    <tbody>
+                      {filteredStudents.length === 0 ? (
+                        <tr>
+                          <td colSpan={lessonDates.length + 1} className="empty-matrix-msg">
+                            Guruhda o'quvchilar mavjud emas
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredStudents.map((student) => {
+                          const isDebtor = (student.balance || 0) < 0 || student.paymentStatus === "Overdue" || student.paymentStatus === "Unpaid";
+                          const paymentClass = isDebtor ? "student-row-debtor" : "student-row-paid";
 
-                        return (
-                          <tr key={student.id} className={`lc-matrix-student-row ${paymentClass}`}>
-                            <td className={`td-student-info ${paymentClass}`}>
-                              <div className="lc-student-row-flex">
-                                <div className="lc-student-avatar-wrap">
-                                  {student.avatar && student.avatar.length > 5 ? (
-                                    <img src={student.avatar} alt="" className="lc-student-avatar-img" />
-                                  ) : (
-                                    <span className="lc-avatar-initials">{(student.fullName || "T").charAt(0)}</span>
-                                  )}
+                          return (
+                            <tr key={student.id} className={`lc-matrix-student-row ${paymentClass}`}>
+                              <td className={`td-student-info ${paymentClass}`}>
+                                <div className="lc-student-row-flex">
+                                  <div className="lc-student-avatar-wrap">
+                                    {student.avatar && student.avatar.length > 5 ? (
+                                      <img src={student.avatar} alt="" className="lc-student-avatar-img" />
+                                    ) : (
+                                      <span className="lc-avatar-initials">{(student.fullName || "T").charAt(0)}</span>
+                                    )}
+                                  </div>
+                                  <span 
+                                    className="td-student-name"
+                                    onClick={() => setSelectedProfileStudent(student)}
+                                  >
+                                    {student.fullName}
+                                  </span>
                                 </div>
-                                <span 
-                                  className="td-student-name"
-                                  onClick={() => setSelectedProfileStudent(student)}
-                                >
-                                  {student.fullName}
-                                </span>
-                              </div>
-                            </td>
+                              </td>
 
-                            {lessonDates.map((d, dIdx) => {
-                              const cellKey = `${student.id}_${d.fullDate}`;
-                              const gradeItem = gradesMatrixData[cellKey];
-                              const score = gradeItem?.score;
-                              const isToday = d.fullDate === todayDateStr;
-                              const isPast = isPastDate(d.fullDate);
-                              const isFuture = isFutureDate(d.fullDate);
-                              const isLockedForTeacher = currentRole !== "admin" && (isPast || isFuture);
+                              {lessonDates.map((d, dIdx) => {
+                                const cellKey = `${student.id}_${d.fullDate}`;
+                                const gradeItem = gradesMatrixData[cellKey];
+                                const score = gradeItem?.score;
+                                const isToday = d.fullDate === todayDateStr;
+                                const isPast = isPastDate(d.fullDate);
+                                const isFuture = isFutureDate(d.fullDate);
+                                const isLockedForTeacher = currentRole !== "admin" && (isPast || isFuture);
 
-                              const attCell = matrixData[cellKey];
-                              const isPresent = attCell?.status === "Present";
-                              const isAbsent = attCell?.status === "Absent";
-                              const isExcused = attCell?.status === "Excused";
+                                const attCell = matrixData[cellKey];
+                                const isPresent = attCell?.status === "Present";
+                                const isAbsent = attCell?.status === "Absent";
+                                const isExcused = attCell?.status === "Excused";
 
-                              return (
-                                <td
-                                  key={dIdx}
-                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-disabled-gray" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!isPresent) return; // Darsda qatnashmagan: bossa ishlamaydi!
-                                    if (isLockedForTeacher) {
-                                      if (isPast) {
-                                        toast.error(`⏱️ O'tib ketgan dars (${d.fullDate}) baholarini faqat Administrator o'zgartira oladi!`);
-                                      } else {
-                                        toast.info(`⏳ Kelajakdagi dars sanasi (${d.fullDate})!`);
+                                return (
+                                  <td
+                                    key={dIdx}
+                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-disabled-gray" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (!isPresent) return; // Darsda qatnashmagan: bossa ishlamaydi!
+                                      if (isLockedForTeacher) {
+                                        if (isPast) {
+                                          const reqKey = `${selectedGroup}_${d.fullDate}`;
+                                          const existingReq = unlockRequests[reqKey];
+                                          if (existingReq?.status === "pending") {
+                                            toast.info(`⏳ "${d.fullDate}" darsi uchun ochish so'rovingiz yuborilgan, Administrator tasdiqlashini kuting.`);
+                                          } else {
+                                            setUnlockRequestModal({
+                                              isOpen: true,
+                                              fullDate: d.fullDate,
+                                              reason: "Baho kiritish unutilgan",
+                                              note: ""
+                                            });
+                                          }
+                                        } else {
+                                          toast.info(`⏳ Kelajakdagi dars sanasi (${d.fullDate})!`);
+                                        }
+                                        return;
                                       }
-                                      return;
-                                    }
-                                    setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
-                                  }}
+                                      setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
+                                    }}
                                   title={
                                     !isPresent
                                       ? `${student.fullName} — Darsda qatnashmagan (Baholab bo'lmaydi)`
@@ -1494,7 +1614,8 @@ const Attendance = () => {
                     )}
                   </tbody>
                 </table>
-              </div>
+              )}
+            </div>
             </div>
           )}
 
@@ -1560,6 +1681,177 @@ const Attendance = () => {
               <button type="button" className="btn-submit-reason-card" onClick={handleConfirmReason}>
                 Tasdiqlash & Botga Yuborish 📲
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 17-Qoida: O'tgan Darsni Qulfini Ochish Uchun Administratorga Ruxsat So'rovi Modali */}
+      {unlockRequestModal.isOpen && (
+        <div className="reason-modal-backdrop" onClick={() => setUnlockRequestModal((prev) => ({ ...prev, isOpen: false }))}>
+          <div className="lc-unlock-request-card" onClick={(e) => e.stopPropagation()}>
+            <div className="lc-unlock-header">
+              <div className="lc-unlock-title-wrap">
+                <span className="lc-unlock-icon">🔒</span>
+                <div>
+                  <h3 className="lc-unlock-title">Qulfni Ochish So'rovi</h3>
+                  <p className="lc-unlock-subtitle">O'tib ketgan dars baho va davomatini tahrirlash</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="btn-close-reason-card" 
+                onClick={() => setUnlockRequestModal((prev) => ({ ...prev, isOpen: false }))}
+                title="Yopish"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="lc-unlock-info-box">
+              <div className="lc-unlock-info-item">
+                <span className="info-label">Guruh:</span>
+                <span className="info-val">{currentGroupObj?.name || "Guruh"}</span>
+              </div>
+              <div className="lc-unlock-info-item">
+                <span className="info-label">Dars sanasi:</span>
+                <span className="info-val highlight-date">{unlockRequestModal.fullDate}</span>
+              </div>
+              <div className="lc-unlock-info-item">
+                <span className="info-label">O'qituvchi:</span>
+                <span className="info-val">{user?.fullName || user?.name || "O'qituvchi"}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSendUnlockRequest} className="lc-unlock-form">
+              <label className="reason-input-label">So'rov sababini tanlang:</label>
+              <select
+                className="reason-select-dropdown"
+                value={unlockRequestModal.reason}
+                onChange={(e) => setUnlockRequestModal({ ...unlockRequestModal, reason: e.target.value })}
+              >
+                <option value="Baho kiritish unutilgan">Baho kiritish unutilgan</option>
+                <option value="Davomat kech belgilandi">Davomat kech belgilandi</option>
+                <option value="Texnik xatolik / Internet uzilgan">Texnik xatolik / Internet uzilgan</option>
+                <option value="O'quvchi darsni qayta topshirdi">O'quvchi darsni qayta topshirdi</option>
+                <option value="Boshqa sabab">Boshqa sabab</option>
+              </select>
+
+              <label className="reason-input-label" style={{ marginTop: '10px' }}>Qo'shimcha izoh (ixtiyoriy):</label>
+              <textarea
+                className="lc-unlock-textarea"
+                rows="2"
+                placeholder="Administrator uchun qo'shimcha ma'lumot..."
+                value={unlockRequestModal.note}
+                onChange={(e) => setUnlockRequestModal({ ...unlockRequestModal, note: e.target.value })}
+              />
+
+              <div className="lc-unlock-actions">
+                <button
+                  type="button"
+                  className="lc-btn-cancel-modal"
+                  onClick={() => setUnlockRequestModal((prev) => ({ ...prev, isOpen: false }))}
+                >
+                  Bekor qilish
+                </button>
+                <button type="submit" className="lc-btn-send-request">
+                  📩 Administratorga So'rov Yuborish
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6-Qoida: Mobil / Planshet Uchun iOS Uslubidagi Bottom Sheet Tezkor Boshqaruv */}
+      {mobileBottomSheet.isOpen && mobileBottomSheet.student && (
+        <div className="lc-mobile-bottom-sheet-overlay" onClick={() => setMobileBottomSheet((prev) => ({ ...prev, isOpen: false }))}>
+          <div className="lc-mobile-bottom-sheet-card" onClick={(e) => e.stopPropagation()}>
+            <div className="lc-sheet-drag-handle"></div>
+            
+            <div className="lc-sheet-student-header">
+              <div className="lc-student-avatar-wrap">
+                {mobileBottomSheet.student.avatar ? (
+                  <img src={mobileBottomSheet.student.avatar} alt="" className="lc-student-avatar-img" />
+                ) : (
+                  <span className="lc-avatar-initials">{(mobileBottomSheet.student.fullName || "T").charAt(0)}</span>
+                )}
+              </div>
+              <div className="lc-sheet-student-info">
+                <h4>{mobileBottomSheet.student.fullName}</h4>
+                <p>{currentGroupObj?.name} • Bugungi dars ({mobileBottomSheet.fullDate})</p>
+              </div>
+              <button
+                type="button"
+                className="lc-sheet-close-btn"
+                onClick={() => setMobileBottomSheet((prev) => ({ ...prev, isOpen: false }))}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Quick Attendance */}
+            <div className="lc-sheet-section">
+              <span className="sheet-sec-label">Davomat:</span>
+              <div className="lc-sheet-att-grid">
+                <button
+                  type="button"
+                  className={`sheet-att-btn att-present ${matrixData[`${mobileBottomSheet.student.id}_${mobileBottomSheet.fullDate}`]?.status === "Present" ? "active" : ""}`}
+                  onClick={() => {
+                    handleSelectStatus(mobileBottomSheet.student.id, mobileBottomSheet.fullDate, mobileBottomSheet.student.fullName, "Present");
+                  }}
+                >
+                  <HiOutlineCheck /> Keldi
+                </button>
+                <button
+                  type="button"
+                  className={`sheet-att-btn att-excused ${matrixData[`${mobileBottomSheet.student.id}_${mobileBottomSheet.fullDate}`]?.status === "Excused" ? "active" : ""}`}
+                  onClick={() => {
+                    handleSelectStatus(mobileBottomSheet.student.id, mobileBottomSheet.fullDate, mobileBottomSheet.student.fullName, "Excused");
+                  }}
+                >
+                  <HiOutlineClock /> Kechikdi
+                </button>
+                <button
+                  type="button"
+                  className={`sheet-att-btn att-absent ${matrixData[`${mobileBottomSheet.student.id}_${mobileBottomSheet.fullDate}`]?.status === "Absent" ? "active" : ""}`}
+                  onClick={() => {
+                    handleSelectStatus(mobileBottomSheet.student.id, mobileBottomSheet.fullDate, mobileBottomSheet.student.fullName, "Absent");
+                    setActiveReasonCard({
+                      studentId: mobileBottomSheet.student.id,
+                      fullDate: mobileBottomSheet.fullDate,
+                      studentName: mobileBottomSheet.student.fullName,
+                      reason: ABSENT_REASONS[0].label,
+                      customNote: ""
+                    });
+                    setMobileBottomSheet((prev) => ({ ...prev, isOpen: false }));
+                  }}
+                >
+                  <HiOutlineXMark /> Kelmadi
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Grade 0-10 */}
+            <div className="lc-sheet-section">
+              <span className="sheet-sec-label">Baho (0-10):</span>
+              <div className="lc-sheet-grades-row">
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
+                  const curScore = gradesMatrixData[`${mobileBottomSheet.student.id}_${mobileBottomSheet.fullDate}`]?.score;
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      className={`sheet-grade-btn num-${num} ${curScore === num ? "active-score" : ""}`}
+                      onClick={() => {
+                        handleSetGradeScore(mobileBottomSheet.student.id, mobileBottomSheet.fullDate, num === 0 ? null : num, mobileBottomSheet.student.fullName, false);
+                      }}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
