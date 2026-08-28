@@ -27,7 +27,11 @@ import {
   HiOutlineExclamationTriangle,
   HiOutlinePhone,
   HiOutlineClock,
-  HiOutlineArrowUpRight
+  HiOutlineArrowUpRight,
+  HiOutlinePaperAirplane,
+  HiOutlineBolt,
+  HiOutlineXCircle,
+  HiOutlineLockOpen
 } from "react-icons/hi2";
 import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Attendance.css";
@@ -1065,8 +1069,8 @@ const Attendance = () => {
                             <HiOutlineArrowUpRight />
                           </span>
                           <span className="g-name-text">{g.name}</span>
-                          {isLive && <span className="mini-live-tag">⚡ JONLI</span>}
-                          {hasLessonToday && !isLive && <span className="mini-today-tag">● BUGUN</span>}
+                          {isLive && <span className="mini-live-tag"><HiOutlineBolt className="inline-bolt-icon" /> JONLI</span>}
+                          {hasLessonToday && !isLive && <span className="mini-today-tag"><span className="mini-today-dot"></span> BUGUN</span>}
                         </td>
                         <td className="td-g-course">
                           <span className="g-course-chip">{g.courseName || g.course_name || "Frontend ReactJS"}</span>
@@ -1635,7 +1639,7 @@ const Attendance = () => {
           <div className="reason-smart-card-popup" onClick={(e) => e.stopPropagation()}>
             <div className="reason-card-header">
               <div className="reason-header-left">
-                <span className="reason-badge-icon">❌</span>
+                <span className="reason-badge-icon"><HiOutlineXCircle className="svg-reason-badge" /></span>
                 <span className="reason-card-title">Dars qoldirish sababi</span>
               </div>
               <button 
@@ -1644,7 +1648,7 @@ const Attendance = () => {
                 onClick={() => setActiveReasonCard(null)}
                 title="Yopish"
               >
-                ✕
+                <HiOutlineXMark />
               </button>
             </div>
 
@@ -1677,7 +1681,7 @@ const Attendance = () => {
               )}
 
               <button type="button" className="btn-submit-reason-card" onClick={handleConfirmReason}>
-                Tasdiqlash & Botga Yuborish 📲
+                Tasdiqlash & Botga Yuborish <FaTelegram className="inline-tg-icon" />
               </button>
             </div>
           </div>
@@ -1690,7 +1694,7 @@ const Attendance = () => {
           <div className="lc-unlock-request-card" onClick={(e) => e.stopPropagation()}>
             <div className="lc-unlock-header">
               <div className="lc-unlock-title-wrap">
-                <span className="lc-unlock-icon">🔒</span>
+                <span className="lc-unlock-icon"><HiOutlineLockClosed /></span>
                 <div>
                   <h3 className="lc-unlock-title">Qulfni Ochish So'rovi</h3>
                   <p className="lc-unlock-subtitle">O'tib ketgan dars baho va davomatini tahrirlash</p>
@@ -1702,7 +1706,7 @@ const Attendance = () => {
                 onClick={() => setUnlockRequestModal((prev) => ({ ...prev, isOpen: false }))}
                 title="Yopish"
               >
-                ✕
+                <HiOutlineXMark />
               </button>
             </div>
 
@@ -1753,7 +1757,7 @@ const Attendance = () => {
                   Bekor qilish
                 </button>
                 <button type="submit" className="lc-btn-send-request">
-                  📩 Administratorga So'rov Yuborish
+                  <HiOutlinePaperAirplane className="svg-send-icon" /> Administratorga So'rov Yuborish
                 </button>
               </div>
             </form>
@@ -1784,7 +1788,7 @@ const Attendance = () => {
                 className="lc-sheet-close-btn"
                 onClick={() => setMobileBottomSheet((prev) => ({ ...prev, isOpen: false }))}
               >
-                ✕
+                <HiOutlineXMark />
               </button>
             </div>
 
