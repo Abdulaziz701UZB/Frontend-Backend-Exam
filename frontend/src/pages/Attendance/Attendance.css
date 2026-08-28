@@ -607,14 +607,15 @@
 }
 
 /* ---------------- Baholash Matrix (Image 2) & Floating 1-10 Picker ---------------- */
+/* ---------------- Baholash Matrix (Matches Davomat) & Floating 1-10 Picker ---------------- */
 .lc-grades-matrix-table .td-student-info {
   border-left: 4.5px solid #22c55e !important;
 }
 
 .td-grade-cell {
   position: relative;
-  background: #162032 !important;
-  border-radius: 12px !important;
+  background: #ffffff;
+  border-radius: 12px;
   transition: all 0.15s ease;
   cursor: pointer;
   text-align: center;
@@ -624,14 +625,14 @@
 }
 
 .td-grade-cell:hover {
-  background: #202d45 !important;
+  background: #f0f9ff !important;
   border-color: #38bdf8 !important;
 }
 
 .td-grade-cell.grade-cell-active {
-  background: #253654 !important;
-  border: 1.5px solid #38bdf8 !important;
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+  background: #e0f2fe !important;
+  border: 1.5px solid #0284c7 !important;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.25);
 }
 
 .cell-grade-badge {
@@ -644,28 +645,29 @@
   font-size: 13.5px;
   font-weight: 900;
   color: #ffffff;
+  transition: all 0.15s ease;
 }
 
 .score-badge-high {
   background: #10b981;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .score-badge-mid {
   background: #0284c7;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
 }
 
 .score-badge-low {
   background: #ef4444;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .cell-grade-placeholder {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: #cbd5e1;
   margin: 0 auto;
 }
 
@@ -675,15 +677,15 @@
 }
 
 .td-grade-cell.grade-cell-locked:hover {
-  background: #162032 !important;
-  border-color: #334155 !important;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
 }
 
 .cell-grade-locked-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
+  color: #94a3b8;
   font-size: 13px;
 }
 
@@ -697,18 +699,18 @@
   opacity: 0.85;
 }
 
-/* Floating 1-10 Popover Dock */
+/* Floating 1-10 Popover Dock (Clean LC-UP Matching Style) */
 .lc-grade-floating-picker {
   position: absolute;
   top: -85px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 999;
-  background: #0f172a;
-  border: 1.5px solid #38bdf8;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: 16px;
   padding: 10px 14px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04);
   white-space: nowrap;
   animation: gradePickerPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -721,7 +723,7 @@
 .grade-picker-hint {
   font-size: 11px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #64748b;
   margin-bottom: 6px;
   text-align: center;
 }
@@ -736,9 +738,9 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #f8fafc;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
   font-size: 13.5px;
   font-weight: 800;
   cursor: pointer;
@@ -751,25 +753,25 @@
 .grade-num-btn:hover {
   transform: scale(1.18);
   background: #1d72fe;
-  border-color: #38bdf8;
+  border-color: #1d72fe;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  box-shadow: 0 4px 12px rgba(29, 114, 254, 0.35);
 }
 
 .grade-num-btn.active-score {
-  background: #22c55e;
-  border-color: #86efac;
+  background: #10b981;
+  border-color: #059669;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
 .grade-num-clear {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: #451a1a;
-  border: 1px solid #7f1d1d;
-  color: #f87171;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #ef4444;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
@@ -780,7 +782,7 @@
 }
 
 .grade-num-clear:hover {
-  background: #dc2626;
+  background: #ef4444;
   color: #ffffff;
   transform: scale(1.15);
 }
@@ -792,9 +794,9 @@
   transform: translateX(-50%) rotate(45deg);
   width: 10px;
   height: 10px;
-  background: #0f172a;
-  border-right: 1.5px solid #38bdf8;
-  border-bottom: 1.5px solid #38bdf8;
+  background: #ffffff;
+  border-right: 1.5px solid #e2e8f0;
+  border-bottom: 1.5px solid #e2e8f0;
 }
 
 .lc-group-card-item {

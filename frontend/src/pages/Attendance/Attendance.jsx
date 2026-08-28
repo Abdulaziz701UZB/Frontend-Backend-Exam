@@ -1203,9 +1203,12 @@ const Attendance = () => {
                       <th className="th-talabalar">Talabalar</th>
                       {lessonDates.map((d, idx) => {
                         const isToday = d.fullDate === todayDateStr;
+                        const isFuture = isFutureDate(d.fullDate);
+                        const isPast = isPastDate(d.fullDate);
                         return (
-                          <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""}`}>
+                          <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                             {isToday && <span className="today-badge-pill">Bugun</span>}
+                            {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                             <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                           </th>
                         );
