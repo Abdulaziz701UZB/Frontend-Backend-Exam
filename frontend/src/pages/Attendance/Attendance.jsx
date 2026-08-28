@@ -115,6 +115,8 @@ const Attendance = () => {
     }
   });
 
+  const gradeInputRef = useRef({ buffer: "", lastKeyTime: 0 });
+
   const now = new Date();
   const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
@@ -643,8 +645,21 @@ const Attendance = () => {
     toast.success(`Bugungi darsda qatnashgan (${presentStudents.length} ta) o'quvchiga 10 ball qo'yildi va saqlandi! 🟢💯`);
   };
 
+  // Filter students based on legend
+  const filteredStudents = activeGroupStudents.filter((s) => {
+    const isDebtor = (s.balance || 0) < 0 || s.paymentStatus === "Overdue" || s.paymentStatus === "Unpaid";
+    if (studentFilter === "debtors") return isDebtor;
+    if (studentFilter === "trial") return s.status === "Trial" || (s.notes || "").includes("Sinov");
+    if (studentFilter === "frozen") return s.status === "Frozen" || s.status === "Inactive";
+    if (studentFilter === "active") return !isDebtor && s.status !== "Frozen";
+    return true;
+  }).sort((a, b) => {
+    if (sortAsc) return a.fullName.localeCompare(b.fullName);
+    return b.fullName.localeCompare(a.fullName);
+  });
+
   // Baholash (1-10 Ball) Ball qo'yish va saqlash
-  const handleSetGradeScore = (studentId, fullDate, score, studentName) => {
+  const handleSetGradeScore = (studentId, fullDate, score, studentName, autoClose = true) => {
     // Admin bo'lmagan foydalanuvchilar (O'qituvchi) o'tib ketgan darslarga baho qo'ya olmaydi
     if (currentRole !== "admin" && isPastDate(fullDate)) {
       toast.error(`⏱️ O'tib ketgan dars (${fullDate}) uchun faqat Administrator baho qo'yishi yoki o'zgartirishi mumkin!`);
@@ -689,10 +704,13 @@ const Attendance = () => {
     setTimeout(() => {
       setSaveStatus("saved");
     }, 300);
-    setActiveGradeCell(null);
+
+    if (autoClose) {
+      setActiveGradeCell(null);
+    }
   };
 
-  // Klaviaturada 1-10 raqamlarini bosib baholash (Keyboard Hotkeys)
+  // Klaviaturada 0-10 yozish (1 keyin 0 yozsa 10 bo'ladi) va Enter bosganda pastdagi talabaga o'tish
   useEffect(() => {
     const handleGradeKeyDown = (e) => {
       if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
@@ -704,15 +722,91 @@ const Attendance = () => {
           const fullDate = parts.slice(1).join("_");
           const student = students.find((s) => String(s.id) === String(studentId));
           const studentName = student?.fullName || "Talaba";
+          const nowTime = Date.now();
 
-          if (e.key === "0" || e.key === "Backspace" || e.key === "Delete") {
+          // Enter yoki Pastga o'q (ArrowDown) -> Pastdagi talabani baholashga o'tish
+          if (e.key === "Enter" || e.key === "ArrowDown") {
             e.preventDefault();
-            handleSetGradeScore(studentId, fullDate, null, studentName);
-          } else if (e.key >= "1" && e.key <= "9") {
+            gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
+            const currentIdx = filteredStudents.findIndex((s) => String(s.id) === String(studentId));
+            if (currentIdx !== -1) {
+              for (let i = currentIdx + 1; i < filteredStudents.length; i++) {
+                const nextS = filteredStudents[i];
+                const nextKey = `${nextS.id}_${fullDate}`;
+                const nextAtt = matrixData[nextKey];
+                if (nextAtt?.status === "Present") {
+                  setActiveGradeCell(nextKey);
+                  return;
+                }
+              }
+              // Agar pastda boshqa darsga kelgan talaba qolmagan bo'lsa
+              setActiveGradeCell(null);
+            }
+            return;
+          }
+
+          // Tepaga o'q (ArrowUp) -> Tepadagi talabaga o'tish
+          if (e.key === "ArrowUp") {
             e.preventDefault();
-            handleSetGradeScore(studentId, fullDate, parseInt(e.key, 10), studentName);
-          } else if (e.key === "Escape") {
+            gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
+            const currentIdx = filteredStudents.findIndex((s) => String(s.id) === String(studentId));
+            if (currentIdx > 0) {
+              for (let i = currentIdx - 1; i >= 0; i--) {
+                const prevS = filteredStudents[i];
+                const prevKey = `${prevS.id}_${fullDate}`;
+                const prevAtt = matrixData[prevKey];
+                if (prevAtt?.status === "Present") {
+                  setActiveGradeCell(prevKey);
+                  return;
+                }
+              }
+            }
+            return;
+          }
+
+          // Backspace yoki Delete -> Bahoni tozalash (Baholanmagan)
+          if (e.key === "Backspace" || e.key === "Delete") {
+            e.preventDefault();
+            gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
+            handleSetGradeScore(studentId, fullDate, null, studentName, false);
+            return;
+          }
+
+          // Escape -> Baholashni yopish
+          if (e.key === "Escape") {
+            gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
             setActiveGradeCell(null);
+            return;
+          }
+
+          // Raqamlar 0 dan 9 gacha
+          if (e.key >= "0" && e.key <= "9") {
+            e.preventDefault();
+            const timeDiff = nowTime - gradeInputRef.current.lastKeyTime;
+
+            // 1 dan keyin 0 bosilsa -> 10 ball!
+            if (e.key === "0" && gradeInputRef.current.buffer === "1" && timeDiff < 1500) {
+              gradeInputRef.current = { buffer: "10", lastKeyTime: nowTime };
+              handleSetGradeScore(studentId, fullDate, 10, studentName, false);
+              return;
+            }
+
+            if (e.key === "1") {
+              gradeInputRef.current = { buffer: "1", lastKeyTime: nowTime };
+              handleSetGradeScore(studentId, fullDate, 1, studentName, false);
+              return;
+            }
+
+            if (e.key === "0") {
+              gradeInputRef.current = { buffer: "0", lastKeyTime: nowTime };
+              handleSetGradeScore(studentId, fullDate, null, studentName, false);
+              return;
+            }
+
+            // 2 dan 9 gacha raqamlar
+            const numVal = parseInt(e.key, 10);
+            gradeInputRef.current = { buffer: String(numVal), lastKeyTime: nowTime };
+            handleSetGradeScore(studentId, fullDate, numVal, studentName, false);
           }
         }
       }
@@ -720,20 +814,7 @@ const Attendance = () => {
 
     window.addEventListener("keydown", handleGradeKeyDown);
     return () => window.removeEventListener("keydown", handleGradeKeyDown);
-  }, [activeGradeCell, students]);
-
-  // Filter students based on legend
-  const filteredStudents = activeGroupStudents.filter((s) => {
-    const isDebtor = (s.balance || 0) < 0 || s.paymentStatus === "Overdue" || s.paymentStatus === "Unpaid";
-    if (studentFilter === "debtors") return isDebtor;
-    if (studentFilter === "trial") return s.status === "Trial" || (s.notes || "").includes("Sinov");
-    if (studentFilter === "frozen") return s.status === "Frozen" || s.status === "Inactive";
-    if (studentFilter === "active") return !isDebtor && s.status !== "Frozen";
-    return true;
-  }).sort((a, b) => {
-    if (sortAsc) return a.fullName.localeCompare(b.fullName);
-    return b.fullName.localeCompare(a.fullName);
-  });
+  }, [activeGradeCell, students, filteredStudents, matrixData]);
 
   // 1, 2, 3, 6, 7, 8, 9, 10-Qoidalar: Guruhlar Hubi Uchun Professional Helperlar
 
@@ -1136,19 +1217,20 @@ const Attendance = () => {
                             <td 
                               key={dIdx} 
                               className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isPast ? "td-cell-past" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) ? "cell-time-locked" : ""}`}
-                              onMouseDown={(e) => handleCellMouseDown(student.id, d.fullDate, student.fullName, e)}
-                              onTouchStart={(e) => handleCellTouchStart(d.fullDate, e)}
-                              onTouchEnd={(e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e)}
-                              onContextMenu={(e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e)}
-                              title={`${student.fullName} — ${d.dayStr}: ${status || (isFuture ? "Kelgusi dars sanasi (Hali boshlanmadi)" : isPast ? "O'tib ketgan dars (Qulflangan)" : "Bugungi dars (Bosing / Drag: ✅ ❌)")} ${isToday ? "(Bugungi dars)" : ""} ${isLessonTimeLocked(d.fullDate) ? "(Qulflangan)" : ""}`}
+                              onMouseDown={isToday ? (e) => handleCellMouseDown(student.id, d.fullDate, student.fullName, e) : undefined}
+                              onTouchStart={isToday ? (e) => handleCellTouchStart(d.fullDate, e) : undefined}
+                              onTouchEnd={isToday ? (e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e) : undefined}
+                              onContextMenu={isToday ? (e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e) : undefined}
+                              onClick={isFuture ? (e) => { e.stopPropagation(); toast.info(`⏳ Kelajakdagi dars (${d.fullDate})! Ushbu dars kuni kelganda davomat ochiladi.`); } : undefined}
+                              title={`${student.fullName} — ${d.dayStr}: ${isFuture ? "Kelgusi dars sanasi (Hali boshlanmagan — davomat qilib bo'lmaydi)" : status || (isPast ? "O'tib ketgan dars (Qulflangan)" : "Bugungi dars (Bosing / Drag: ✅ ❌)")}`}
                             >
                               {/* 8-Qoida: Faqat Admin o'zgartirishi mumkin bo'lgan qulf suv belgisi */}
-                              {isLessonTimeLocked(d.fullDate) && (
+                              {isLessonTimeLocked(d.fullDate) && !isFuture && (
                                 <HiOutlineLockClosed className="locked-watermark-icon" title="Qulflangan — Faqat Admin o'zgartira oladi" />
                               )}
 
-                              {/* LC-UP Usulidagi Tepada Ochiluvchi Tanlagich (Floating Top Popover) */}
-                              {activePickerCell === cellKey && (
+                              {/* LC-UP Usulidagi Tepada Ochiluvchi Tanlagich (Floating Top Popover) - Faqat bugun uchun */}
+                              {!isFuture && activePickerCell === cellKey && (
                                 <div 
                                   className="lc-floating-popover-card" 
                                   onClick={(e) => e.stopPropagation()}
@@ -1213,31 +1295,28 @@ const Attendance = () => {
                                 </div>
                               )}
 
-                              {status === "Present" && (
+                              {/* Kelgusi sanalarda davomat bo'lmaydi - faqat bo'sh nuqta */}
+                              {isFuture ? (
+                                <div className="cell-empty-dash">
+                                  <span className="empty-dot"></span>
+                                </div>
+                              ) : status === "Present" ? (
                                 <div className="cell-circle circle-present">
                                   <HiOutlineCheck className="circle-icon" />
                                 </div>
-                              )}
-
-                              {status === "Excused" && (
+                              ) : status === "Excused" ? (
                                 <div className="cell-circle circle-excused">
                                   <HiOutlineClock className="circle-flag-yellow" />
                                 </div>
-                              )}
-
-                              {status === "Absent" && (
+                              ) : status === "Absent" ? (
                                 <div className="cell-circle circle-absent">
                                   <HiOutlineFlag className="circle-flag-red" />
                                 </div>
-                              )}
-
-                              {status === "Trial" && (
+                              ) : status === "Trial" ? (
                                 <div className="cell-circle circle-trial">
                                   <HiOutlineInformationCircle className="circle-icon" />
                                 </div>
-                              )}
-
-                              {!status && (
+                              ) : (
                                 <div className="cell-empty-dash">
                                   <span className="empty-dot"></span>
                                 </div>
