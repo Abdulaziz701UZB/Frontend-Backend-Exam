@@ -35,9 +35,7 @@ import "./Attendance.css";
 const LC_UP_TABS = [
   { id: "attendance", label: "Davomat" },
   { id: "grades", label: "Baholash" },
-  { id: "exercises", label: "Mashqlar" },
   { id: "homework", label: "Uyga vazifa" },
-  { id: "discounts", label: "Chegirma" },
   { id: "ratings", label: "Reyting" },
   { id: "exams", label: "Imtihonlar" },
   { id: "history", label: "Tarix" },

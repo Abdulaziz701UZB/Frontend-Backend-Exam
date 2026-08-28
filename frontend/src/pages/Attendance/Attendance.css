@@ -2130,75 +2130,75 @@
   transform: scale(1.22);
 }
 
-/* Present: solid sky-blue with 3D glass glow */
+/* 1-Qoida: Uniform Solid Elevation Badges (Present, Excused, Absent) */
+.cell-circle {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: none !important;
+}
+
+.cell-circle:hover {
+  transform: scale(1.18);
+}
+
+/* Present: Sky-Blue Solid Badge */
 .circle-present {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.42);
-  animation: springBounce 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
 }
 
-@keyframes springBounce {
-  0% { transform: scale(0.6); }
-  70% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-.circle-icon {
-  font-size: 18px;
+.circle-present .circle-icon {
+  color: #ffffff !important;
+  font-size: 15px;
   stroke-width: 2.8;
 }
 
-/* 4-Qoida: Excused Emerald Flag Pill */
+/* Excused: Amber / Yellow Solid Badge */
 .circle-excused {
-  width: 38px;
-  height: 28px;
-  border-radius: 12px;
-  background: #f0fdf4;
-  border: 1.5px solid #bbf7d0;
-  box-shadow: 0 2px 5px rgba(22, 163, 74, 0.1);
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
 }
 
-.circle-flag-green {
-  color: #16a34a;
+.circle-excused .circle-flag-yellow {
+  color: #ffffff !important;
   font-size: 15px;
+  stroke-width: 2.8;
 }
 
-/* 2-Qoida: Absent Crimson Soft Pill */
+/* Absent: Coral Red Solid Badge */
 .circle-absent {
-  width: 38px;
-  height: 28px;
-  border-radius: 12px;
-  background: #fff1f2;
-  border: 1.5px solid #fecdd3;
-  box-shadow: 0 2px 5px rgba(225, 29, 72, 0.12);
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
 }
 
-.circle-absent:hover {
-  animation: microShake 0.25s ease-in-out;
-}
-
-@keyframes microShake {
-  0%, 100% { transform: translateX(0) scale(1.15); }
-  25% { transform: translateX(-2px) scale(1.15); }
-  75% { transform: translateX(2px) scale(1.15); }
-}
-
-.circle-flag-red {
-  color: #e11d48;
+.circle-absent .circle-flag-red {
+  color: #ffffff !important;
   font-size: 15px;
+  stroke-width: 2.8;
 }
 
 /* Trial / Info */
 .circle-trial {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: #6366f1;
   color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+.circle-trial .circle-icon {
+  color: #ffffff !important;
+  font-size: 15px;
 }
 
 /* 7-Qoida: Minimalist Glowing Pulse Dot */
