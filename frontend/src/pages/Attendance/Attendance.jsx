@@ -1326,9 +1326,10 @@ const Attendance = () => {
                               return (
                                 <td
                                   key={dIdx}
-                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-absent" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-disabled-gray" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    if (!isPresent) return; // Darsda qatnashmagan: bossa ishlamaydi!
                                     if (isLockedForTeacher) {
                                       if (isPast) {
                                         toast.error(`⏱️ O'tib ketgan dars (${d.fullDate}) baholarini faqat Administrator o'zgartira oladi!`);
@@ -1337,21 +1338,11 @@ const Attendance = () => {
                                       }
                                       return;
                                     }
-                                    if (!isPresent) {
-                                      if (isAbsent) {
-                                        toast.error(`🚨 "${student.fullName}" ushbu darsga kelmagan! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`);
-                                      } else if (isExcused) {
-                                        toast.error(`🚨 "${student.fullName}" sababli kelmagan! Baho qo'yib bo'lmaydi.`);
-                                      } else {
-                                        toast.warning(`⚠️ Avval "${student.fullName}"ning davomatini "Keldi" deb belgilang!`);
-                                      }
-                                      return;
-                                    }
                                     setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
                                   }}
                                   title={
                                     !isPresent
-                                      ? `${student.fullName} — Darsda qatnashmagan (Baho qo'yib bo'lmaydi)`
+                                      ? `${student.fullName} — Darsda qatnashmagan (Baholab bo'lmaydi)`
                                       : isLockedForTeacher && isPast
                                       ? `${student.fullName} — O'tib ketgan dars (Faqat Admin o'zgartira oladi)`
                                       : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
@@ -1399,34 +1390,22 @@ const Attendance = () => {
                                   )}
 
                                   {/* Watermark Lock Icon on top right for past locked dates */}
-                                  {isLockedForTeacher && isPast && (
+                                  {isLockedForTeacher && isPast && isPresent && (
                                     <HiOutlineLockClosed
                                       className="cell-corner-lock-icon"
                                       title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
                                     />
                                   )}
 
-                                  {/* Kelmagan yoki Sababli bo'lgan o'quvchilar belgisi */}
-                                  {isAbsent && (
-                                    <span className="grade-absent-badge" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)">
-                                      <HiOutlineXMark />
-                                    </span>
-                                  )}
-                                  {isExcused && (
-                                    <span className="grade-excused-badge" title="Sababli kelmagan (Baho qo'yib bo'lmaydi)">
-                                      <HiOutlineFlag />
-                                    </span>
-                                  )}
-
-                                  {/* Render Clean Score Badge if Present */}
-                                  {isPresent && (
-                                    score != null ? (
-                                      <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
-                                        {score}
-                                      </div>
-                                    ) : (
-                                      <div className="cell-grade-placeholder"></div>
-                                    )
+                                  {/* Agar darsda qatnashmagan bo'lsa: 2-Rasmdagi kabi toza tekis kulrang o'chiq katakcha */}
+                                  {!isPresent ? (
+                                    <div className="cell-grade-gray-disabled"></div>
+                                  ) : score != null ? (
+                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
+                                      {score}
+                                    </div>
+                                  ) : (
+                                    <div className="cell-grade-placeholder"></div>
                                   )}
                                 </td>
                               );
