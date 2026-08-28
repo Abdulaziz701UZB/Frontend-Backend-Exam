@@ -811,17 +811,43 @@ const Attendance = () => {
       return;
     }
 
-    // Darsga kelmagan (Absent / Excused / Belgilanmagan) o'quvchiga baho qo'yib bo'lmaydi
-    const attRecord = matrixData[`${studentId}_${fullDate}`];
-    if (attRecord?.status !== "Present") {
-      const statusLabel = attRecord?.status === "Excused" ? "Sababli dars qoldirgan" : attRecord?.status === "Absent" ? "Kelmadi" : "Davomati belgilanmagan";
-      toast.error(`🚨 "${studentName}" ushbu darsda qatnashmagan (${statusLabel})! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`);
-      setActiveGradeCell(null);
-      return;
-    }
-
     const cellKey = `${studentId}_${fullDate}`;
     const finalScore = (score === 0 || score === null) ? null : score;
+
+    // Agar o'quvchining davomati hali "Present" (Keldi) bo'lmasa, baho qo'yilganda avtomatik ravishda "Present" deb belgilanadi!
+    const attRecord = matrixData[cellKey];
+    if (finalScore !== null && attRecord?.status !== "Present") {
+      setMatrixData((prev) => ({
+        ...prev,
+        [cellKey]: { status: "Present", note: "" }
+      }));
+      setAttendanceRecords((prev) => {
+        const idx = prev.findIndex(
+          (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
+                 String(r.studentId || r.student_id) === String(studentId) &&
+                 r.date === fullDate
+        );
+        if (idx >= 0) {
+          const copy = [...prev];
+          copy[idx] = { ...copy[idx], status: "Present", note: "" };
+          return copy;
+        } else {
+          return [
+            ...prev,
+            {
+              id: `att_${Date.now()}_${Math.random()}`,
+              groupId: selectedGroup,
+              group_id: selectedGroup,
+              studentId,
+              student_id: studentId,
+              date: fullDate,
+              status: "Present",
+              note: ""
+            }
+          ];
+        }
+      });
+    }
 
     setGradesMatrixData((prev) => {
       const updated = {
@@ -1606,26 +1632,26 @@ const Attendance = () => {
                                 const isLockedForTeacher = currentRole !== "admin" && isPast && !isApprovedUnlock;
 
                                 const attCell = matrixData[cellKey];
-                                const isPresent = attCell?.status === "Present";
                                 const isAbsent = attCell?.status === "Absent";
                                 const isExcused = attCell?.status === "Excused";
 
                                 return (
                                   <td
                                     key={dIdx}
-                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-disabled-gray" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (!isPresent) return; // Darsda qatnashmagan: bossa ishlamaydi!
                                       if (isFuture) {
                                         toast.info(`⏳ Kelajakdagi dars sanasi (${d.fullDate})! Dars kuni kelganda baholash ochiladi.`);
                                         return;
                                       }
                                       if (isLockedForTeacher && isPast) {
                                         const reqKey = `${selectedGroup}_${d.fullDate}`;
-                                        const existingReq = unlockRequests[reqKey];
+                                        const existingReq = unlockRequests[reqKey] || unlockRequests[d.fullDate];
                                         if (existingReq?.status === "pending") {
                                           toast.info(`⏳ "${d.fullDate}" darsi uchun ochish so'rovingiz yuborilgan, Administrator tasdiqlashini kuting.`);
+                                        } else if (existingReq?.status === "rejected") {
+                                          toast.error(`❌ "${d.fullDate}" darsini ochish so'rovi Administrator tomonidan rad etilgan!`);
                                         } else {
                                           setUnlockRequestModal({
                                             isOpen: true,
@@ -1638,77 +1664,78 @@ const Attendance = () => {
                                       }
                                       setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
                                     }}
-                                  title={
-                                    !isPresent
-                                      ? `${student.fullName} — Darsda qatnashmagan (Baholab bo'lmaydi)`
-                                      : isLockedForTeacher && isPast
-                                      ? `${student.fullName} — O'tib ketgan dars (Faqat Admin o'zgartira oladi)`
-                                      : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
-                                  }
-                                >
-                                  {/* Floating 1-10 Numbers Dock Popover (Faqat darsga kelganlar uchun ochiladi) */}
-                                  {isPresent && !isLockedForTeacher && activeGradeCell === cellKey && (
-                                    <div
-                                      className="lc-grade-floating-picker"
-                                      onClick={(e) => e.stopPropagation()}
-                                      onMouseDown={(e) => e.stopPropagation()}
-                                      onMouseUp={(e) => e.stopPropagation()}
-                                    >
-                                      <div className="grade-picker-hint">
-                                        Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
-                                      </div>
-                                      <div className="grade-numbers-grid">
-                                        <button
-                                          type="button"
-                                          className="grade-num-btn num-0"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
-                                          }}
-                                          title="0 — Baholanmaganga qaytarish (O'chirish)"
-                                        >
-                                          0
-                                        </button>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                    title={
+                                      isFuture
+                                        ? `${student.fullName} — Kelajakdagi dars (Baholab bo'lmaydi)`
+                                        : isLockedForTeacher && isPast
+                                        ? `${student.fullName} — O'tib ketgan dars (Qulflangan — ochish so'rovini yuboring)`
+                                        : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholash (Bosing yoki 1-10 tering)'}`
+                                    }
+                                  >
+                                    {/* Floating 1-10 Numbers Dock Popover (Ochiq darslar uchun bosganda ochiladi) */}
+                                    {!isLockedForTeacher && !isFuture && activeGradeCell === cellKey && (
+                                      <div
+                                        className="lc-grade-floating-picker"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onMouseUp={(e) => e.stopPropagation()}
+                                      >
+                                        <div className="grade-picker-hint">
+                                          Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
+                                        </div>
+                                        <div className="grade-numbers-grid">
                                           <button
-                                            key={num}
                                             type="button"
-                                            className={`grade-num-btn num-${num} ${score === num ? "active-score" : ""}`}
+                                            className="grade-num-btn num-0"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleSetGradeScore(student.id, d.fullDate, num, student.fullName);
+                                              handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
                                             }}
+                                            title="0 — Bahoni tozalash"
                                           >
-                                            {num}
+                                            0
                                           </button>
-                                        ))}
+                                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                            <button
+                                              key={num}
+                                              type="button"
+                                              className={`grade-num-btn num-${num} ${score === num ? "active-score" : ""}`}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSetGradeScore(student.id, d.fullDate, num, student.fullName);
+                                              }}
+                                            >
+                                              {num}
+                                            </button>
+                                          ))}
+                                        </div>
+                                        <div className="lc-popover-arrow"></div>
                                       </div>
-                                      <div className="lc-popover-arrow"></div>
-                                    </div>
-                                  )}
+                                    )}
 
-                                  {/* Watermark Lock Icon on top right for past locked dates */}
-                                  {isLockedForTeacher && isPast && isPresent && (
-                                    <HiOutlineLockClosed
-                                      className="cell-corner-lock-icon"
-                                      title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
-                                    />
-                                  )}
+                                    {/* Watermark Lock Icon on top right for past locked dates */}
+                                    {isLockedForTeacher && isPast && (
+                                      <HiOutlineLockClosed
+                                        className="cell-corner-lock-icon"
+                                        title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
+                                      />
+                                    )}
 
-                                  {/* Agar darsda qatnashmagan bo'lsa: bir xil tekis kulrang o'chiq katakcha (ishlamaydi) */}
-                                  {!isPresent ? (
-                                    <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
-                                  ) : score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
-                                      {score}
-                                    </div>
-                                  ) : (
-                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
+                                    {score != null ? (
+                                      <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
+                                        {score}
+                                      </div>
+                                    ) : isAbsent ? (
+                                      <div className="cell-grade-absent-tag" title="Kelmadi (Baho qo'yilsa avtomatik 'Keldi'ga o'tadi)">Kelmadi</div>
+                                    ) : isExcused ? (
+                                      <div className="cell-grade-excused-tag" title="Uzrli (Baho qo'yilsa avtomatik 'Keldi'ga o'tadi)">Uzrli</div>
+                                    ) : (
+                                      <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
                         );
                       })
                     )}
