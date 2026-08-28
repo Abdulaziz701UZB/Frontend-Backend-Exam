@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { studentsApi, groupsApi, teachersApi } from "../../services/api";
 import { 
@@ -20,6 +20,7 @@ import "./CommandPalette.css";
 
 const CommandPalette = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const inputRef = useRef(null);
 
   const [query, setQuery] = useState("");
   const [students, setStudents] = useState([]);
@@ -95,6 +96,8 @@ const CommandPalette = ({ isOpen, onClose }) => {
     onClose();
     navigate(path);
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="cmd-overlay" onClick={onClose}>
