@@ -25,11 +25,83 @@ import {
   HiOutlineChartBar,
   HiOutlineChatBubbleLeftRight,
   HiOutlineCheckBadge,
-  HiOutlineChevronDown
+  HiOutlineChevronDown,
+  HiOutlineArrowPath
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap, FaTelegram } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
 import "./Header.css";
+const DEFAULT_TEST_NOTIFICATIONS = [
+  {
+    id: 1,
+    type: "unlock", // 1. Qabul / Rad qilish & 3. O'qituvchiga javob
+    title: "Davomat Qulfini Ochish So'rovi",
+    message: "F-12 guruhi o'qituvchisi (Abdulaziz) 03-Avgust darsini ochishni so'radi. Sabab: 'Baho kiritish unutilgan'.",
+    time: "5 daqiqa oldin",
+    dateKey: "today",
+    group: "F-12 Guruh",
+    targetDate: "2026-08-03",
+    status: "pending", // pending | approved | rejected
+    read: false,
+    link: "/attendance/G-101"
+  },
+  {
+    id: 2,
+    type: "conflict", // 15. Xona / O'qituvchi To'qnashuvi
+    title: "Xona To'qnashuvi Ogohlantirishi",
+    message: "2-Xonada 14:00 da bir vaqtda 2 ta guruh (F-12 va Backend NodeJS) darsi belgilangan!",
+    time: "15 daqiqa oldin",
+    dateKey: "today",
+    read: false,
+    link: "/rooms"
+  },
+  {
+    id: 3,
+    type: "schedule", // 14. Darsga Jonli Countdown
+    title: "Dars Eslatmasi (Yaqinlashmoqda)",
+    message: "Frontend ReactJS guruhi darsi boshlanishiga oz vaqt qoldi (2-Xona).",
+    time: "Bugun 14:00",
+    dateKey: "today",
+    targetTime: "14:00",
+    read: false,
+    link: "/attendance/G-101"
+  },
+  {
+    id: 4,
+    type: "payment", // 2. To'lov + SMS/Telegram
+    title: "Yangi To'lov Qabul Qilindi",
+    message: "Abdulaziz Abdulhayev (Frontend kursi) 450,000 so'm to'lov qildi.",
+    time: "25 daqiqa oldin",
+    dateKey: "today",
+    studentName: "Abdulaziz Abdulhayev",
+    amount: "450,000 so'm",
+    read: false,
+    link: "/payments"
+  },
+  {
+    id: 5,
+    type: "student",
+    title: "Yangi O'quvchi Ro'yxatdan O'tdi",
+    message: "Rustam Qodirov 'Frontend ReactJS' guruhiga muvaffaqiyatli qo'shildi.",
+    time: "Kecha 18:40",
+    dateKey: "yesterday",
+    read: true,
+    link: "/students"
+  },
+  {
+    id: 6,
+    type: "unlock",
+    title: "O'tilgan Darsni Qayta Baholash So'rovi",
+    message: "Backend NodeJS guruhi o'qituvchisi (Sarvar) 01-Avgust imtihon bahosini to'g'irlash uchun ruxsat so'radi.",
+    time: "3 kun oldin",
+    dateKey: "week",
+    group: "NodeJS Guruh",
+    targetDate: "2026-08-01",
+    status: "approved",
+    read: true,
+    link: "/attendance/G-101"
+  }
+];
 
 const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const navigate = useNavigate();
@@ -89,64 +161,16 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
 
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [notifFilter, setNotifFilter] = useState("all");
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "unlock",
-      title: "Davomat Qulfini Ochish So'rovi",
-      message: "F-12 guruhi o'qituvchisi (Abdulaziz) 03-Avgust darsini ochishni so'radi. Sabab: 'Baho kiritish unutilgan'.",
-      time: "5 daqiqa oldin",
-      dateKey: "today",
-      group: "F-12",
-      targetDate: "2026-08-03",
-      status: "pending", // pending | approved | rejected
-      read: false,
-      link: "/attendance/G-101"
-    },
-    {
-      id: 2,
-      type: "conflict", // 15. Xona / O'qituvchi To'qnashuvi
-      title: "Xona To'qnashuvi Ogohlantirishi",
-      message: "2-Xonada 14:00 da bir vaqtda 2 ta guruh (F-12 va Backend NodeJS) belgilangan!",
-      time: "15 daqiqa oldin",
-      dateKey: "today",
-      read: false,
-      link: "/rooms"
-    },
-    {
-      id: 3,
-      type: "schedule", // 14. Darsga Jonli Countdown
-      title: "Dars Eslatmasi (Yaqinlashmoqda)",
-      message: "Frontend ReactJS guruhi darsi boshlanishiga oz vaqt qoldi (2-Xona).",
-      time: "Bugun 14:00",
-      dateKey: "today",
-      targetTime: "14:00",
-      read: false,
-      link: "/attendance/G-101"
-    },
-    {
-      id: 4,
-      type: "payment", // 2. To'lov + SMS/Telegram
-      title: "Yangi To'lov Qabul Qilindi",
-      message: "Abdulaziz Abdulhayev (Frontend kursi) 450,000 so'm to'lov qildi.",
-      time: "25 daqiqa oldin",
-      dateKey: "today",
-      studentName: "Abdulaziz Abdulhayev",
-      amount: "450,000 so'm",
-      read: false,
-      link: "/payments"
-    },
-    {
-      id: 5,
-      type: "student",
-      title: "Yangi O'quvchi Ro'yxatdan O'tdi",
-      message: "Rustam Qodirov 'Frontend ReactJS' guruhiga muvaffaqiyatli qo'shildi.",
-      time: "Kecha 18:40",
-      dateKey: "yesterday",
-      read: true,
-      link: "/students"
-    }
-  ]);
+  const [notifications, setNotifications] = useState(DEFAULT_TEST_NOTIFICATIONS);
+
+  // Sinov Ma'lumotlarini Qayta Yuklash
+  const handleReloadDemoData = () => {
+    setNotifications(DEFAULT_TEST_NOTIFICATIONS);
+    setNotifFilter("all");
+    setDateFilter("all");
+    playChime();
+    toast.success("🔄 8 ta sinov bildirishnomalari muvaffaqiyatli yuklandi!");
+  };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -514,6 +538,16 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   {soundEnabled ? <HiOutlineSpeakerWave /> : <HiOutlineSpeakerXMark />}
                 </button>
 
+                {/* Demo Data Reload Button */}
+                <button
+                  type="button"
+                  className="btn-reload-demo"
+                  onClick={handleReloadDemoData}
+                  title="8 ta sinov bildirishnomalarini qayta yuklash"
+                >
+                  <HiOutlineArrowPath /> Sinov
+                </button>
+
                 {unreadCount > 0 && (
                   <button
                     type="button"
@@ -673,6 +707,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   </div>
                   <h4>Hozircha bildirishnomalar yo'q</h4>
                   <p>Yangi dars so'rovlari va to'lovlar shu yerda paydo bo'ladi</p>
+                  <button
+                    type="button"
+                    className="btn-load-demo-notifs"
+                    onClick={handleReloadDemoData}
+                  >
+                    <HiOutlineArrowPath /> ⚡ 8 ta Sinov Xabarlarini Yuklash
+                  </button>
                 </div>
               ) : (
                 <div className="notif-modal-cards-list">
