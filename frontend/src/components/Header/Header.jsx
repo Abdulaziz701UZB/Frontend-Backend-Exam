@@ -11,7 +11,11 @@ import {
   HiOutlineArrowRightOnRectangle,
   HiOutlineBell,
   HiOutlineCurrencyDollar,
-  HiOutlineClock
+  HiOutlineClock,
+  HiOutlineCheck,
+  HiOutlineTrash,
+  HiOutlineUser,
+  HiOutlineArrowTopRightOnSquare
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
@@ -37,47 +41,66 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const [targetUserId, setTargetUserId] = useState(201);
   const [passwordInput, setPasswordInput] = useState("");
 
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
+  const [notifFilter, setNotifFilter] = useState("all");
   const [notifications, setNotifications] = useState([
     {
       id: 1,
       type: "unlock",
       title: "Davomat So'rovi",
-      message: "F-12 guruhi o'qituvchisi 03-Avgust darsini ochishni so'radi",
+      message: "F-12 guruhi o'qituvchisi 03-Avgust darsi uchun qulfni ochish so'rovini yubordi.",
       time: "5 daqiqa oldin",
-      read: false
+      read: false,
+      link: "/attendance"
     },
     {
       id: 2,
       type: "payment",
-      title: "Yangi To'lov",
-      message: "Abdulaziz Abdulhayev 450,000 so'm to'lov qildi",
+      title: "Yangi To'lov Qabul Qilindi",
+      message: "Abdulaziz Abdulhayev (Frontend kursi) 450,000 so'm to'lov qildi.",
       time: "25 daqiqa oldin",
-      read: false
+      read: false,
+      link: "/payments"
     },
     {
       id: 3,
       type: "schedule",
       title: "Dars Eslatmasi",
-      message: "14:00 da Frontend ReactJS guruhi darsi boshlanadi",
+      message: "14:00 da Frontend ReactJS guruhi darsi boshlanadi (2-Xona).",
       time: "1 soat oldin",
-      read: true
+      read: true,
+      link: "/attendance"
+    },
+    {
+      id: 4,
+      type: "student",
+      title: "Yangi O'quvchi Ro'yxatdan O'tdi",
+      message: "Rustam Qodirov 'Frontend ReactJS' guruhiga qo'shildi.",
+      time: "Bugun 09:15",
+      read: true,
+      link: "/students"
     }
   ]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const filteredNotifs = notifications.filter((n) => {
+    if (notifFilter === "unread") return !n.read;
+    if (notifFilter === "unlock") return n.type === "unlock";
+    if (notifFilter === "payment") return n.type === "payment";
+    if (notifFilter === "schedule") return n.type === "schedule";
+    return true;
+  });
+
   useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setNotificationsOpen(false);
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isNotifModalOpen) {
+        setIsNotifModalOpen(false);
       }
     };
-    if (notificationsOpen) {
-      document.addEventListener("mousedown", handleOutsideClick);
-    }
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [notificationsOpen]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isNotifModalOpen]);
 
   const getFormattedDate = () => {
     const d = new Date();
@@ -201,76 +224,15 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               </div>
             </div>
 
-            <div className="crm-notif-wrapper" ref={notifRef}>
-              <button
-                type="button"
-                className={`crm-notif-btn ${notificationsOpen ? "active" : ""}`}
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                title="Bildirishnomalar"
-              >
-                <HiOutlineBell className="notif-icon" />
-                {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
-              </button>
-
-              {notificationsOpen && (
-                <div className="crm-notif-dropdown" onClick={(e) => e.stopPropagation()}>
-                  <div className="crm-notif-header">
-                    <div className="notif-header-left">
-                      <span className="notif-title">Bildirishnomalar</span>
-                      {unreadCount > 0 && <span className="notif-unread-pill">{unreadCount} yangi</span>}
-                    </div>
-                    {unreadCount > 0 && (
-                      <button
-                        type="button"
-                        className="notif-mark-read-btn"
-                        onClick={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
-                      >
-                        Barchasi o'qildi
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="crm-notif-list">
-                    {notifications.length === 0 ? (
-                      <div className="notif-empty-state">
-                        <HiOutlineBell className="notif-empty-icon" />
-                        <p>Yangi bildirishnomalar yo'q</p>
-                      </div>
-                    ) : (
-                      notifications.map((notif) => (
-                        <div
-                          key={notif.id}
-                          className={`notif-item ${!notif.read ? "unread" : ""}`}
-                          onClick={() => {
-                            setNotifications((prev) =>
-                              prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))
-                            );
-                          }}
-                        >
-                          <div className={`notif-type-icon icon-${notif.type}`}>
-                            {notif.type === "unlock" ? (
-                              <HiLockClosed />
-                            ) : notif.type === "payment" ? (
-                              <HiOutlineCurrencyDollar />
-                            ) : (
-                              <HiOutlineClock />
-                            )}
-                          </div>
-                          <div className="notif-content">
-                            <div className="notif-item-top">
-                              <span className="notif-item-title">{notif.title}</span>
-                              <span className="notif-time">{notif.time}</span>
-                            </div>
-                            <p className="notif-desc">{notif.message}</p>
-                          </div>
-                          {!notif.read && <span className="notif-blue-dot"></span>}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              className={`crm-notif-btn ${isNotifModalOpen ? "active" : ""}`}
+              onClick={() => setIsNotifModalOpen(true)}
+              title="Bildirishnomalar markazini ochish"
+            >
+              <HiOutlineBell className="notif-icon" />
+              {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
+            </button>
 
             <button
               className="crm-logout-btn"
@@ -380,6 +342,171 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* BILDIRISHNOMALAR MARKAZI MODALI */}
+      {isNotifModalOpen && (
+        <div className="crm-notif-modal-backdrop" onClick={() => setIsNotifModalOpen(false)}>
+          <div className="crm-notif-modal-card" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="crm-notif-modal-header">
+              <div className="notif-modal-title-group">
+                <div className="notif-modal-icon-badge">
+                  <HiOutlineBell className="modal-bell-svg" />
+                </div>
+                <div>
+                  <h3 className="notif-modal-title">Bildirishnomalar Markazi</h3>
+                  <p className="notif-modal-subtitle">
+                    O'quv markazi so'rovlari, to'lovlar va dars eslatmalari
+                  </p>
+                </div>
+              </div>
+              <div className="notif-modal-header-actions">
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    className="btn-mark-all-read"
+                    onClick={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+                    title="Barcha xabarlarni o'qilgan deb belgilash"
+                  >
+                    <HiOutlineCheck /> Barchasi o'qildi
+                  </button>
+                )}
+                {notifications.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn-clear-notifs"
+                    onClick={() => setNotifications([])}
+                    title="Bildirishnomalarni tozalash"
+                  >
+                    <HiOutlineTrash />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn-close-notif-modal"
+                  onClick={() => setIsNotifModalOpen(false)}
+                  title="Yopish (Esc)"
+                >
+                  <HiXMark />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="crm-notif-modal-tabs">
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "all" ? "active" : ""}`}
+                onClick={() => setNotifFilter("all")}
+              >
+                Barchasi ({notifications.length})
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "unread" ? "active" : ""}`}
+                onClick={() => setNotifFilter("unread")}
+              >
+                O'qilmagan ({unreadCount})
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "unlock" ? "active" : ""}`}
+                onClick={() => setNotifFilter("unlock")}
+              >
+                Davomat So'rovlari
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "payment" ? "active" : ""}`}
+                onClick={() => setNotifFilter("payment")}
+              >
+                To'lovlar
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "schedule" ? "active" : ""}`}
+                onClick={() => setNotifFilter("schedule")}
+              >
+                Dars Eslatmalari
+              </button>
+            </div>
+
+            {/* Notifications List Body */}
+            <div className="crm-notif-modal-body">
+              {filteredNotifs.length === 0 ? (
+                <div className="notif-modal-empty">
+                  <div className="empty-bell-circle">
+                    <HiOutlineBell />
+                  </div>
+                  <h4>Hozircha bildirishnomalar yo'q</h4>
+                  <p>Yangi dars so'rovlari va to'lovlar shu yerda paydo bo'ladi</p>
+                </div>
+              ) : (
+                <div className="notif-modal-cards-list">
+                  {filteredNotifs.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`notif-modal-card-item ${!notif.read ? "is-unread" : ""}`}
+                      onClick={() => {
+                        setNotifications((prev) =>
+                          prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))
+                        );
+                        if (notif.link) {
+                          setIsNotifModalOpen(false);
+                          navigate(notif.link);
+                        }
+                      }}
+                    >
+                      <div className={`notif-card-icon-wrap type-${notif.type}`}>
+                        {notif.type === "unlock" ? (
+                          <HiLockClosed />
+                        ) : notif.type === "payment" ? (
+                          <HiOutlineCurrencyDollar />
+                        ) : notif.type === "schedule" ? (
+                          <HiOutlineClock />
+                        ) : (
+                          <HiOutlineUser />
+                        )}
+                      </div>
+
+                      <div className="notif-card-details">
+                        <div className="notif-card-top-row">
+                          <span className="notif-card-title">{notif.title}</span>
+                          <span className="notif-card-time">{notif.time}</span>
+                        </div>
+                        <p className="notif-card-msg">{notif.message}</p>
+                        {notif.link && (
+                          <div className="notif-card-footer-action">
+                            <span className="notif-link-hint">
+                              O'tish <HiOutlineArrowTopRightOnSquare />
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {!notif.read && <span className="notif-unread-glow-dot"></span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="crm-notif-modal-footer">
+              <div className="notif-footer-hint">
+                <span className="live-status-dot"></span> Bildirishnomalar real-vaqtda sinxronlanadi
+              </div>
+              <button
+                type="button"
+                className="btn-modal-close-footer"
+                onClick={() => setIsNotifModalOpen(false)}
+              >
+                Yopish
+              </button>
+            </div>
           </div>
         </div>
       )}
