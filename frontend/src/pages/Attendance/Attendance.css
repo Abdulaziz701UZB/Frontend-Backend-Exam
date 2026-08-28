@@ -673,7 +673,7 @@
 
 .td-grade-cell.grade-cell-locked {
   cursor: not-allowed;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .td-grade-cell.grade-cell-locked:hover {
@@ -681,22 +681,14 @@
   border-color: #e2e8f0 !important;
 }
 
-.cell-grade-locked-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94a3b8;
-  font-size: 13px;
-}
-
-.mini-grade-lock-icon {
+.cell-corner-lock-icon {
+  position: absolute;
+  top: 4px;
+  right: 5px;
   font-size: 11px;
-  margin-left: 3px;
-  opacity: 0.85;
-}
-
-.score-badge-locked {
-  opacity: 0.85;
+  color: #94a3b8;
+  opacity: 0.75;
+  pointer-events: none;
 }
 
 /* Floating 1-10 Popover Dock (Clean LC-UP Matching Style) */
@@ -1445,8 +1437,8 @@
 
 .td-attendance-cell.td-cell-today {
   background: rgba(240, 249, 255, 0.75) !important;
-  border-left: 2px dashed #0ea5e9 !important;
-  border-right: 2px dashed #0ea5e9 !important;
+  border-left: 2px solid #0ea5e9 !important;
+  border-right: 2px solid #0ea5e9 !important;
   cursor: pointer !important;
   pointer-events: auto !important;
 }

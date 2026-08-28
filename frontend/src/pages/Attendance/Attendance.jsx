@@ -1319,15 +1319,18 @@ const Attendance = () => {
                                     </div>
                                   )}
 
-                                  {/* Render Score Badge */}
+                                  {/* Watermark Lock Icon on top right for past locked dates */}
+                                  {isLockedForTeacher && isPast && (
+                                    <HiOutlineLockClosed
+                                      className="cell-corner-lock-icon"
+                                      title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
+                                    />
+                                  )}
+
+                                  {/* Render Clean Score Badge */}
                                   {score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"} ${isLockedForTeacher ? "score-badge-locked" : ""}`}>
+                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
                                       {score}
-                                      {isLockedForTeacher && isPast && <HiOutlineLockClosed className="mini-grade-lock-icon" />}
-                                    </div>
-                                  ) : isLockedForTeacher && isPast ? (
-                                    <div className="cell-grade-locked-empty" title="Faqat Admin baholay oladi">
-                                      <HiOutlineLockClosed className="mini-grade-lock-icon" />
                                     </div>
                                   ) : (
                                     <div className="cell-grade-placeholder"></div>
