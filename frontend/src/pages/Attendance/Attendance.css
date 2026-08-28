@@ -691,6 +691,37 @@
   pointer-events: none;
 }
 
+.grade-absent-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #ef4444;
+  font-size: 14px;
+}
+
+.grade-excused-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #f97316;
+  font-size: 14px;
+}
+
+.td-grade-cell.grade-cell-absent {
+  background: #fbfbfb !important;
+  opacity: 0.85;
+}
+
 /* Floating 1-10 Popover Dock (Clean LC-UP Matching Style) */
 .lc-grade-floating-picker {
   position: absolute;

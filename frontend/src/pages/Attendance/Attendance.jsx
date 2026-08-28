@@ -601,16 +601,26 @@ const Attendance = () => {
     toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
   };
 
-  // Bugungi dars uchun barcha o'quvchilarga 10 ball qo'yish
+  // Bugungi dars uchun faqat darsga kelgan (Present) o'quvchilarga 10 ball qo'yish
   const handleMarkAllGradesTen = () => {
     if (activeGroupStudents.length === 0) {
       toast.warning("Guruhda faol talabalar mavjud emas!");
       return;
     }
 
+    const presentStudents = activeGroupStudents.filter((student) => {
+      const att = matrixData[`${student.id}_${todayDateStr}`];
+      return att?.status === "Present";
+    });
+
+    if (presentStudents.length === 0) {
+      toast.warning("Bugungi darsda qatnashgan ('Keldi') o'quvchi topilmadi! Avval davomatni belgilang.");
+      return;
+    }
+
     setGradesMatrixData((prev) => {
       let copy = { ...prev };
-      activeGroupStudents.forEach((student) => {
+      presentStudents.forEach((student) => {
         const cellKey = `${student.id}_${todayDateStr}`;
         copy[cellKey] = {
           score: 10,
@@ -630,7 +640,7 @@ const Attendance = () => {
       setSaveStatus("saved");
     }, 300);
 
-    toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilarga 10 ball qo'yildi va saqlandi! 🟢💯`);
+    toast.success(`Bugungi darsda qatnashgan (${presentStudents.length} ta) o'quvchiga 10 ball qo'yildi va saqlandi! 🟢💯`);
   };
 
   // Baholash (1-10 Ball) Ball qo'yish va saqlash
@@ -643,6 +653,15 @@ const Attendance = () => {
     }
     if (currentRole !== "admin" && isFutureDate(fullDate)) {
       toast.info(`⏳ Kelajakdagi dars sanasi (${fullDate})! Dars kuni kelganda baholash ochiladi.`);
+      setActiveGradeCell(null);
+      return;
+    }
+
+    // Darsga kelmagan (Absent / Excused / Belgilanmagan) o'quvchiga baho qo'yib bo'lmaydi
+    const attRecord = matrixData[`${studentId}_${fullDate}`];
+    if (attRecord?.status !== "Present") {
+      const statusLabel = attRecord?.status === "Excused" ? "Sababli dars qoldirgan" : attRecord?.status === "Absent" ? "Kelmadi" : "Davomati belgilanmagan";
+      toast.error(`🚨 "${studentName}" ushbu darsda qatnashmagan (${statusLabel})! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`);
       setActiveGradeCell(null);
       return;
     }
@@ -1299,10 +1318,15 @@ const Attendance = () => {
                               const isFuture = isFutureDate(d.fullDate);
                               const isLockedForTeacher = currentRole !== "admin" && (isPast || isFuture);
 
+                              const attCell = matrixData[cellKey];
+                              const isPresent = attCell?.status === "Present";
+                              const isAbsent = attCell?.status === "Absent";
+                              const isExcused = attCell?.status === "Excused";
+
                               return (
                                 <td
                                   key={dIdx}
-                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-absent" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (isLockedForTeacher) {
@@ -1313,16 +1337,28 @@ const Attendance = () => {
                                       }
                                       return;
                                     }
+                                    if (!isPresent) {
+                                      if (isAbsent) {
+                                        toast.error(`🚨 "${student.fullName}" ushbu darsga kelmagan! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`);
+                                      } else if (isExcused) {
+                                        toast.error(`🚨 "${student.fullName}" sababli kelmagan! Baho qo'yib bo'lmaydi.`);
+                                      } else {
+                                        toast.warning(`⚠️ Avval "${student.fullName}"ning davomatini "Keldi" deb belgilang!`);
+                                      }
+                                      return;
+                                    }
                                     setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
                                   }}
                                   title={
-                                    isLockedForTeacher && isPast
+                                    !isPresent
+                                      ? `${student.fullName} — Darsda qatnashmagan (Baho qo'yib bo'lmaydi)`
+                                      : isLockedForTeacher && isPast
                                       ? `${student.fullName} — O'tib ketgan dars (Faqat Admin o'zgartira oladi)`
                                       : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
                                   }
                                 >
-                                  {/* Floating 1-10 Numbers Dock Popover */}
-                                  {!isLockedForTeacher && activeGradeCell === cellKey && (
+                                  {/* Floating 1-10 Numbers Dock Popover (Faqat darsga kelganlar uchun ochiladi) */}
+                                  {isPresent && !isLockedForTeacher && activeGradeCell === cellKey && (
                                     <div
                                       className="lc-grade-floating-picker"
                                       onClick={(e) => e.stopPropagation()}
@@ -1370,13 +1406,27 @@ const Attendance = () => {
                                     />
                                   )}
 
-                                  {/* Render Clean Score Badge */}
-                                  {score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
-                                      {score}
-                                    </div>
-                                  ) : (
-                                    <div className="cell-grade-placeholder"></div>
+                                  {/* Kelmagan yoki Sababli bo'lgan o'quvchilar belgisi */}
+                                  {isAbsent && (
+                                    <span className="grade-absent-badge" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)">
+                                      <HiOutlineXMark />
+                                    </span>
+                                  )}
+                                  {isExcused && (
+                                    <span className="grade-excused-badge" title="Sababli kelmagan (Baho qo'yib bo'lmaydi)">
+                                      <HiOutlineFlag />
+                                    </span>
+                                  )}
+
+                                  {/* Render Clean Score Badge if Present */}
+                                  {isPresent && (
+                                    score != null ? (
+                                      <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
+                                        {score}
+                                      </div>
+                                    ) : (
+                                      <div className="cell-grade-placeholder"></div>
+                                    )
                                   )}
                                 </td>
                               );
