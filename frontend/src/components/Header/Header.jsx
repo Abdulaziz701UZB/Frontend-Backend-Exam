@@ -262,13 +262,6 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   useEffect(() => {
     const handleNewNotif = (e) => {
       try {
-        if (e.detail?.skipCurrentSync) {
-          const target = e.detail?.targetRole;
-          if (target && target === currentRole) {
-            triggerBellRing();
-          }
-          return;
-        }
         const saved = localStorage.getItem("velnex_all_notifications_v3");
         if (saved) {
           setAllNotifications(JSON.parse(saved));
@@ -330,15 +323,12 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       link: `/attendance/${groupName}`
     };
 
-    const updated = allNotifications.map((n) =>
-      n.id === notifId ? { ...n, status: "approved", read: true } : n
-    );
-    const finalList = [newTeacherNotif, ...updated];
-    setAllNotifications(finalList);
-
-    try {
-      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(finalList));
-    } catch (e) {}
+    setAllNotifications((prev) => {
+      const updated = prev.map((n) =>
+        n.id === notifId ? { ...n, status: "approved", read: true } : n
+      );
+      return [newTeacherNotif, ...updated];
+    });
 
     triggerBellRing();
 
@@ -369,13 +359,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
         detail: { groupName, date, status: "approved" }
       }));
       window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher", skipCurrentSync: true }
+        detail: { targetRole: "teacher" }
       }));
     } catch (e) {
       console.error("Unlock localStorage error", e);
     }
 
-    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi ochildi! O'qituvchiga ruxsat berildi.`);
+    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi ochildi! O'qituvchiga xabarnoma jo'natildi.`);
   };
 
   // 1. Rad etish (Reject) - Ochilmasin va O'qituvchiga Xabar Borsin!
@@ -395,15 +385,12 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       link: `/attendance/${groupName || "G-101"}`
     };
 
-    const updated = allNotifications.map((n) =>
-      n.id === notifId ? { ...n, status: "rejected", read: true } : n
-    );
-    const finalList = [newTeacherNotif, ...updated];
-    setAllNotifications(finalList);
-
-    try {
-      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(finalList));
-    } catch (e) {}
+    setAllNotifications((prev) => {
+      const updated = prev.map((n) =>
+        n.id === notifId ? { ...n, status: "rejected", read: true } : n
+      );
+      return [newTeacherNotif, ...updated];
+    });
 
     triggerBellRing();
 
@@ -433,13 +420,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
         detail: { groupName, date, status: "rejected" }
       }));
       window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher", skipCurrentSync: true }
+        detail: { targetRole: "teacher" }
       }));
     } catch (e) {
       console.error("Reject error", e);
     }
 
-    toast.info(`❌ "${groupName || "Dars"}" darsini ochish so'rovi rad etildi.`);
+    toast.info(`❌ "${groupName || "Dars"}" darsini ochish so'rovi rad etildi va dars qulfi ochilmadi.`);
   };
 
   // 2. Bir bosishda Telegram Botga yuborish
@@ -470,18 +457,12 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       link: notif?.link || "/attendance/G-101"
     };
 
-    const finalList = [newTeacherNotif, ...allNotifications];
-    setAllNotifications(finalList);
-
-    try {
-      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(finalList));
-    } catch (e) {}
-
+    setAllNotifications((prev) => [newTeacherNotif, ...prev]);
     triggerBellRing();
 
     try {
       window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher", skipCurrentSync: true }
+        detail: { targetRole: "teacher" }
       }));
     } catch (e) {}
 
@@ -712,27 +693,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               <div className="admin-icon-badge">
                 <HiOutlineLockClosed />
               </div>
-              <div className="admin-modal-title-wrap">
+              <div>
                 <h3>{targetRole === "admin" ? "Administrator" : targetRole === "teacher" ? "O'qituvchi" : "O'quvchi"} Paneliga O'tish</h3>
                 <p>Ushbu profilga kirish uchun parolni kiriting</p>
               </div>
-              <button
-                type="button"
-                className="admin-modal-close-btn"
-                onClick={() => setAuthModalOpen(false)}
-                title="Yopish"
-              >
-                <HiXMark />
-              </button>
             </div>
 
             <form onSubmit={handlePasswordSubmit} className="admin-auth-form">
-              {authError && (
-                <div className="admin-auth-error">
-                  <HiOutlineExclamationTriangle /> {authError}
-                </div>
-              )}
-
               {targetRole === "teacher" && (
                 <div className="admin-field-group">
                   <label>O'qituvchini tanlang</label>
@@ -780,12 +747,8 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               </div>
 
               <div className="admin-modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setAuthModalOpen(false)}>
-                  Bekor qilish
-                </button>
-                <button type="submit" className="btn-confirm">
-                  <HiKey /> Kirish
-                </button>
+                <button type="button" className="btn-cancel" onClick={() => setAuthModalOpen(false)}>Bekor qilish</button>
+                <button type="submit" className="btn-confirm">Kirish</button>
               </div>
             </form>
           </div>
