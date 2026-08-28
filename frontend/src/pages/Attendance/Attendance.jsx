@@ -1251,7 +1251,7 @@ const Attendance = () => {
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
-                              {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">⏳ So'rov</span>}
+                              {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
                           );
@@ -1455,7 +1455,7 @@ const Attendance = () => {
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
-                              {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">⏳ So'rov</span>}
+                              {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
                           );
