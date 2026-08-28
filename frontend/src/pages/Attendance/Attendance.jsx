@@ -1400,7 +1400,7 @@ const Attendance = () => {
                                   {!isPresent ? (
                                     <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
                                   ) : score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
+                                    <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
                                       {score}
                                     </div>
                                   ) : (
