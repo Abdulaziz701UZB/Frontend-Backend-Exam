@@ -9,6 +9,8 @@ import {
   HiLockClosed, 
   HiXMark, 
   HiKey,
+  HiOutlineLockClosed,
+  HiOutlineDocumentCheck,
   HiOutlineArrowRightOnRectangle,
   HiOutlineBell,
   HiOutlineCurrencyDollar,
