@@ -712,13 +712,27 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               <div className="admin-icon-badge">
                 <HiOutlineLockClosed />
               </div>
-              <div>
+              <div className="admin-modal-title-wrap">
                 <h3>{targetRole === "admin" ? "Administrator" : targetRole === "teacher" ? "O'qituvchi" : "O'quvchi"} Paneliga O'tish</h3>
                 <p>Ushbu profilga kirish uchun parolni kiriting</p>
               </div>
+              <button
+                type="button"
+                className="admin-modal-close-btn"
+                onClick={() => setAuthModalOpen(false)}
+                title="Yopish"
+              >
+                <HiXMark />
+              </button>
             </div>
 
             <form onSubmit={handlePasswordSubmit} className="admin-auth-form">
+              {authError && (
+                <div className="admin-auth-error">
+                  <HiOutlineExclamationTriangle /> {authError}
+                </div>
+              )}
+
               {targetRole === "teacher" && (
                 <div className="admin-field-group">
                   <label>O'qituvchini tanlang</label>
@@ -766,8 +780,12 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               </div>
 
               <div className="admin-modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setAuthModalOpen(false)}>Bekor qilish</button>
-                <button type="submit" className="btn-confirm">Kirish</button>
+                <button type="button" className="btn-cancel" onClick={() => setAuthModalOpen(false)}>
+                  Bekor qilish
+                </button>
+                <button type="submit" className="btn-confirm">
+                  <HiKey /> Kirish
+                </button>
               </div>
             </form>
           </div>

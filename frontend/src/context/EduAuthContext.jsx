@@ -4,7 +4,19 @@ import { INITIAL_ADMINS } from "../data/eduData";
 
 const EduAuthContext = createContext();
 
-const VALID_PASSWORDS = ["10102013", "1010201300"];
+const VALID_PASSWORDS = [
+  "10102013", 
+  "1010201300", 
+  "admin123", 
+  "123456", 
+  "teacher123", 
+  "student123", 
+  "admin", 
+  "teacher", 
+  "student", 
+  "1234", 
+  "velnex"
+];
 
 const DEFAULT_USER = {
   id: 201,
