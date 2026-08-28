@@ -26,7 +26,8 @@ import {
   HiOutlineNoSymbol,
   HiOutlineExclamationTriangle,
   HiOutlinePhone,
-  HiOutlineClock
+  HiOutlineClock,
+  HiOutlineArrowUpRight
 } from "react-icons/hi2";
 import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
 import "./Attendance.css";
@@ -83,6 +84,7 @@ const Attendance = () => {
   const [loading, setLoading] = useState(true);
 
   const [selectedGroup, setSelectedGroup] = useState(routeGroupId || null);
+  const [groupFilterTab, setGroupFilterTab] = useState("all");
 
   useEffect(() => {
     if (routeGroupId) {
@@ -102,6 +104,16 @@ const Attendance = () => {
   const [isZenMode, setIsZenMode] = useState(false);
   const [activeReasonCard, setActiveReasonCard] = useState(null);
   const [saveStatus, setSaveStatus] = useState("saved");
+
+  const [activeGradeCell, setActiveGradeCell] = useState(null);
+  const [gradesMatrixData, setGradesMatrixData] = useState(() => {
+    try {
+      const saved = localStorage.getItem("velnex_grades_matrix");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const now = new Date();
   const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -589,6 +601,65 @@ const Attendance = () => {
     toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
   };
 
+  // Baholash (1-10 Ball) Ball qo'yish va saqlash
+  const handleSetGradeScore = (studentId, fullDate, score, studentName) => {
+    const cellKey = `${studentId}_${fullDate}`;
+    setGradesMatrixData((prev) => {
+      const updated = {
+        ...prev,
+        [cellKey]: {
+          score: score,
+          date: fullDate,
+          studentId: studentId,
+          updatedAt: new Date().toISOString()
+        }
+      };
+      try {
+        localStorage.setItem("velnex_grades_matrix", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    setSaveStatus("saving");
+    setTimeout(() => {
+      setSaveStatus("saved");
+    }, 300);
+    setActiveGradeCell(null);
+  };
+
+  // Klaviaturada 1-10 raqamlarini bosib baholash (Keyboard Hotkeys)
+  useEffect(() => {
+    const handleGradeKeyDown = (e) => {
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+
+      if (activeGradeCell) {
+        const parts = activeGradeCell.split("_");
+        if (parts.length >= 2) {
+          const studentId = parts[0];
+          const fullDate = parts.slice(1).join("_");
+          const student = students.find((s) => String(s.id) === String(studentId));
+          const studentName = student?.fullName || "Talaba";
+
+          if (e.key >= "1" && e.key <= "9") {
+            e.preventDefault();
+            handleSetGradeScore(studentId, fullDate, parseInt(e.key, 10), studentName);
+          } else if (e.key === "0") {
+            e.preventDefault();
+            handleSetGradeScore(studentId, fullDate, 10, studentName);
+          } else if (e.key === "Backspace" || e.key === "Delete") {
+            e.preventDefault();
+            handleSetGradeScore(studentId, fullDate, null, studentName);
+          } else if (e.key === "Escape") {
+            setActiveGradeCell(null);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleGradeKeyDown);
+    return () => window.removeEventListener("keydown", handleGradeKeyDown);
+  }, [activeGradeCell, students]);
+
   // Filter students based on legend
   const filteredStudents = activeGroupStudents.filter((s) => {
     const isDebtor = (s.balance || 0) < 0 || s.paymentStatus === "Overdue" || s.paymentStatus === "Unpaid";
@@ -720,102 +791,92 @@ const Attendance = () => {
 
   return (
     <div className="lc-up-attendance-container">
-      {/* 1. AGAR GURUH TANLANMAGAN BO'LSA: GURUHLARNI TANLASH KARTALARI (HUB) */}
+      {/* 1. AGAR GURUH TANLANMAGAN BO'LSA: GURUHLARNI TANLASH JURNALI (HUB) */}
       {!selectedGroup ? (
-        <div className="lc-group-selection-view">
+        <div className="lc-group-selection-view oxford-dark-hub">
+          {/* Header matching Image 1 */}
           <div className="lc-group-selection-header">
-            <div>
-              <h2 className="lc-group-selection-title">📋 Davomat Uchun Guruhni Tanlang</h2>
-              <p className="lc-group-selection-subtitle">Davomat va baholash jurnalini ochish uchun quyidagi guruhlardan birini bosing</p>
+            <div className="hub-title-wrap">
+              <h2 className="lc-group-selection-title">Guruhlar</h2>
+            </div>
+            {/* Filter Pills: Barchasi | Bugun */}
+            <div className="hub-filter-pill-container">
+              <button
+                type="button"
+                className={`hub-filter-pill ${groupFilterTab === "all" ? "active" : ""}`}
+                onClick={() => setGroupFilterTab("all")}
+              >
+                Barchasi
+              </button>
+              <button
+                type="button"
+                className={`hub-filter-pill ${groupFilterTab === "today" ? "active" : ""}`}
+                onClick={() => setGroupFilterTab("today")}
+              >
+                Bugun
+              </button>
             </div>
           </div>
 
-          <div className="lc-groups-cards-grid">
-            {accessibleGroups.map((g) => {
-              const gStudents = students.filter((s) => String(s.groupId || s.group_id) === String(g.id));
-              const hasLessonToday = isGroupLessonToday(g);
-              const isLive = isLessonLiveNow(g);
-              const timing = getLessonTimingStatus(g);
-              const attStatus = getGroupAttendanceStatus(g.id, gStudents);
-              const courseTheme = getCourseTheme(g.courseName || g.course_name || "");
+          {/* Sleek Dark Table matching Image 1 */}
+          <div className="lc-groups-table-container">
+            <table className="lc-groups-list-table">
+              <thead>
+                <tr>
+                  <th className="th-g-name">Guruh nomi</th>
+                  <th className="th-g-course">Kurs</th>
+                  <th className="th-g-students">O'quvchilar ⓘ</th>
+                  <th className="th-g-room">Xona</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(groupFilterTab === "today" ? accessibleGroups.filter(isGroupLessonToday) : accessibleGroups).length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="empty-groups-row">
+                      {groupFilterTab === "today" ? "Bugun darsi bor guruhlar mavjud emas" : "Guruhlar topilmadi"}
+                    </td>
+                  </tr>
+                ) : (
+                  (groupFilterTab === "today" ? accessibleGroups.filter(isGroupLessonToday) : accessibleGroups).map((g) => {
+                    const gStudents = students.filter((s) => String(s.groupId || s.group_id) === String(g.id));
+                    const hasLessonToday = isGroupLessonToday(g);
+                    const isLive = isLessonLiveNow(g);
+                    const timing = getLessonTimingStatus(g);
+                    const attStatus = getGroupAttendanceStatus(g.id, gStudents);
 
-              return (
-                <div
-                  key={g.id}
-                  className={`lc-group-card-item ${courseTheme} ${hasLessonToday ? "card-has-today-lesson" : "card-no-lesson-today"} ${isLive ? "card-is-live-now" : ""}`}
-                  onClick={() => {
-                    setSelectedGroup(g.id);
-                    navigate(`/attendance/${g.id}`);
-                  }}
-                >
-                  {/* Top Decorative Gradient Accent */}
-                  <div className="card-top-gradient-bar"></div>
-
-                  <div className="group-card-top">
-                    <span className={`group-card-badge ${courseTheme}`}>{g.courseName || "Frontend ReactJS"}</span>
-                    
-                    {/* 7 & 8-Qoida: Jonli Pulslanuvchi Badge */}
-                    {isLive ? (
-                      <span className="live-status-pill badge-live-pulse">
-                        <span className="pulse-dot blue"></span> ⚡ JONLI DARS
-                      </span>
-                    ) : hasLessonToday ? (
-                      <span className="live-status-pill badge-today-pulse">
-                        <span className="pulse-dot green"></span> ● BUGUN DARSI BOR
-                      </span>
-                    ) : (
-                      <span className="live-status-pill badge-no-lesson">
-                        Bugun dars yo'q
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="group-card-title-row">
-                    <h3 className="group-card-title">{g.name}</h3>
-                    <span className="group-card-count">👥 {gStudents.length} ta o'quvchi</span>
-                  </div>
-
-                  {/* 9-Qoida: Bugungi Davomat Statusi */}
-                  {hasLessonToday && (
-                    <div className={`card-attendance-status-pill status-${attStatus.type}`}>
-                      {attStatus.label}
-                    </div>
-                  )}
-
-                  <div className="group-card-info">
-                    <div className="info-row">
-                      <span className="info-label">👨‍🏫 O'qituvchi:</span>
-                      <span className="info-val teacher-val">
-                        <span className="teacher-mini-avatar">{(g.teacherName || "O").charAt(0)}</span>
-                        {g.teacherName || "Tayinlanmagan"}
-                      </span>
-                    </div>
-
-                    <div className="info-row">
-                      <span className="info-label">⏰ Dars Vaqti:</span>
-                      <div className="time-val-wrapper">
-                        <span className="info-val">{g.scheduleTime || "14:00 - 16:00"}</span>
-                        {/* 10-Qoida: Countdown badge */}
-                        {hasLessonToday && (
-                          <span className={`timing-pill timing-${timing.status}`}>
-                            {timing.text}
+                    return (
+                      <tr
+                        key={g.id}
+                        className={`lc-group-table-row ${hasLessonToday ? "row-today" : ""}`}
+                        onClick={() => {
+                          setSelectedGroup(g.id);
+                          navigate(`/attendance/${g.id}`);
+                        }}
+                      >
+                        <td className="td-g-name">
+                          <span className="g-arrow-icon">
+                            <HiOutlineArrowUpRight />
                           </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="info-row">
-                      <span className="info-label">📅 Dars Kunlari:</span>
-                      <span className="info-val days-val">{g.scheduleDays || "Dushanba - Chorshanba - Juma"}</span>
-                    </div>
-                  </div>
-
-                  <button type="button" className="btn-enter-group-attendance">
-                    Davomat Jurnalini Ochish →
-                  </button>
-                </div>
-              );
-            })}
+                          <span className="g-name-text">{g.name}</span>
+                          {isLive && <span className="mini-live-tag">⚡ JONLI</span>}
+                          {hasLessonToday && !isLive && <span className="mini-today-tag">● BUGUN</span>}
+                        </td>
+                        <td className="td-g-course">
+                          <span className="g-course-chip">{g.courseName || g.course_name || "Frontend ReactJS"}</span>
+                        </td>
+                        <td className="td-g-students">
+                          <span className="g-students-count">{gStudents.length}</span>
+                        </td>
+                        <td className="td-g-room">
+                          <span className="g-room-text">{g.roomName || g.room || "1-xona"}</span>
+                          <span className="g-time-subtext">{g.scheduleTime || "14:00 - 16:00"}</span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       ) : (
@@ -1123,187 +1184,129 @@ const Attendance = () => {
           {/* BAHOLASH TAB */}
           {activeTab === "grades" && (
             <div className="lc-grades-wrapper">
-              {/* Grades Toolbar */}
-              <div className="grades-header-toolbar">
-                <div className="grades-date-picker-wrap">
-                  <span className="grades-toolbar-label">
-                    <HiOutlineCalendarDays className="inline-icon-xs text-indigo" />
-                    Baholash Dars Sanasi:
-                  </span>
-                  <select
-                    value={selectedGradeDate || (lessonDates[0]?.fullDate || "")}
-                    onChange={(e) => setSelectedGradeDate(e.target.value)}
-                    className="lc-grade-date-select"
-                  >
-                    {lessonDates.map((d) => (
-                      <option key={d.fullDate} value={d.fullDate}>
-                        {d.dayStr} ({d.fullDate})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <table className="lc-grades-table">
-                <thead>
-                  <tr>
-                    <th>№</th>
-                    <th>Talaba F.I.SH</th>
-                    <th>Davomat Holati</th>
-                    <th>Ball (1-10)</th>
-                    <th>Uy Vazifasi</th>
-                    <th>Izoh / Baholash Qaydi</th>
-                    <th>Telegram Xabarnoma</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((st, idx) => {
-                    const activeDateStr = selectedGradeDate || (lessonDates[0]?.fullDate || "");
-                    const attCell = matrixData[`${st.id}_${activeDateStr}`];
-                    const isPresent = attCell?.status === "Present";
-                    const isAbsent = attCell?.status === "Absent";
-                    const isExcused = attCell?.status === "Excused";
-
-                    return (
-                      <tr key={st.id} className={!isPresent ? "row-student-absent" : ""}>
-                        <td>{idx + 1}</td>
-                        <td>
-                          <strong>{st.fullName}</strong>
-                        </td>
-                        <td>
-                          {isPresent && (
-                            <span className="badge-att-status badge-status-present">
-                              <HiOutlineCheck className="inline-icon-xs" /> Darsda qatnashgan
-                            </span>
-                          )}
-                          {isExcused && (
-                            <span className="badge-att-status badge-status-excused">
-                              <HiOutlineFlag className="inline-icon-xs" /> Sababli kelmagan
-                            </span>
-                          )}
-                          {isAbsent && (
-                            <span className="badge-att-status badge-status-absent">
-                              <HiOutlineXMark className="inline-icon-xs" /> Kelmagan
-                            </span>
-                          )}
-                          {!attCell?.status && (
-                            <span className="badge-att-status badge-status-none">
-                              • Belgilanmagan
-                            </span>
-                          )}
-                        </td>
-                        <td>
-                          {isPresent && !isLessonTimeLocked(activeDateStr) ? (
-                            <input
-                              type="number"
-                              min="1"
-                              max="10"
-                              value={gradesData[st.id]?.score || 10}
-                              onChange={(e) =>
-                                setGradesData((prev) => ({
-                                  ...prev,
-                                  [st.id]: { ...prev[st.id], score: e.target.value }
-                                }))
-                              }
-                              className="lc-grade-input"
-                            />
-                          ) : isPresent && isLessonTimeLocked(activeDateStr) ? (
-                            <div
-                              className="locked-grade-cell"
-                              onClick={() =>
-                                toast.error(
-                                  `⏱️ Ushbu dars baholari qulflangan (Dars tugaganiga 1 soatdan ko'p vaqt o'tgan). O'zgartirish uchun Adminga murojaat qiling.`
-                                )
-                              }
-                              title="Dars tugaganiga 1 soatdan ko'p vaqt o'tgan (Qulflangan)"
-                            >
-                              <span className="badge-absent-lock" style={{ background: '#f8fafc', color: '#64748b', borderColor: '#e2e8f0' }}>
-                                <HiOutlineLockClosed className="inline-icon-xs" /> {gradesData[st.id]?.score || 10} ball
-                              </span>
-                            </div>
-                          ) : (
-                            <div
-                              className="locked-grade-cell"
-                              onClick={() =>
-                                toast.error(
-                                  `🚨 "${st.fullName}" ushbu darsga kelmagan! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`
-                                )
-                              }
-                              title="Darsda yo'q - baho qo'yib bo'lmaydi"
-                            >
-                              <span className="badge-absent-lock">
-                                <HiOutlineLockClosed className="inline-icon-xs" /> Bloklangan
-                              </span>
-                            </div>
-                          )}
-                        </td>
-                        <td>
-                          <label className={`checkbox-wrap ${!isPresent || isLessonTimeLocked(activeDateStr) ? "disabled-checkbox" : ""}`}>
-                            <input
-                              type="checkbox"
-                              disabled={!isPresent || isLessonTimeLocked(activeDateStr)}
-                              checked={isPresent ? (gradesData[st.id]?.homework ?? true) : false}
-                              onChange={(e) =>
-                                isPresent && !isLessonTimeLocked(activeDateStr) &&
-                                setGradesData((prev) => ({
-                                  ...prev,
-                                  [st.id]: { ...prev[st.id], homework: e.target.checked }
-                                }))
-                              }
-                            />
-                            <span>{isPresent ? "Bajarilgan" : "Qatnashmagan"}</span>
-                          </label>
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            disabled={!isPresent || isLessonTimeLocked(activeDateStr)}
-                            value={isPresent ? (gradesData[st.id]?.comment || "") : ""}
-                            onChange={(e) =>
-                              isPresent && !isLessonTimeLocked(activeDateStr) &&
-                              setGradesData((prev) => ({
-                                ...prev,
-                                [st.id]: { ...prev[st.id], comment: e.target.value }
-                              }))
-                            }
-                            placeholder={
-                              !isPresent
-                                ? "Darsda qatnashmaganligi sababli baholanmaydi"
-                                : isLessonTimeLocked(activeDateStr)
-                                ? "Dars qulflangan (O'zgartirib bo'lmaydi)"
-                                : "Darsdagi faollik izohi..."
-                            }
-                            className={`lc-comment-input ${!isPresent || isLessonTimeLocked(activeDateStr) ? "disabled-input" : ""}`}
-                          />
-                        </td>
-                        <td>
-                          {isPresent && !isLessonTimeLocked(activeDateStr) ? (
-                            <button
-                              type="button"
-                              className="btn-tg-grade"
-                              onClick={() =>
-                                toast.success(
-                                  `📲 "${st.fullName}" ota-onasiga baho bot orqali yuborildi!`
-                                )
-                              }
-                            >
-                              <FaTelegram /> Yuborish
-                            </button>
-                          ) : isPresent && isLessonTimeLocked(activeDateStr) ? (
-                            <span className="tg-disabled-tag">
-                              <HiOutlineLockClosed className="inline-icon-xs" /> Qulflangan
-                            </span>
-                          ) : (
-                            <span className="tg-disabled-tag">
-                              <HiOutlineNoSymbol className="inline-icon-xs" /> Darsda yo'q
-                            </span>
-                          )}
+              <div className="lc-matrix-wrapper">
+                <table className="lc-matrix-table lc-grades-matrix-table">
+                  <thead>
+                    <tr>
+                      <th className="th-talabalar">Talabalar</th>
+                      {lessonDates.map((d, idx) => {
+                        const isToday = d.fullDate === todayDateStr;
+                        return (
+                          <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""}`}>
+                            {isToday && <span className="today-badge-pill">Bugun</span>}
+                            <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan={lessonDates.length + 1} className="empty-matrix-msg">
+                          Guruhda o'quvchilar mavjud emas
                         </td>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    ) : (
+                      filteredStudents.map((student) => {
+                        const isDebtor = (student.balance || 0) < 0 || student.paymentStatus === "Overdue" || student.paymentStatus === "Unpaid";
+                        const paymentClass = isDebtor ? "student-row-debtor" : "student-row-paid";
+
+                        return (
+                          <tr key={student.id} className={`lc-matrix-student-row ${paymentClass}`}>
+                            <td className={`td-student-info ${paymentClass}`}>
+                              <div className="lc-student-row-flex">
+                                <div className="lc-student-avatar-wrap">
+                                  {student.avatar && student.avatar.length > 5 ? (
+                                    <img src={student.avatar} alt="" className="lc-student-avatar-img" />
+                                  ) : (
+                                    <span className="lc-avatar-initials">{(student.fullName || "T").charAt(0)}</span>
+                                  )}
+                                </div>
+                                <span 
+                                  className="td-student-name"
+                                  onClick={() => setSelectedProfileStudent(student)}
+                                >
+                                  {student.fullName}
+                                </span>
+                              </div>
+                            </td>
+
+                            {lessonDates.map((d, dIdx) => {
+                              const cellKey = `${student.id}_${d.fullDate}`;
+                              const gradeItem = gradesMatrixData[cellKey];
+                              const score = gradeItem?.score;
+                              const isToday = d.fullDate === todayDateStr;
+
+                              return (
+                                <td
+                                  key={dIdx}
+                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
+                                  }}
+                                  title={`${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`}
+                                >
+                                  {/* Floating 1-10 Numbers Dock Popover */}
+                                  {activeGradeCell === cellKey && (
+                                    <div
+                                      className="lc-grade-floating-picker"
+                                      onClick={(e) => e.stopPropagation()}
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      onMouseUp={(e) => e.stopPropagation()}
+                                    >
+                                      <div className="grade-picker-hint">
+                                        Ballni tanlang (yoki klaviaturada 1-10 bosing):
+                                      </div>
+                                      <div className="grade-numbers-grid">
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                          <button
+                                            key={num}
+                                            type="button"
+                                            className={`grade-num-btn num-${num} ${score === num ? "active-score" : ""}`}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSetGradeScore(student.id, d.fullDate, num, student.fullName);
+                                            }}
+                                          >
+                                            {num}
+                                          </button>
+                                        ))}
+                                        <button
+                                          type="button"
+                                          className="grade-num-clear"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
+                                          }}
+                                          title="Ballni o'chirish"
+                                        >
+                                          ✕
+                                        </button>
+                                      </div>
+                                      <div className="lc-popover-arrow"></div>
+                                    </div>
+                                  )}
+
+                                  {/* Render Score Badge */}
+                                  {score != null ? (
+                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
+                                      {score}
+                                    </div>
+                                  ) : (
+                                    <div className="cell-grade-placeholder"></div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 

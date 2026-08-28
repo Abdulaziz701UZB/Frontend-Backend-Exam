@@ -421,37 +421,354 @@
   gap: 24px;
 }
 
-.lc-group-selection-header {
+/* ---------------- Oxford Dark Theme Group Selection Hub (Image 1) ---------------- */
+.lc-group-selection-view.oxford-dark-hub {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 24px;
+  padding: 24px 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.oxford-dark-hub .lc-group-selection-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #ffffff;
-  padding: 24px 28px;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  background: transparent;
+  padding: 0 0 20px 0;
+  border: none;
+  box-shadow: none;
 }
 
-.lc-group-selection-title {
-  font-size: 22px;
+.oxford-dark-hub .lc-group-selection-title {
+  font-size: 26px;
   font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 4px;
+  color: #f8fafc;
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
-.lc-group-selection-subtitle {
-  font-size: 14px;
+.hub-filter-pill-container {
+  display: inline-flex;
+  align-items: center;
+  background: #1e293b;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid #334155;
+  gap: 4px;
+}
+
+.hub-filter-pill {
+  padding: 8px 22px;
+  border-radius: 11px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hub-filter-pill:hover {
+  color: #ffffff;
+}
+
+.hub-filter-pill.active {
+  background: #1d72fe;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(29, 114, 254, 0.45);
+}
+
+/* Oxford Dark Groups Table */
+.lc-groups-table-container {
+  background: #111c30;
+  border-radius: 20px;
+  padding: 16px 20px;
+  border: 1px solid #1e293b;
+  overflow-x: auto;
+}
+
+.lc-groups-list-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.lc-groups-list-table thead th {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
   color: #64748b;
-  font-weight: 500;
+  text-align: left;
+  letter-spacing: 0.2px;
 }
 
-.lc-groups-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 22px;
+.lc-group-table-row {
+  background: #1e293b;
+  border-radius: 14px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
 }
 
-/* Glassmorphic Base Card */
+.lc-group-table-row:hover {
+  background: #25334d;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.lc-group-table-row td {
+  padding: 18px 20px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.lc-group-table-row td:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+
+.lc-group-table-row td:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+.td-g-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.g-arrow-icon {
+  color: #38bdf8;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.g-name-text {
+  color: #f8fafc;
+  font-weight: 800;
+  font-size: 14.5px;
+}
+
+.mini-live-tag {
+  background: #1d72fe;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(29, 114, 254, 0.5);
+}
+
+.mini-today-tag {
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.g-course-chip {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.g-students-count {
+  font-weight: 700;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.g-room-text {
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-right: 8px;
+}
+
+.g-time-subtext {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.empty-groups-row {
+  text-align: center;
+  padding: 40px !important;
+  color: #64748b !important;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------------- Baholash Matrix (Image 2) & Floating 1-10 Picker ---------------- */
+.lc-grades-matrix-table .td-student-info {
+  border-left: 4.5px solid #22c55e !important;
+}
+
+.td-grade-cell {
+  position: relative;
+  background: #162032 !important;
+  border-radius: 12px !important;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  text-align: center;
+  vertical-align: middle;
+  min-width: 48px;
+  height: 48px;
+}
+
+.td-grade-cell:hover {
+  background: #202d45 !important;
+  border-color: #38bdf8 !important;
+}
+
+.td-grade-cell.grade-cell-active {
+  background: #253654 !important;
+  border: 1.5px solid #38bdf8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+}
+
+.cell-grade-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.score-badge-high {
+  background: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.score-badge-mid {
+  background: #0284c7;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.score-badge-low {
+  background: #ef4444;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+.cell-grade-placeholder {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 auto;
+}
+
+/* Floating 1-10 Popover Dock */
+.lc-grade-floating-picker {
+  position: absolute;
+  top: -85px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  background: #0f172a;
+  border: 1.5px solid #38bdf8;
+  border-radius: 16px;
+  padding: 10px 14px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.2);
+  white-space: nowrap;
+  animation: gradePickerPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes gradePickerPop {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.92); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.grade-picker-hint {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.grade-numbers-grid {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.grade-num-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grade-num-btn:hover {
+  transform: scale(1.18);
+  background: #1d72fe;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+
+.grade-num-btn.active-score {
+  background: #22c55e;
+  border-color: #86efac;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+.grade-num-clear {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #451a1a;
+  border: 1px solid #7f1d1d;
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.grade-num-clear:hover {
+  background: #dc2626;
+  color: #ffffff;
+  transform: scale(1.15);
+}
+
+.lc-popover-arrow {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: #0f172a;
+  border-right: 1.5px solid #38bdf8;
+  border-bottom: 1.5px solid #38bdf8;
+}
+
 .lc-group-card-item {
   position: relative;
   overflow: hidden;
