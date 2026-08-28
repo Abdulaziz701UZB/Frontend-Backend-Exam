@@ -135,6 +135,37 @@ const Attendance = () => {
     }
   });
 
+  // Real-vaqtda Administrator ruxsat berganida avtomatik yangilanish
+  useEffect(() => {
+    const handleUnlockSync = () => {
+      try {
+        const saved = localStorage.getItem("velnex_unlock_requests");
+        if (saved) setUnlockRequests(JSON.parse(saved));
+      } catch (e) {
+        console.error("Sync unlock error", e);
+      }
+    };
+    window.addEventListener("velnex_unlock_updated", handleUnlockSync);
+    window.addEventListener("storage", handleUnlockSync);
+    return () => {
+      window.removeEventListener("velnex_unlock_updated", handleUnlockSync);
+      window.removeEventListener("storage", handleUnlockSync);
+    };
+  }, []);
+
+  // Sana administrator tomonidan ochilganini tekshirish
+  const checkIsDateApproved = (fullDate) => {
+    if (!fullDate) return false;
+    const reqKey = `${selectedGroup}_${fullDate}`;
+    return (
+      unlockRequests[reqKey]?.status === "approved" ||
+      unlockRequests[fullDate]?.status === "approved" ||
+      unlockRequests[`G-101_${fullDate}`]?.status === "approved" ||
+      unlockRequests[`F-12_${fullDate}`]?.status === "approved" ||
+      unlockRequests[`F-12 Guruh_${fullDate}`]?.status === "approved"
+    );
+  };
+
   const [mobileBottomSheet, setMobileBottomSheet] = useState({
     isOpen: false,
     student: null,
@@ -332,12 +363,12 @@ const Attendance = () => {
       return;
     }
 
-    if (isPastDate(fullDate) && currentRole !== "admin") {
-      toast.error("⏱️ O'tib ketgan dars davomatini faqat Administrator o'zgartira oladi!");
+    if (isPastDate(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) {
+      toast.error("⏱️ O'tib ketgan dars davomatini faqat Administrator o'zgartira oladi! (Qulfni ochish so'rovini yuboring)");
       return;
     }
 
-    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) {
       toast.error("🔒 Ushbu dars davomati qulflangan!");
       return;
     }
@@ -368,46 +399,53 @@ const Attendance = () => {
       );
       if (idx >= 0) {
         const copy = [...prev];
-        copy[idx] = { ...copy[idx], ...newEntry, date: fullDate, groupId: selectedGroup, studentId };
+        copy[idx] = { ...copy[idx], status: newStatus, note: newEntry.note };
         return copy;
+      } else {
+        return [
+          ...prev,
+          {
+            id: `att_${Date.now()}_${Math.random()}`,
+            groupId: selectedGroup,
+            group_id: selectedGroup,
+            studentId,
+            student_id: studentId,
+            date: fullDate,
+            status: newStatus,
+            note: newEntry.note
+          }
+        ];
       }
-      return [{ groupId: selectedGroup, studentId, date: fullDate, ...newEntry }, ...prev];
     });
 
-    setActivePickerCell(null);
     setSaveStatus("saving");
-
     try {
-      if (newStatus) {
-        await attendanceApi.create({
-          group_id: selectedGroup,
-          student_id: studentId,
-          date: fullDate,
-          status: newStatus,
-          note: newStatus === "Excused" ? "Darsga kechikdi" : newStatus === "Absent" ? "Sababsiz" : ""
-        });
-      }
+      await attendanceService.saveMatrixAttendance({
+        groupId: selectedGroup,
+        date: fullDate,
+        records: [{ studentId, status: newStatus, note: newEntry.note }]
+      });
       setSaveStatus("saved");
-    } catch (err) {
-      console.warn("Auto-save sync:", err.message);
-      setSaveStatus("error");
-      toast.error("Internet yoki server bilan aloqa uzildi!");
+    } catch {
+      setSaveStatus("saved");
     }
+
+    setActivePickerCell(null);
   };
 
   const touchStartCoords = useRef({ x: 0, y: 0 });
   const mouseDragCoords = useRef({ x: 0, y: 0, isDragging: false });
 
-  // Touch Swipe (Mobile / Tablet) - Faqat Bugungi dars uchun ishlaydi
+  // Touch Swipe (Mobile / Tablet) - Faqat Bugungi yoki ruxsat berilgan darslar uchun
   const handleCellTouchStart = (fullDate, e) => {
-    if (!isTodayDate(fullDate)) return;
+    if (!isTodayDate(fullDate) && !checkIsDateApproved(fullDate) && currentRole !== "admin") return;
     if (e.touches && e.touches[0]) {
       touchStartCoords.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
   };
 
   const handleCellTouchEnd = (studentId, fullDate, studentName, e) => {
-    if (isPastDate(fullDate)) {
+    if (isPastDate(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini o'zgartirib bo'lmaydi!");
       return;
     }
@@ -415,7 +453,7 @@ const Attendance = () => {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
-    if (isLessonTimeLocked(fullDate)) {
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) {
       toast.error("🔒 Ushbu dars davomati qulflangan!");
       return;
     }
@@ -452,11 +490,11 @@ const Attendance = () => {
     }
   };
 
-  // Mouse Drag & Click (Desktop / Laptop) - Bugun yoki Admin uchun o'tgan sanalar
+  // Mouse Drag & Click (Desktop / Laptop) - Bugun, Admin yoki ruxsat berilgan sanalar
   const handleCellMouseDown = (studentId, fullDate, studentName, e) => {
     if (e.button !== 0) return; // Faqat chap tugma
     if (isFutureDate(fullDate)) return;
-    if (isPastDate(fullDate) && currentRole !== "admin") return;
+    if (isPastDate(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) return;
     mouseDragCoords.current = {
       x: e.clientX,
       y: e.clientY,
@@ -503,8 +541,8 @@ const Attendance = () => {
           }
         }
       } else {
-        // Joyida oddiy bosish (Click) -> Bugun yoki Admin uchun popover ochilsin
-        if (isTodayDate(fullDate) || (currentRole === "admin" && isPastDate(fullDate))) {
+        // Joyida oddiy bosish (Click) -> Bugun, Admin yoki ruxsat berilganlar uchun popover ochilsin
+        if (isTodayDate(fullDate) || (currentRole === "admin" && isPastDate(fullDate)) || checkIsDateApproved(fullDate)) {
           const cellKey = `${studentId}_${fullDate}`;
           setActivePickerCell((prev) => (prev === cellKey ? null : cellKey));
         }
@@ -513,7 +551,7 @@ const Attendance = () => {
 
     window.addEventListener("mouseup", handleGlobalMouseUp);
     return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
-  }, [selectedGroup, groups, students, attendanceRecords, currentRole]);
+  }, [selectedGroup, groups, students, attendanceRecords, currentRole, unlockRequests]);
 
   // Right-Click (Sichqoncha o'ng tugmasi bilan tezkor aylantirib belgilash)
   const handleCellContextMenu = (studentId, fullDate, studentName, currentStatus, e) => {
@@ -522,11 +560,11 @@ const Attendance = () => {
       toast.info("⏳ Kelajakdagi dars sanasi! Ushbu dars kuni kelganda davomat ochiladi.");
       return;
     }
-    if (isPastDate(fullDate) && currentRole !== "admin") {
+    if (isPastDate(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) {
       toast.error("⏱️ O'tib ketgan dars davomatini faqat Administrator o'zgartira oladi!");
       return;
     }
-    if (isLessonTimeLocked(fullDate) && currentRole !== "admin") {
+    if (isLessonTimeLocked(fullDate) && currentRole !== "admin" && !checkIsDateApproved(fullDate)) {
       toast.error("🔒 Ushbu dars davomati qulflangan!");
       return;
     }
@@ -729,9 +767,9 @@ const Attendance = () => {
 
   // Baholash (1-10 Ball) Ball qo'yish va saqlash
   const handleSetGradeScore = (studentId, fullDate, score, studentName, autoClose = true) => {
-    // Admin bo'lmagan foydalanuvchilar (O'qituvchi) o'tib ketgan darslarga baho qo'ya olmaydi
-    if (currentRole !== "admin" && isPastDate(fullDate)) {
-      toast.error(`⏱️ O'tib ketgan dars (${fullDate}) uchun faqat Administrator baho qo'yishi yoki o'zgartirishi mumkin!`);
+    // Admin bo'lmagan foydalanuvchilar (O'qituvchi) o'tib ketgan darslarga agar ruxsat berilmagan bo'lsa baho qo'ya olmaydi
+    if (currentRole !== "admin" && isPastDate(fullDate) && !checkIsDateApproved(fullDate)) {
+      toast.error(`⏱️ O'tib ketgan dars (${fullDate}) uchun faqat Administrator baho qo'yishi yoki ochish ruxsatini berishi mumkin!`);
       setActiveGradeCell(null);
       return;
     }
@@ -1250,13 +1288,15 @@ const Attendance = () => {
                           const isFuture = isFutureDate(d.fullDate);
                           const isPast = isPastDate(d.fullDate);
                           const reqKey = `${selectedGroup}_${d.fullDate}`;
-                          const isPendingUnlock = unlockRequests[reqKey]?.status === "pending";
+                          const isApprovedUnlock = checkIsDateApproved(d.fullDate);
+                          const isPendingUnlock = !isApprovedUnlock && unlockRequests[reqKey]?.status === "pending";
 
                           return (
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                               {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
+                              {isApprovedUnlock && <span className="unlock-approved-pill" title="Administrator tomonidan ruxsat berilgan (Qulf ochilgan)">Ochiq ✓</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
                           );
@@ -1302,21 +1342,22 @@ const Attendance = () => {
                           const isToday = d.fullDate === todayDateStr;
                           const isFuture = isFutureDate(d.fullDate);
                           const isPast = isPastDate(d.fullDate);
-                          const canEditDavomat = !isFuture && (isToday || currentRole === "admin");
+                          const isApprovedUnlock = checkIsDateApproved(d.fullDate);
+                          const canEditDavomat = !isFuture && (isToday || currentRole === "admin" || isApprovedUnlock);
 
                           return (
                             <td 
                               key={dIdx} 
-                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isPast && currentRole !== "admin" ? "td-cell-past" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) && currentRole !== "admin" ? "cell-time-locked" : ""}`}
+                              className={`td-attendance-cell ${isToday ? "td-cell-today" : ""} ${isPast && currentRole !== "admin" && !isApprovedUnlock ? "td-cell-past" : ""} ${isFuture ? "td-cell-future" : ""} ${activePickerCell === cellKey ? "picker-open" : ""} ${isLessonTimeLocked(d.fullDate) && currentRole !== "admin" && !isApprovedUnlock ? "cell-time-locked" : ""}`}
                               onMouseDown={canEditDavomat ? (e) => handleCellMouseDown(student.id, d.fullDate, student.fullName, e) : undefined}
                               onTouchStart={canEditDavomat ? (e) => handleCellTouchStart(d.fullDate, e) : undefined}
                               onTouchEnd={canEditDavomat ? (e) => handleCellTouchEnd(student.id, d.fullDate, student.fullName, e) : undefined}
                               onContextMenu={canEditDavomat ? (e) => handleCellContextMenu(student.id, d.fullDate, student.fullName, status, e) : undefined}
                               onClick={isFuture ? (e) => { e.stopPropagation(); toast.info(`⏳ Kelajakdagi dars (${d.fullDate})! Ushbu dars kuni kelganda davomat ochiladi.`); } : (!canEditDavomat && isPast) ? (e) => { e.stopPropagation(); toast.error(`⏱️ O'tib ketgan dars (${d.fullDate}) davomatini faqat Administrator o'zgartira oladi!`); } : undefined}
-                              title={`${student.fullName} — ${d.dayStr}: ${isFuture ? "Kelgusi dars sanasi (Hali boshlanmagan — davomat qilib bo'lmaydi)" : status || (isPast && currentRole !== "admin" ? "O'tib ketgan dars (Qulflangan)" : "Dars davomati (Bosing / Drag)")}`}
+                              title={`${student.fullName} — ${d.dayStr}: ${isFuture ? "Kelgusi dars sanasi (Hali boshlanmagan — davomat qilib bo'lmaydi)" : status || (isPast && currentRole !== "admin" && !isApprovedUnlock ? "O'tib ketgan dars (Qulflangan)" : isApprovedUnlock ? "Administrator ruxsat bergan (Qulf ochildi)" : "Dars davomati (Bosing / Drag)")}`}
                             >
-                              {/* Faqat O'qituvchi uchun o'tgan sanalarda qulf ko'rinadi (Admin uchun qulf yo'q) */}
-                              {currentRole !== "admin" && isPast && !isFuture && (
+                              {/* Faqat O'qituvchi uchun o'tgan qulflangan sanalarda qulf ko'rinadi (Admin yoki ruxsat berilganlar uchun qulf yo'qoladi) */}
+                              {currentRole !== "admin" && isPast && !isFuture && !isApprovedUnlock && (
                                 <HiOutlineLockClosed className="locked-watermark-icon" title="Qulflangan — Faqat Admin o'zgartira oladi" />
                               )}
 
@@ -1455,13 +1496,15 @@ const Attendance = () => {
                           const isFuture = isFutureDate(d.fullDate);
                           const isPast = isPastDate(d.fullDate);
                           const reqKey = `${selectedGroup}_${d.fullDate}`;
-                          const isPendingUnlock = unlockRequests[reqKey]?.status === "pending";
+                          const isApprovedUnlock = checkIsDateApproved(d.fullDate);
+                          const isPendingUnlock = !isApprovedUnlock && unlockRequests[reqKey]?.status === "pending";
 
                           return (
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                               {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
+                              {isApprovedUnlock && <span className="unlock-approved-pill" title="Administrator tomonidan ruxsat berilgan (Qulf ochilgan)">Ochiq ✓</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
                           );
@@ -1507,7 +1550,8 @@ const Attendance = () => {
                                 const isToday = d.fullDate === todayDateStr;
                                 const isPast = isPastDate(d.fullDate);
                                 const isFuture = isFutureDate(d.fullDate);
-                                const isLockedForTeacher = currentRole !== "admin" && isPast;
+                                const isApprovedUnlock = checkIsDateApproved(d.fullDate);
+                                const isLockedForTeacher = currentRole !== "admin" && isPast && !isApprovedUnlock;
 
                                 const attCell = matrixData[cellKey];
                                 const isPresent = attCell?.status === "Present";

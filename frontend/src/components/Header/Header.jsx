@@ -182,7 +182,38 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       )
     );
     playChime();
-    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi muvaffaqiyatli ochildi! O'qituvchiga ruxsat berildi.`);
+
+    // 1. Synchronize to localStorage velnex_unlock_requests
+    try {
+      const saved = localStorage.getItem("velnex_unlock_requests");
+      const parsed = saved ? JSON.parse(saved) : {};
+      
+      const keysToSave = [
+        `G-101_${date}`,
+        `F-12_${date}`,
+        `F-12 Guruh_${date}`,
+        `${groupName}_${date}`,
+        date
+      ];
+      keysToSave.forEach((k) => {
+        parsed[k] = {
+          status: "approved",
+          approvedAt: new Date().toISOString(),
+          groupName,
+          date
+        };
+      });
+      localStorage.setItem("velnex_unlock_requests", JSON.stringify(parsed));
+
+      // 2. Dispatch Live Event for real-time reactive sync in Attendance & Tables
+      window.dispatchEvent(new CustomEvent("velnex_unlock_updated", {
+        detail: { groupName, date, status: "approved" }
+      }));
+    } catch (e) {
+      console.error("Unlock localStorage error", e);
+    }
+
+    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi muvaffaqiyatli ochildi! O'qituvchiga amalda to'liq ruxsat berildi.`);
   };
 
   // 1. Rad etish (Reject)
