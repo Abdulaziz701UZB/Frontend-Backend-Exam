@@ -793,19 +793,65 @@
   justify-content: center;
 }
 
-.grade-num-btn:hover {
+/* 1, 2 Qizil Hover & Active */
+.grade-num-btn.num-1:hover,
+.grade-num-btn.num-2:hover,
+.grade-num-btn.num-1.active-score,
+.grade-num-btn.num-2.active-score {
+  background: #ef4444 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
   transform: scale(1.18);
-  background: #1d72fe;
-  border-color: #1d72fe;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(29, 114, 254, 0.35);
 }
 
-.grade-num-btn.active-score {
-  background: #10b981;
-  border-color: #059669;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+/* 3, 4, 5 Sariq Hover & Active */
+.grade-num-btn.num-3:hover,
+.grade-num-btn.num-4:hover,
+.grade-num-btn.num-5:hover,
+.grade-num-btn.num-3.active-score,
+.grade-num-btn.num-4.active-score,
+.grade-num-btn.num-5.active-score {
+  background: #f59e0b !important;
+  border-color: #d97706 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+  transform: scale(1.18);
+}
+
+/* 6, 7 Ko'k Hover & Active */
+.grade-num-btn.num-6:hover,
+.grade-num-btn.num-7:hover,
+.grade-num-btn.num-6.active-score,
+.grade-num-btn.num-7.active-score {
+  background: #0284c7 !important;
+  border-color: #0369a1 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4) !important;
+  transform: scale(1.18);
+}
+
+/* 8, 9, 10 Yashil Hover & Active */
+.grade-num-btn.num-8:hover,
+.grade-num-btn.num-9:hover,
+.grade-num-btn.num-10:hover,
+.grade-num-btn.num-8.active-score,
+.grade-num-btn.num-9.active-score,
+.grade-num-btn.num-10.active-score {
+  background: #10b981 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+  transform: scale(1.18);
+}
+
+/* 0 Kulrang Hover */
+.grade-num-btn.num-0:hover {
+  background: #64748b !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.35) !important;
+  transform: scale(1.18);
 }
 
 .grade-num-clear {
