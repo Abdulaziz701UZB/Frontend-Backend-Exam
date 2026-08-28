@@ -667,11 +667,13 @@ const Attendance = () => {
     }
 
     const cellKey = `${studentId}_${fullDate}`;
+    const finalScore = (score === 0 || score === null) ? null : score;
+
     setGradesMatrixData((prev) => {
       const updated = {
         ...prev,
         [cellKey]: {
-          score: score,
+          score: finalScore,
           date: fullDate,
           studentId: studentId,
           updatedAt: new Date().toISOString()
@@ -703,12 +705,12 @@ const Attendance = () => {
           const student = students.find((s) => String(s.id) === String(studentId));
           const studentName = student?.fullName || "Talaba";
 
-          if (e.key >= "0" && e.key <= "9") {
-            e.preventDefault();
-            handleSetGradeScore(studentId, fullDate, parseInt(e.key, 10), studentName);
-          } else if (e.key === "Backspace" || e.key === "Delete") {
+          if (e.key === "0" || e.key === "Backspace" || e.key === "Delete") {
             e.preventDefault();
             handleSetGradeScore(studentId, fullDate, null, studentName);
+          } else if (e.key >= "1" && e.key <= "9") {
+            e.preventDefault();
+            handleSetGradeScore(studentId, fullDate, parseInt(e.key, 10), studentName);
           } else if (e.key === "Escape") {
             setActiveGradeCell(null);
           }
@@ -1354,10 +1356,10 @@ const Attendance = () => {
                                       onMouseUp={(e) => e.stopPropagation()}
                                     >
                                       <div className="grade-picker-hint">
-                                        Ballni tanlang (yoki klaviaturada 0-9 bosing):
+                                        Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
                                       </div>
                                       <div className="grade-numbers-grid">
-                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                                           <button
                                             key={num}
                                             type="button"
@@ -1377,9 +1379,9 @@ const Attendance = () => {
                                             e.stopPropagation();
                                             handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
                                           }}
-                                          title="Ballni o'chirish"
+                                          title="0 — Baholanmaganga qaytarish (O'chirish)"
                                         >
-                                          ✕
+                                          0
                                         </button>
                                       </div>
                                       <div className="lc-popover-arrow"></div>
@@ -1394,15 +1396,15 @@ const Attendance = () => {
                                     />
                                   )}
 
-                                  {/* Agar darsda qatnashmagan bo'lsa: 2-Rasmdagi kabi kulrang o'chiq katakcha (ishlamaydi) */}
+                                  {/* Agar darsda qatnashmagan bo'lsa: bir xil tekis kulrang o'chiq katakcha (ishlamaydi) */}
                                   {!isPresent ? (
                                     <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
                                   ) : score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : score >= 1 ? "low" : "zero"}`}>
+                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
                                       {score}
                                     </div>
                                   ) : (
-                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing (0-10)"></div>
+                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
                                   )}
                                 </td>
                               );
