@@ -669,6 +669,34 @@
   margin: 0 auto;
 }
 
+.td-grade-cell.grade-cell-locked {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.td-grade-cell.grade-cell-locked:hover {
+  background: #162032 !important;
+  border-color: #334155 !important;
+}
+
+.cell-grade-locked-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  font-size: 13px;
+}
+
+.mini-grade-lock-icon {
+  font-size: 11px;
+  margin-left: 3px;
+  opacity: 0.85;
+}
+
+.score-badge-locked {
+  opacity: 0.85;
+}
+
 /* Floating 1-10 Popover Dock */
 .lc-grade-floating-picker {
   position: absolute;

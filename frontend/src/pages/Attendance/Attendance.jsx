@@ -603,6 +603,18 @@ const Attendance = () => {
 
   // Baholash (1-10 Ball) Ball qo'yish va saqlash
   const handleSetGradeScore = (studentId, fullDate, score, studentName) => {
+    // Admin bo'lmagan foydalanuvchilar (O'qituvchi) o'tib ketgan darslarga baho qo'ya olmaydi
+    if (currentRole !== "admin" && isPastDate(fullDate)) {
+      toast.error(`⏱️ O'tib ketgan dars (${fullDate}) uchun faqat Administrator baho qo'yishi yoki o'zgartirishi mumkin!`);
+      setActiveGradeCell(null);
+      return;
+    }
+    if (currentRole !== "admin" && isFutureDate(fullDate)) {
+      toast.info(`⏳ Kelajakdagi dars sanasi (${fullDate})! Dars kuni kelganda baholash ochiladi.`);
+      setActiveGradeCell(null);
+      return;
+    }
+
     const cellKey = `${studentId}_${fullDate}`;
     setGradesMatrixData((prev) => {
       const updated = {
@@ -1237,19 +1249,34 @@ const Attendance = () => {
                               const gradeItem = gradesMatrixData[cellKey];
                               const score = gradeItem?.score;
                               const isToday = d.fullDate === todayDateStr;
+                              const isPast = isPastDate(d.fullDate);
+                              const isFuture = isFutureDate(d.fullDate);
+                              const isLockedForTeacher = currentRole !== "admin" && (isPast || isFuture);
 
                               return (
                                 <td
                                   key={dIdx}
-                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                  className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    if (isLockedForTeacher) {
+                                      if (isPast) {
+                                        toast.error(`⏱️ O'tib ketgan dars (${d.fullDate}) baholarini faqat Administrator o'zgartira oladi!`);
+                                      } else {
+                                        toast.info(`⏳ Kelajakdagi dars sanasi (${d.fullDate})!`);
+                                      }
+                                      return;
+                                    }
                                     setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
                                   }}
-                                  title={`${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`}
+                                  title={
+                                    isLockedForTeacher && isPast
+                                      ? `${student.fullName} — O'tib ketgan dars (Faqat Admin o'zgartira oladi)`
+                                      : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
+                                  }
                                 >
                                   {/* Floating 1-10 Numbers Dock Popover */}
-                                  {activeGradeCell === cellKey && (
+                                  {!isLockedForTeacher && activeGradeCell === cellKey && (
                                     <div
                                       className="lc-grade-floating-picker"
                                       onClick={(e) => e.stopPropagation()}
@@ -1291,8 +1318,13 @@ const Attendance = () => {
 
                                   {/* Render Score Badge */}
                                   {score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
+                                    <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"} ${isLockedForTeacher ? "score-badge-locked" : ""}`}>
                                       {score}
+                                      {isLockedForTeacher && isPast && <HiOutlineLockClosed className="mini-grade-lock-icon" />}
+                                    </div>
+                                  ) : isLockedForTeacher && isPast ? (
+                                    <div className="cell-grade-locked-empty" title="Faqat Admin baholay oladi">
+                                      <HiOutlineLockClosed className="mini-grade-lock-icon" />
                                     </div>
                                   ) : (
                                     <div className="cell-grade-placeholder"></div>
