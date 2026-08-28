@@ -735,6 +735,38 @@ const Attendance = () => {
       return copy;
     });
 
+    // Administrator bildirishnomalar markaziga yangi so'rov xabari yuborish
+    try {
+      const savedNotifs = localStorage.getItem("velnex_all_notifications_v3");
+      const notifsList = savedNotifs ? JSON.parse(savedNotifs) : [];
+      const newAdminNotif = {
+        id: `adm_req_${Date.now()}`,
+        role: "admin",
+        type: "unlock",
+        title: "Davomat Qulfini Ochish So'rovi",
+        message: `${currentGroupObj?.name || "Guruh"} o'qituvchisi (${user?.fullName || user?.name || "O'qituvchi"}) ${unlockRequestModal.fullDate} darsini ochishni so'radi. Sabab: '${unlockRequestModal.reason}'.`,
+        time: "Hozirgina",
+        dateKey: "today",
+        group: currentGroupObj?.name || "Guruh",
+        targetDate: unlockRequestModal.fullDate,
+        status: "pending",
+        read: false,
+        link: `/attendance/${selectedGroup}`
+      };
+      const updatedNotifs = [newAdminNotif, ...notifsList];
+      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(updatedNotifs));
+
+      // Administrator uchun qo'ng'iroq chalinishi signali yuborish
+      window.dispatchEvent(new CustomEvent("velnex_new_notification", {
+        detail: { targetRole: "admin" }
+      }));
+      window.dispatchEvent(new CustomEvent("velnex_unlock_updated", {
+        detail: { groupName: currentGroupObj?.name, date: unlockRequestModal.fullDate, status: "pending" }
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+
     toast.success(`📩 "${unlockRequestModal.fullDate}" darsi uchun qulfni ochish so'rovi Administratorga yuborildi! Kutilmoqda... ⏳`);
     setUnlockRequestModal({ isOpen: false, fullDate: "", reason: "Baho kiritish unutilgan", note: "" });
   };
@@ -1289,13 +1321,23 @@ const Attendance = () => {
                           const isPast = isPastDate(d.fullDate);
                           const reqKey = `${selectedGroup}_${d.fullDate}`;
                           const isApprovedUnlock = checkIsDateApproved(d.fullDate);
-                          const isPendingUnlock = !isApprovedUnlock && unlockRequests[reqKey]?.status === "pending";
+                          const isRejectedUnlock = !isApprovedUnlock && (
+                            unlockRequests[reqKey]?.status === "rejected" ||
+                            unlockRequests[d.fullDate]?.status === "rejected" ||
+                            unlockRequests[`G-101_${d.fullDate}`]?.status === "rejected" ||
+                            unlockRequests[`F-12_${d.fullDate}`]?.status === "rejected"
+                          );
+                          const isPendingUnlock = !isApprovedUnlock && !isRejectedUnlock && (
+                            unlockRequests[reqKey]?.status === "pending" ||
+                            unlockRequests[d.fullDate]?.status === "pending"
+                          );
 
                           return (
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                               {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
+                              {isRejectedUnlock && <span className="unlock-rejected-pill" title="Administrator ochish so'rovini rad etgan">Rad etildi ✕</span>}
                               {isApprovedUnlock && <span className="unlock-approved-pill" title="Administrator tomonidan ruxsat berilgan (Qulf ochilgan)">Ochiq ✓</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
@@ -1497,13 +1539,23 @@ const Attendance = () => {
                           const isPast = isPastDate(d.fullDate);
                           const reqKey = `${selectedGroup}_${d.fullDate}`;
                           const isApprovedUnlock = checkIsDateApproved(d.fullDate);
-                          const isPendingUnlock = !isApprovedUnlock && unlockRequests[reqKey]?.status === "pending";
+                          const isRejectedUnlock = !isApprovedUnlock && (
+                            unlockRequests[reqKey]?.status === "rejected" ||
+                            unlockRequests[d.fullDate]?.status === "rejected" ||
+                            unlockRequests[`G-101_${d.fullDate}`]?.status === "rejected" ||
+                            unlockRequests[`F-12_${d.fullDate}`]?.status === "rejected"
+                          );
+                          const isPendingUnlock = !isApprovedUnlock && !isRejectedUnlock && (
+                            unlockRequests[reqKey]?.status === "pending" ||
+                            unlockRequests[d.fullDate]?.status === "pending"
+                          );
 
                           return (
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                               {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
+                              {isRejectedUnlock && <span className="unlock-rejected-pill" title="Administrator ochish so'rovini rad etgan">Rad etildi ✕</span>}
                               {isApprovedUnlock && <span className="unlock-approved-pill" title="Administrator tomonidan ruxsat berilgan (Qulf ochilgan)">Ochiq ✓</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
