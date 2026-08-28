@@ -260,6 +260,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   useEffect(() => {
     const handleNewNotif = (e) => {
       try {
+        if (e.detail?.skipCurrentSync) {
+          const target = e.detail?.targetRole;
+          if (target && target === currentRole) {
+            triggerBellRing();
+          }
+          return;
+        }
         const saved = localStorage.getItem("velnex_all_notifications_v3");
         if (saved) {
           setAllNotifications(JSON.parse(saved));
@@ -321,12 +328,15 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       link: `/attendance/${groupName}`
     };
 
-    setAllNotifications((prev) => {
-      const updated = prev.map((n) =>
-        n.id === notifId ? { ...n, status: "approved", read: true } : n
-      );
-      return [newTeacherNotif, ...updated];
-    });
+    const updated = allNotifications.map((n) =>
+      n.id === notifId ? { ...n, status: "approved", read: true } : n
+    );
+    const finalList = [newTeacherNotif, ...updated];
+    setAllNotifications(finalList);
+
+    try {
+      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(finalList));
+    } catch (e) {}
 
     triggerBellRing();
 
@@ -357,13 +367,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
         detail: { groupName, date, status: "approved" }
       }));
       window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher" }
+        detail: { targetRole: "teacher", skipCurrentSync: true }
       }));
     } catch (e) {
       console.error("Unlock localStorage error", e);
     }
 
-    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi ochildi! O'qituvchiga xabarnoma jo'natildi.`);
+    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi ochildi! O'qituvchiga ruxsat berildi.`);
   };
 
   // 1. Rad etish (Reject) - Ochilmasin va O'qituvchiga Xabar Borsin!
@@ -383,12 +393,15 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       link: `/attendance/${groupName || "G-101"}`
     };
 
-    setAllNotifications((prev) => {
-      const updated = prev.map((n) =>
-        n.id === notifId ? { ...n, status: "rejected", read: true } : n
-      );
-      return [newTeacherNotif, ...updated];
-    });
+    const updated = allNotifications.map((n) =>
+      n.id === notifId ? { ...n, status: "rejected", read: true } : n
+    );
+    const finalList = [newTeacherNotif, ...updated];
+    setAllNotifications(finalList);
+
+    try {
+      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(finalList));
+    } catch (e) {}
 
     triggerBellRing();
 
@@ -418,13 +431,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
         detail: { groupName, date, status: "rejected" }
       }));
       window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher" }
+        detail: { targetRole: "teacher", skipCurrentSync: true }
       }));
     } catch (e) {
       console.error("Reject error", e);
     }
 
-    toast.info(`❌ "${groupName || "Dars"}" darsini ochish so'rovi rad etildi va dars qulfi ochilmadi.`);
+    toast.info(`❌ "${groupName || "Dars"}" darsini ochish so'rovi rad etildi.`);
   };
 
   // 2. Bir bosishda Telegram Botga yuborish
@@ -455,12 +468,18 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       link: notif?.link || "/attendance/G-101"
     };
 
-    setAllNotifications((prev) => [newTeacherNotif, ...prev]);
+    const finalList = [newTeacherNotif, ...allNotifications];
+    setAllNotifications(finalList);
+
+    try {
+      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(finalList));
+    } catch (e) {}
+
     triggerBellRing();
 
     try {
       window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher" }
+        detail: { targetRole: "teacher", skipCurrentSync: true }
       }));
     } catch (e) {}
 
