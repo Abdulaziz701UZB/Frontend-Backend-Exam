@@ -1397,15 +1397,15 @@ const Attendance = () => {
                                     />
                                   )}
 
-                                  {/* Agar darsda qatnashmagan bo'lsa: 2-Rasmdagi kabi toza tekis kulrang o'chiq katakcha */}
+                                  {/* Agar darsda qatnashmagan bo'lsa: 2-Rasmdagi kabi kulrang o'chiq katakcha (ishlamaydi) */}
                                   {!isPresent ? (
-                                    <div className="cell-grade-gray-disabled"></div>
+                                    <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
                                   ) : score != null ? (
                                     <div className={`cell-grade-badge score-badge-${score >= 9 ? "high" : score >= 6 ? "mid" : "low"}`}>
                                       {score}
                                     </div>
                                   ) : (
-                                    <div className="cell-grade-placeholder"></div>
+                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing (1-10)"></div>
                                   )}
                                 </td>
                               );
