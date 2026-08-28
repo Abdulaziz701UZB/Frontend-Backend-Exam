@@ -2622,111 +2622,206 @@ body.dark-theme .circle-absent {
   letter-spacing: 0.4px !important;
   line-height: 1 !important;
 }
+/* 17-Qoida: Professional Glassmorphic Unlock Request Modal */
 .lc-unlock-request-card {
   background: #ffffff;
-  border-radius: 20px;
-  padding: 24px;
-  max-width: 440px;
+  border-radius: 24px;
+  padding: 26px 28px;
+  max-width: 460px;
   width: 92%;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.16);
-  animation: unlockPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18), 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e2e8f0;
+  animation: unlockPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
+
 @keyframes unlockPop {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.92) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
+
 .lc-unlock-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
+
 .lc-unlock-title-wrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
+
 .lc-unlock-icon {
-  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  flex-shrink: 0;
 }
+
 .lc-unlock-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
   color: #0f172a;
   margin: 0;
+  letter-spacing: -0.3px;
 }
+
 .lc-unlock-subtitle {
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: #64748b;
-  margin: 2px 0 0 0;
+  margin: 3px 0 0 0;
 }
+
 .lc-unlock-info-box {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: 16px;
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
+
 .lc-unlock-info-item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 12.5px;
+  font-size: 13px;
 }
-.info-label {
+
+.lc-unlock-info-item .info-label {
   color: #64748b;
   font-weight: 600;
 }
-.info-val {
+
+.lc-unlock-info-item .info-val {
   color: #0f172a;
   font-weight: 700;
 }
-.highlight-date {
+
+.lc-unlock-info-item .highlight-date {
   color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 12.5px;
 }
+
+.lc-unlock-form .reason-input-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.lc-unlock-form .reason-select-dropdown {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 0 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.lc-unlock-form .reason-select-dropdown:focus {
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+}
+
 .lc-unlock-textarea {
   width: 100%;
+  border-radius: 12px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 8px 12px;
+  background: #f8fafc;
+  padding: 10px 14px;
   font-size: 13px;
-  resize: vertical;
-  margin-top: 6px;
+  font-weight: 500;
+  color: #0f172a;
   outline: none;
+  transition: all 0.2s ease;
   font-family: inherit;
+  resize: none;
+  box-sizing: border-box;
 }
+
 .lc-unlock-textarea:focus {
   border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
 }
+
 .lc-unlock-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 22px;
 }
+
 .lc-btn-cancel-modal {
-  padding: 9px 16px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  padding: 11px 20px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
   color: #64748b;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 13.5px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
+
+.lc-btn-cancel-modal:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
 .lc-btn-send-request {
-  padding: 9px 18px;
-  border-radius: 10px;
+  padding: 11px 22px;
+  border-radius: 12px;
   border: none;
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 13.5px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lc-btn-send-request:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+}
+
+.lc-btn-send-request:active {
+  transform: translateY(0);
 }
 
 /* 6-Qoida: Mobil / Planshet Bottom Sheet */
