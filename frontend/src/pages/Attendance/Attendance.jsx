@@ -1359,6 +1359,17 @@ const Attendance = () => {
                                         Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
                                       </div>
                                       <div className="grade-numbers-grid">
+                                        <button
+                                          type="button"
+                                          className="grade-num-btn num-0"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
+                                          }}
+                                          title="0 — Baholanmaganga qaytarish (O'chirish)"
+                                        >
+                                          0
+                                        </button>
                                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                                           <button
                                             key={num}
@@ -1372,17 +1383,6 @@ const Attendance = () => {
                                             {num}
                                           </button>
                                         ))}
-                                        <button
-                                          type="button"
-                                          className="grade-num-clear"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
-                                          }}
-                                          title="0 — Baholanmaganga qaytarish (O'chirish)"
-                                        >
-                                          0
-                                        </button>
                                       </div>
                                       <div className="lc-popover-arrow"></div>
                                     </div>
