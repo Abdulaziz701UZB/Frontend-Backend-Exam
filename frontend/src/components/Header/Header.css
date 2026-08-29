@@ -230,32 +230,8 @@
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
 }
 
-.crm-notif-btn.bell-button-ringing {
-  background: #fffbeb !important;
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.45) !important;
-}
-
 .crm-notif-btn .notif-icon {
   font-size: 19px;
-  transition: transform 0.2s ease;
-}
-
-.bell-icon-ringing {
-  animation: bellShakeSwing 0.9s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-  color: #f59e0b !important;
-  transform-origin: top center;
-}
-
-@keyframes bellShakeSwing {
-  0% { transform: rotate(0); }
-  15% { transform: rotate(20deg) scale(1.15); }
-  30% { transform: rotate(-20deg) scale(1.15); }
-  45% { transform: rotate(14deg) scale(1.1); }
-  60% { transform: rotate(-14deg) scale(1.1); }
-  75% { transform: rotate(8deg) scale(1.05); }
-  85% { transform: rotate(-6deg) scale(1.02); }
-  100% { transform: rotate(0) scale(1); }
 }
 
 .notif-badge-count {

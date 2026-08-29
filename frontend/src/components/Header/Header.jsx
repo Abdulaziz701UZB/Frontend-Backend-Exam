@@ -9,8 +9,6 @@ import {
   HiLockClosed, 
   HiXMark, 
   HiKey,
-  HiOutlineLockClosed,
-  HiOutlineDocumentCheck,
   HiOutlineArrowRightOnRectangle,
   HiOutlineBell,
   HiOutlineCurrencyDollar,
@@ -33,10 +31,9 @@ import {
 import { FaCrown, FaChalkboardUser, FaGraduationCap, FaTelegram } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
 import "./Header.css";
-const DEFAULT_ADMIN_NOTIFICATIONS = [
+const DEFAULT_TEST_NOTIFICATIONS = [
   {
-    id: "adm_1",
-    role: "admin",
+    id: 1,
     type: "unlock", // 1. Qabul / Rad qilish & 3. O'qituvchiga javob
     title: "Davomat Qulfini Ochish So'rovi",
     message: "F-12 guruhi o'qituvchisi (Abdulaziz) 03-Avgust darsini ochishni so'radi. Sabab: 'Baho kiritish unutilgan'.",
@@ -49,8 +46,7 @@ const DEFAULT_ADMIN_NOTIFICATIONS = [
     link: "/attendance/G-101"
   },
   {
-    id: "adm_2",
-    role: "admin",
+    id: 2,
     type: "conflict", // 15. Xona / O'qituvchi To'qnashuvi
     title: "Xona To'qnashuvi Ogohlantirishi",
     message: "2-Xonada 14:00 da bir vaqtda 2 ta guruh (F-12 va Backend NodeJS) darsi belgilangan!",
@@ -60,8 +56,18 @@ const DEFAULT_ADMIN_NOTIFICATIONS = [
     link: "/rooms"
   },
   {
-    id: "adm_3",
-    role: "admin",
+    id: 3,
+    type: "schedule", // 14. Darsga Jonli Countdown
+    title: "Dars Eslatmasi (Yaqinlashmoqda)",
+    message: "Frontend ReactJS guruhi darsi boshlanishiga oz vaqt qoldi (2-Xona).",
+    time: "Bugun 14:00",
+    dateKey: "today",
+    targetTime: "14:00",
+    read: false,
+    link: "/attendance/G-101"
+  },
+  {
+    id: 4,
     type: "payment", // 2. To'lov + SMS/Telegram
     title: "Yangi To'lov Qabul Qilindi",
     message: "Abdulaziz Abdulhayev (Frontend kursi) 450,000 so'm to'lov qildi.",
@@ -73,8 +79,7 @@ const DEFAULT_ADMIN_NOTIFICATIONS = [
     link: "/payments"
   },
   {
-    id: "adm_4",
-    role: "admin",
+    id: 5,
     type: "student",
     title: "Yangi O'quvchi Ro'yxatdan O'tdi",
     message: "Rustam Qodirov 'Frontend ReactJS' guruhiga muvaffaqiyatli qo'shildi.",
@@ -84,8 +89,7 @@ const DEFAULT_ADMIN_NOTIFICATIONS = [
     link: "/students"
   },
   {
-    id: "adm_5",
-    role: "admin",
+    id: 6,
     type: "unlock",
     title: "O'tilgan Darsni Qayta Baholash So'rovi",
     message: "Backend NodeJS guruhi o'qituvchisi (Sarvar) 01-Avgust imtihon bahosini to'g'irlash uchun ruxsat so'radi.",
@@ -94,57 +98,6 @@ const DEFAULT_ADMIN_NOTIFICATIONS = [
     group: "NodeJS Guruh",
     targetDate: "2026-08-01",
     status: "approved",
-    read: true,
-    link: "/attendance/G-101"
-  }
-];
-
-const DEFAULT_TEACHER_NOTIFICATIONS = [
-  {
-    id: "tch_1",
-    role: "teacher",
-    type: "schedule", // 14. Darsga Jonli Countdown
-    title: "Dars Eslatmasi (Yaqinlashmoqda)",
-    message: "Frontend ReactJS guruhi darsi boshlanishiga oz vaqt qoldi (2-Xona).",
-    time: "Bugun 14:00",
-    dateKey: "today",
-    targetTime: "14:00",
-    read: false,
-    link: "/attendance/G-101"
-  },
-  {
-    id: "tch_2",
-    role: "teacher",
-    type: "unlock_approved",
-    title: "✅ Dars Qulfi Ochildi (Ruxsat Berildi)",
-    message: "Administrator 01-Avgust darsi bo'yicha baholash so'rovingizni tasdiqladi va darsni ochdi.",
-    time: "Kecha 17:15",
-    dateKey: "yesterday",
-    group: "Frontend ReactJS",
-    targetDate: "2026-08-01",
-    status: "approved",
-    read: false,
-    link: "/attendance/G-101"
-  },
-  {
-    id: "tch_3",
-    role: "teacher",
-    type: "homework",
-    title: "📝 Yangi Uy Vazifasi Topshirildi",
-    message: "Sardor Alimov 'JavaScript Promises & Async/Await' mavzusi bo'yicha uy vazifasini tekshirish uchun topshirdi.",
-    time: "Bugun 11:30",
-    dateKey: "today",
-    read: false,
-    link: "/homework"
-  },
-  {
-    id: "tch_4",
-    role: "teacher",
-    type: "reply",
-    title: "💬 Administratordan Xabar",
-    message: "Admin: 'Davomat tasdiqlandi, bugun soat 18:00 gacha kiritishingiz mumkin.'",
-    time: "2 soat oldin",
-    dateKey: "today",
     read: true,
     link: "/attendance/G-101"
   }
@@ -171,60 +124,29 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
   const [targetUserId, setTargetUserId] = useState(201);
   const [passwordInput, setPasswordInput] = useState("");
 
-  // 19. Ovozli Qo'ng'iroq Signali (Real Ting-Ting Crystal Brass Bell Chime)
+  // 19. Ovozli Signal (Apple Web Audio API Chime)
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isBellRinging, setIsBellRinging] = useState(false);
 
-  const playBellChime = () => {
+  const playChime = () => {
     if (!soundEnabled) return;
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      if (ctx.state === "suspended") {
-        ctx.resume();
-      }
-
-      // 3-bosqichli jarangdor qo'ng'iroq chalinishi: "Ting... Ting... Ting..."
-      const notes = [
-        { time: 0, freq: 1174.66, dur: 0.35, vol: 0.18 }, // D6
-        { time: 0.13, freq: 1567.98, dur: 0.45, vol: 0.24 }, // G6
-        { time: 0.26, freq: 1760.00, dur: 0.75, vol: 0.28 }, // A6
-      ];
-
-      notes.forEach((n) => {
-        const osc = ctx.createOscillator();
-        const overtone = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(n.freq, ctx.currentTime + n.time);
-
-        overtone.type = "triangle";
-        overtone.frequency.setValueAtTime(n.freq * 2, ctx.currentTime + n.time);
-
-        gain.gain.setValueAtTime(0.001, ctx.currentTime + n.time);
-        gain.gain.exponentialRampToValueAtTime(n.vol, ctx.currentTime + n.time + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + n.time + n.dur);
-
-        osc.connect(gain);
-        overtone.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(ctx.currentTime + n.time);
-        overtone.start(ctx.currentTime + n.time);
-        osc.stop(ctx.currentTime + n.time + n.dur);
-        overtone.stop(ctx.currentTime + n.time + n.dur);
-      });
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
     } catch (e) {
       console.log("Audio play error", e);
     }
-  };
-
-  const triggerBellRing = () => {
-    setIsBellRinging(true);
-    playBellChime();
-    setTimeout(() => setIsBellRinging(false), 1200);
   };
 
   // 18. Haftalik Xulosa (Weekly Digest) ko'rsatish
@@ -239,98 +161,27 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
 
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [notifFilter, setNotifFilter] = useState("all");
-
-  // Bildirishnomalarni yuklash va roli bo'yicha qat'iy ajratish
-  const getInitialNotifications = () => {
-    try {
-      const saved = localStorage.getItem("velnex_all_notifications_v3");
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return [...DEFAULT_ADMIN_NOTIFICATIONS, ...DEFAULT_TEACHER_NOTIFICATIONS];
-  };
-
-  const [allNotifications, setAllNotifications] = useState(getInitialNotifications);
-
-  // Avtomatik saqlash
-  useEffect(() => {
-    try {
-      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(allNotifications));
-    } catch (e) {}
-  }, [allNotifications]);
-
-  // Real-vaqtda boshqa joydan yangi xabar kelganda qabul qilish va qo'ng'iroqni chalish
-  useEffect(() => {
-    const handleNewNotif = (e) => {
-      try {
-        const saved = localStorage.getItem("velnex_all_notifications_v3");
-        if (saved) {
-          setAllNotifications(JSON.parse(saved));
-        }
-        const target = e.detail?.targetRole;
-        if (!target || target === currentRole) {
-          triggerBellRing();
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    window.addEventListener("velnex_new_notification", handleNewNotif);
-    window.addEventListener("storage", handleNewNotif);
-    return () => {
-      window.removeEventListener("velnex_new_notification", handleNewNotif);
-      window.removeEventListener("storage", handleNewNotif);
-    };
-  }, [currentRole, soundEnabled]);
-
-  // ROL BO'YICHA FILTRLASH:
-  // Admin faqat o'zining xabarlarini ko'radi (role: "admin")
-  // O'qituvchi faqat o'zining xabarlarini ko'radi (role: "teacher")
-  const activeRole = currentRole === "teacher" ? "teacher" : "admin";
-  const notifications = allNotifications.filter(
-    (n) => (n.role || "admin") === activeRole
-  );
+  const [notifications, setNotifications] = useState(DEFAULT_TEST_NOTIFICATIONS);
 
   // Sinov Ma'lumotlarini Qayta Yuklash
   const handleReloadDemoData = () => {
-    const freshData = [...DEFAULT_ADMIN_NOTIFICATIONS, ...DEFAULT_TEACHER_NOTIFICATIONS];
-    setAllNotifications(freshData);
-    try {
-      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(freshData));
-    } catch (e) {}
+    setNotifications(DEFAULT_TEST_NOTIFICATIONS);
     setNotifFilter("all");
     setDateFilter("all");
-    triggerBellRing();
-    toast.success(`🔄 ${activeRole === "teacher" ? "O'qituvchi" : "Administrator"} uchun sinov bildirishnomalari yuklandi!`);
+    playChime();
+    toast.success("🔄 8 ta sinov bildirishnomalari muvaffaqiyatli yuklandi!");
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // 1. Modal Ichidan To'g'ridan-to'g'ri Qabul Qilish (Approve)
   const handleApproveUnlock = (notifId, groupName, date) => {
-    const newTeacherNotif = {
-      id: `tch_unlock_${Date.now()}`,
-      role: "teacher",
-      type: "unlock_approved",
-      title: "✅ Dars Qulfi Ochildi (Ruxsat Berildi)",
-      message: `Administrator "${groupName}" guruhining ${date} darsini ochdi! Endi bemalol davomat va baholarni kiritishingiz mumkin.`,
-      time: "Hozirgina",
-      dateKey: "today",
-      group: groupName,
-      targetDate: date,
-      status: "approved",
-      read: false,
-      link: `/attendance/${groupName}`
-    };
-
-    setAllNotifications((prev) => {
-      const updated = prev.map((n) =>
+    setNotifications((prev) =>
+      prev.map((n) =>
         n.id === notifId ? { ...n, status: "approved", read: true } : n
-      );
-      return [newTeacherNotif, ...updated];
-    });
-
-    triggerBellRing();
+      )
+    );
+    playChime();
 
     // 1. Synchronize to localStorage velnex_unlock_requests
     try {
@@ -354,119 +205,45 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
       });
       localStorage.setItem("velnex_unlock_requests", JSON.stringify(parsed));
 
-      // 2. Dispatch Live Events
+      // 2. Dispatch Live Event for real-time reactive sync in Attendance & Tables
       window.dispatchEvent(new CustomEvent("velnex_unlock_updated", {
         detail: { groupName, date, status: "approved" }
-      }));
-      window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher" }
       }));
     } catch (e) {
       console.error("Unlock localStorage error", e);
     }
 
-    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi ochildi! O'qituvchiga xabarnoma jo'natildi.`);
+    toast.success(`✅ "${groupName}" guruhining ${date} darsi qulfi muvaffaqiyatli ochildi! O'qituvchiga amalda to'liq ruxsat berildi.`);
   };
 
-  // 1. Rad etish (Reject) - Ochilmasin va O'qituvchiga Xabar Borsin!
-  const handleRejectUnlock = (notifId, groupName, date) => {
-    const newTeacherNotif = {
-      id: `tch_reject_${Date.now()}`,
-      role: "teacher",
-      type: "unlock_rejected",
-      title: "❌ Dars Ochish So'rovi Rad Etildi",
-      message: `Administrator "${groupName || "Dars"}" guruhining ${date || ""} darsini ochish so'rovingizni rad etdi. Dars qulflangan holatda qoladi.`,
-      time: "Hozirgina",
-      dateKey: "today",
-      group: groupName,
-      targetDate: date,
-      status: "rejected",
-      read: false,
-      link: `/attendance/${groupName || "G-101"}`
-    };
-
-    setAllNotifications((prev) => {
-      const updated = prev.map((n) =>
+  // 1. Rad etish (Reject)
+  const handleRejectUnlock = (notifId) => {
+    setNotifications((prev) =>
+      prev.map((n) =>
         n.id === notifId ? { ...n, status: "rejected", read: true } : n
-      );
-      return [newTeacherNotif, ...updated];
-    });
-
-    triggerBellRing();
-
-    // Persist rejection so date REMAINS LOCKED
-    try {
-      const saved = localStorage.getItem("velnex_unlock_requests");
-      const parsed = saved ? JSON.parse(saved) : {};
-      const keysToSave = [
-        `G-101_${date}`,
-        `F-12_${date}`,
-        `F-12 Guruh_${date}`,
-        `${groupName}_${date}`,
-        date
-      ].filter(Boolean);
-
-      keysToSave.forEach((k) => {
-        parsed[k] = {
-          status: "rejected",
-          rejectedAt: new Date().toISOString(),
-          groupName,
-          date
-        };
-      });
-      localStorage.setItem("velnex_unlock_requests", JSON.stringify(parsed));
-
-      window.dispatchEvent(new CustomEvent("velnex_unlock_updated", {
-        detail: { groupName, date, status: "rejected" }
-      }));
-      window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher" }
-      }));
-    } catch (e) {
-      console.error("Reject error", e);
-    }
-
-    toast.info(`❌ "${groupName || "Dars"}" darsini ochish so'rovi rad etildi va dars qulfi ochilmadi.`);
+      )
+    );
+    playChime();
+    toast.info("❌ So'rov rad etildi va o'qituvchiga xabar qilindi.");
   };
 
   // 2. Bir bosishda Telegram Botga yuborish
   const handleSendTelegram = (notif) => {
-    triggerBellRing();
+    playChime();
     toast.success(`📲 Telegram bot orqali rasmiy xabarnoma muvaffaqiyatli jo'natildi!`);
   };
 
   // 2. Bir bosishda SMS yuborish
   const handleSendSMS = (notif) => {
-    triggerBellRing();
+    playChime();
     toast.success(`📩 Ota-onasiga SMS xabarnoma muvaffaqiyatli yuborildi!`);
   };
 
   // 3. O'qituvchiga Javob Yuborish
-  const handleSendQuickReply = (notifId, notif) => {
+  const handleSendQuickReply = (notifId) => {
     if (!quickReplyText.trim()) return;
-
-    const newTeacherNotif = {
-      id: `tch_reply_${Date.now()}`,
-      role: "teacher",
-      type: "reply",
-      title: "💬 Administratordan Javob",
-      message: `Admin: "${quickReplyText}" (${notif?.group || "Dars so'rovi"})`,
-      time: "Hozirgina",
-      dateKey: "today",
-      read: false,
-      link: notif?.link || "/attendance/G-101"
-    };
-
-    setAllNotifications((prev) => [newTeacherNotif, ...prev]);
-    triggerBellRing();
-
-    try {
-      window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "teacher" }
-      }));
-    } catch (e) {}
-
     toast.success(`💬 O'qituvchiga javob yuborildi: "${quickReplyText}"`);
+    playChime();
     setReplyingNotifId(null);
     setQuickReplyText("");
   };
@@ -641,11 +418,11 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
 
             <button
               type="button"
-              className={`crm-notif-btn ${isNotifModalOpen ? "active" : ""} ${isBellRinging ? "bell-button-ringing" : ""}`}
+              className={`crm-notif-btn ${isNotifModalOpen ? "active" : ""}`}
               onClick={() => setIsNotifModalOpen(true)}
               title="Bildirishnomalar markazini ochish"
             >
-              <HiOutlineBell className={`notif-icon ${isBellRinging ? "bell-icon-ringing" : ""}`} />
+              <HiOutlineBell className="notif-icon" />
               {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
             </button>
 
@@ -685,61 +462,59 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
         </div>
       </div>
 
-      {/* Password Modal */}
       {authModalOpen && (
-        <div className="admin-modal-backdrop" onClick={() => setAuthModalOpen(false)}>
-          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <div className="admin-icon-badge">
-                <HiOutlineLockClosed />
-              </div>
-              <div>
-                <h3>{targetRole === "admin" ? "Administrator" : targetRole === "teacher" ? "O'qituvchi" : "O'quvchi"} Paneliga O'tish</h3>
-                <p>Ushbu profilga kirish uchun parolni kiriting</p>
-              </div>
+        <div className="modal-overlay" onClick={() => setAuthModalOpen(false)}>
+          <div className="modal-content card auth-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>
+                <HiLockClosed className="inline-icon-sm" />
+                {targetRole === "admin"
+                  ? "Admin Paneli Paroli"
+                  : targetRole === "teacher"
+                    ? "O'qituvchi Kabineti"
+                    : "O'quvchi Kabineti"}
+              </h2>
+              <button
+                className="close-modal-btn"
+                onClick={() => setAuthModalOpen(false)}
+                aria-label="Yopish"
+              >
+                <HiXMark />
+              </button>
             </div>
 
-            <form onSubmit={handlePasswordSubmit} className="admin-auth-form">
-              {targetRole === "teacher" && (
-                <div className="admin-field-group">
-                  <label>O'qituvchini tanlang</label>
-                  <select
-                    className="admin-input-select"
-                    value={targetUserId}
-                    onChange={(e) => setTargetUserId(e.target.value)}
-                  >
-                    {allTeachers.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.fullName || t.name} ({t.subject || "Ustoz"})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+            {authError && <div className="alert alert-error">{authError}</div>}
 
-              {targetRole === "student" && (
-                <div className="admin-field-group">
-                  <label>O'quvchini tanlang</label>
-                  <select
-                    className="admin-input-select"
-                    value={targetUserId}
-                    onChange={(e) => setTargetUserId(e.target.value)}
-                  >
-                    {allStudents.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.fullName || s.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+            <form onSubmit={handlePasswordSubmit} className="admin-modal-form">
+              <div className="form-group">
+                <label className="form-label">
+                  Foydalanuvchini Tanlang:
+                </label>
+                <select
+                  className="form-select"
+                  value={targetUserId}
+                  onChange={(e) => setTargetUserId(parseInt(e.target.value))}
+                >
+                  {getTargetUserList().map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name || u.fullName} (
+                      {u.roleTitle ||
+                        u.subject ||
+                        u.groupName ||
+                        "Foydalanuvchi"}
+                      )
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <div className="admin-field-group">
-                <label>Parolni kiriting</label>
+              <div className="form-group">
+                <label className="form-label">Tizim Parolini Kiriting:</label>
                 <input
                   type="password"
-                  className="admin-input-text"
-                  placeholder="Parolni kiriting (Masalan: admin123 yoki 123456)"
+                  className="form-input"
+                  required
+                  placeholder="Admin parolini kiriting"
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   autoFocus
@@ -747,15 +522,23 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               </div>
 
               <div className="admin-modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setAuthModalOpen(false)}>Bekor qilish</button>
-                <button type="submit" className="btn-confirm">Kirish</button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setAuthModalOpen(false)}
+                >
+                  Bekor qilish
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  <HiKey /> Kirish va Tasdiqlash
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* BILDIRISHNOMALAR MARKAZI MODALI */}
+      {/* BILDIRISHNOMALAR MARKAZI MODALI (TOP 8 IMKONIYAT) */}
       {isNotifModalOpen && (
         <div className="crm-notif-modal-backdrop" onClick={() => setIsNotifModalOpen(false)}>
           <div className="crm-notif-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -763,16 +546,12 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             <div className="crm-notif-modal-header">
               <div className="notif-modal-title-group">
                 <div className="notif-modal-icon-badge">
-                  <HiOutlineBell className={`modal-bell-svg ${isBellRinging ? "bell-icon-ringing" : ""}`} />
+                  <HiOutlineBell className="modal-bell-svg" />
                 </div>
                 <div>
-                  <h3 className="notif-modal-title">
-                    {currentRole === "teacher" ? "O'qituvchi Bildirishnomalari" : "Administrator Bildirishnomalari"}
-                  </h3>
+                  <h3 className="notif-modal-title">Bildirishnomalar Markazi</h3>
                   <p className="notif-modal-subtitle">
-                    {currentRole === "teacher"
-                      ? "Dars eslatmalari, ruxsat javoblari va uy vazifalari"
-                      : "Dars so'rovlari, to'lovlar, to'qnashuvlar va markaz statistikasi"}
+                    So'rovlar, to'lovlar, to'qnashuvlar va jonli dars eslatmalari
                   </p>
                 </div>
               </div>
@@ -795,7 +574,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                   type="button"
                   className="btn-header-action-icon btn-reload-demo"
                   onClick={handleReloadDemoData}
-                  title="Sinov bildirishnomalarini qayta yuklash"
+                  title="8 ta sinov bildirishnomasini qayta yuklash"
                 >
                   <HiOutlineArrowPath />
                 </button>
@@ -806,9 +585,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                     type="button"
                     className="btn-header-action-icon btn-mark-all-read"
                     onClick={() => {
-                      setNotifications((prev) =>
-                        prev.map((n) => ((n.role || "admin") === currentRole ? { ...n, read: true } : n))
-                      );
+                      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
                       playChime();
                     }}
                     title="Barcha xabarlarni o'qilgan deb belgilash"
@@ -822,7 +599,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                     type="button"
                     className="btn-header-action-icon btn-clear-notifs"
                     onClick={() => {
-                      setNotifications((prev) => prev.filter((n) => (n.role || "admin") !== currentRole));
+                      setNotifications([]);
                       playChime();
                     }}
                     title="Bildirishnomalarni tozalash"
@@ -858,56 +635,34 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               >
                 O'qilmagan ({unreadCount})
               </button>
-
-              {currentRole === "admin" ? (
-                <>
-                  <button
-                    type="button"
-                    className={`notif-tab-btn ${notifFilter === "unlock" ? "active" : ""}`}
-                    onClick={() => setNotifFilter("unlock")}
-                  >
-                    Davomat So'rovlari
-                  </button>
-                  <button
-                    type="button"
-                    className={`notif-tab-btn ${notifFilter === "conflict" ? "active" : ""}`}
-                    onClick={() => setNotifFilter("conflict")}
-                  >
-                    To'qnashuvlar ⚠️
-                  </button>
-                  <button
-                    type="button"
-                    className={`notif-tab-btn ${notifFilter === "payment" ? "active" : ""}`}
-                    onClick={() => setNotifFilter("payment")}
-                  >
-                    To'lovlar
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className={`notif-tab-btn ${notifFilter === "schedule" ? "active" : ""}`}
-                    onClick={() => setNotifFilter("schedule")}
-                  >
-                    Dars Eslatmalari
-                  </button>
-                  <button
-                    type="button"
-                    className={`notif-tab-btn ${notifFilter === "unlock" ? "active" : ""}`}
-                    onClick={() => setNotifFilter("unlock")}
-                  >
-                    Ruxsat Xabarlari
-                  </button>
-                  <button
-                    type="button"
-                    className={`notif-tab-btn ${notifFilter === "homework" ? "active" : ""}`}
-                    onClick={() => setNotifFilter("homework")}
-                  >
-                    Uy Vazifalari
-                  </button>
-                </>
-              )}
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "unlock" ? "active" : ""}`}
+                onClick={() => setNotifFilter("unlock")}
+              >
+                Davomat So'rovlari
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "conflict" ? "active" : ""}`}
+                onClick={() => setNotifFilter("conflict")}
+              >
+                To'qnashuvlar ⚠️
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "payment" ? "active" : ""}`}
+                onClick={() => setNotifFilter("payment")}
+              >
+                To'lovlar
+              </button>
+              <button
+                type="button"
+                className={`notif-tab-btn ${notifFilter === "schedule" ? "active" : ""}`}
+                onClick={() => setNotifFilter("schedule")}
+              >
+                Dars Eslatmalari
+              </button>
             </div>
 
             {/* 10. Sana Bo'yicha Filtr Pillslari (Date Filter Row) */}
@@ -958,45 +713,22 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             {/* 18. Haftalik Qisqacha Xulosa (Weekly Digest Summary Card) */}
             {showWeeklyDigest && (
               <div className="crm-weekly-digest-banner">
-                {currentRole === "admin" ? (
-                  <>
-                    <div className="digest-col">
-                      <span className="digest-label">📈 O'rtacha Davomat</span>
-                      <span className="digest-val text-green">94.2%</span>
-                    </div>
-                    <div className="digest-col">
-                      <span className="digest-label">💰 Haftalik Tushum</span>
-                      <span className="digest-val text-blue">8,450,000 so'm</span>
-                    </div>
-                    <div className="digest-col">
-                      <span className="digest-label">👥 Faol O'quvchilar</span>
-                      <span className="digest-val">128 ta</span>
-                    </div>
-                    <div className="digest-col">
-                      <span className="digest-label">⚡ Darslar Soni</span>
-                      <span className="digest-val">32 ta</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="digest-col">
-                      <span className="digest-label">📊 Guruh Davomati</span>
-                      <span className="digest-val text-green">96.8%</span>
-                    </div>
-                    <div className="digest-col">
-                      <span className="digest-label">⚡ O'tilgan Darslar</span>
-                      <span className="digest-val text-blue">18 ta dars</span>
-                    </div>
-                    <div className="digest-col">
-                      <span className="digest-label">🎓 O'quvchilar</span>
-                      <span className="digest-val">24 ta</span>
-                    </div>
-                    <div className="digest-col">
-                      <span className="digest-label">📝 Vazifalar Tekshiruvi</span>
-                      <span className="digest-val text-green">100% (Hammasi)</span>
-                    </div>
-                  </>
-                )}
+                <div className="digest-col">
+                  <span className="digest-label">📈 O'rtacha Davomat</span>
+                  <span className="digest-val text-green">94.2%</span>
+                </div>
+                <div className="digest-col">
+                  <span className="digest-label">💰 Haftalik Tushum</span>
+                  <span className="digest-val text-blue">8,450,000 so'm</span>
+                </div>
+                <div className="digest-col">
+                  <span className="digest-label">👥 Faol O'quvchilar</span>
+                  <span className="digest-val">128 ta</span>
+                </div>
+                <div className="digest-col">
+                  <span className="digest-label">⚡ Darslar Soni</span>
+                  <span className="digest-val">32 ta</span>
+                </div>
               </div>
             )}
 
@@ -1008,13 +740,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                     <HiOutlineBell />
                   </div>
                   <h4>Hozircha bildirishnomalar yo'q</h4>
-                  <p>Yangi xabarlar va eslatmalar shu yerda paydo bo'ladi</p>
+                  <p>Yangi dars so'rovlari va to'lovlar shu yerda paydo bo'ladi</p>
                   <button
                     type="button"
                     className="btn-load-demo-notifs"
                     onClick={handleReloadDemoData}
                   >
-                    <HiOutlineArrowPath /> ⚡ Sinov Xabarlarini Yuklash
+                    <HiOutlineArrowPath /> ⚡ 8 ta Sinov Xabarlarini Yuklash
                   </button>
                 </div>
               ) : (
@@ -1032,20 +764,14 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                       <div className={`notif-card-icon-wrap type-${notif.type}`}>
                         {notif.type === "unlock" ? (
                           <HiLockClosed />
-                        ) : notif.type === "unlock_approved" ? (
-                          <HiOutlineCheckBadge style={{ color: "#16a34a" }} />
-                        ) : notif.type === "unlock_rejected" ? (
-                          <HiXMark style={{ color: "#dc2626" }} />
                         ) : notif.type === "conflict" ? (
                           <HiOutlineExclamationTriangle />
                         ) : notif.type === "payment" ? (
                           <HiOutlineCurrencyDollar />
                         ) : notif.type === "schedule" ? (
                           <HiOutlineClock />
-                        ) : notif.type === "homework" ? (
-                          <HiOutlineDocumentCheck />
                         ) : (
-                          <HiOutlineChatBubbleLeftRight />
+                          <HiOutlineUser />
                         )}
                       </div>
 
@@ -1061,12 +787,6 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                                   ? "✕ Rad etildi"
                                   : "⏳ Kutilmoqda"}
                               </span>
-                            )}
-                            {notif.type === "unlock_approved" && (
-                              <span className="status-pill pill-approved">✓ Ochildi</span>
-                            )}
-                            {notif.type === "unlock_rejected" && (
-                              <span className="status-pill pill-rejected">✕ Rad etildi</span>
                             )}
                             {/* 14. Jonli Countdown Nishoni */}
                             {notif.type === "schedule" && (
@@ -1086,8 +806,8 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
 
                         <p className="notif-card-msg">{notif.message}</p>
 
-                        {/* 1. Modal Ichidan To'g'ridan-to'g'ri Qabul / Rad qilish (Faqat Administrator uchun) */}
-                        {currentRole === "admin" && notif.type === "unlock" && notif.status !== "approved" && notif.status !== "rejected" && (
+                        {/* 1. Modal Ichidan To'g'ridan-to'g'ri Qabul / Rad qilish (Unlock requests) */}
+                        {notif.type === "unlock" && notif.status !== "approved" && notif.status !== "rejected" && (
                           <div className="notif-action-btn-row" onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
@@ -1099,7 +819,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                             <button
                               type="button"
                               className="btn-quick-reject"
-                              onClick={() => handleRejectUnlock(notif.id, notif.group, notif.targetDate)}
+                              onClick={() => handleRejectUnlock(notif.id)}
                             >
                               <HiXMark /> Rad etish
                             </button>
@@ -1145,13 +865,13 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
                                 value={quickReplyText}
                                 onChange={(e) => setQuickReplyText(e.target.value)}
                                 onKeyDown={(e) => {
-                                  if (e.key === "Enter") handleSendQuickReply(notif.id, notif);
+                                  if (e.key === "Enter") handleSendQuickReply(notif.id);
                                 }}
                               />
                               <button
                                 type="button"
                                 className="btn-send-reply"
-                                onClick={() => handleSendQuickReply(notif.id, notif)}
+                                onClick={() => handleSendQuickReply(notif.id)}
                               >
                                 <HiOutlinePaperAirplane />
                               </button>
@@ -1223,7 +943,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             {/* Modal Footer */}
             <div className="crm-notif-modal-footer">
               <div className="notif-footer-hint">
-                <span className="live-status-dot"></span> {currentRole === "teacher" ? "O'qituvchi" : "Administrator"} bildirishnomalar markazi faol
+                <span className="live-status-dot"></span> Bildirishnomalar markazi faol & avto-sinxronlanadi
               </div>
               <button
                 type="button"

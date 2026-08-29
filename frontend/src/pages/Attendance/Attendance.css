@@ -731,68 +731,22 @@
 
 .td-grade-cell.grade-cell-disabled-gray {
   background: #ffffff !important;
-  cursor: pointer !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
   user-select: none !important;
   opacity: 1 !important;
 }
 
 .cell-grade-gray-disabled {
-  background: #f8fafc !important;
-  border: 1px dashed #cbd5e1 !important;
-  border-radius: 999px;
-  width: 28px;
-  height: 28px;
-  margin: 0 auto;
-  opacity: 0.7 !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease;
-}
-
-.cell-grade-gray-disabled:hover {
-  background: #e0f2fe !important;
-  border-color: #0284c7 !important;
-  transform: scale(1.1);
-}
-
-.cell-grade-absent-tag {
-  font-size: 10px !important;
-  font-weight: 700;
-  color: #dc2626;
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-radius: 999px;
-  padding: 2px 7px;
-  display: inline-block;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cell-grade-absent-tag:hover {
-  background: #fecaca;
-  transform: scale(1.06);
-}
-
-.cell-grade-excused-tag {
-  font-size: 10px !important;
-  font-weight: 700;
-  color: #b45309;
-  background: #fef3c7;
-  border: 1px solid #fde68a;
-  border-radius: 999px;
-  padding: 2px 7px;
-  display: inline-block;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cell-grade-excused-tag:hover {
-  background: #fde68a;
-  transform: scale(1.06);
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .td-grade-cell {
   opacity: 1 !important;
-  cursor: pointer !important;
 }
 
 /* Floating 1-10 Popover Dock (Clean LC-UP Matching Style) */
@@ -2001,155 +1955,293 @@
   to { opacity: 1; }
 }
 
-.reason-smart-card-popup {
+/* ---------------- Oxford LC-UP: Yangi Sabab Kiritish Modali ---------------- */
+.lc-oxford-reason-card {
   position: relative;
   width: 100%;
-  max-width: 380px;
+  max-width: 440px;
   background: #ffffff !important;
-  border: 1.5px solid #0ea5e9;
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(14, 165, 233, 0.1);
-  padding: 20px;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.22), 0 4px 16px rgba(15, 23, 42, 0.08);
+  padding: 24px 28px;
   z-index: 100000;
   text-align: left;
-  animation: modalDropIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: oxfordModalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
-@keyframes modalDropIn {
-  from { opacity: 0; transform: translateY(-24px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes oxfordModalPop {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.reason-card-header {
+.lc-oxford-reason-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 20px;
 }
 
-.reason-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.lc-oxford-reason-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.2px;
 }
 
-.reason-badge-icon {
-  font-size: 16px;
-}
-
-.reason-card-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #e11d48;
-}
-
-.btn-close-reason-card {
-  background: #f1f5f9;
+.btn-oxford-close {
+  background: transparent;
   border: none;
-  font-size: 14px;
-  font-weight: 800;
-  color: #64748b;
+  font-size: 18px;
+  color: #94a3b8;
   cursor: pointer;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
 }
 
-.btn-close-reason-card:hover {
+.btn-oxford-close:hover {
+  background: #f1f5f9;
   color: #0f172a;
-  background: #e2e8f0;
 }
 
-.reason-card-student {
+.lc-oxford-reason-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.lc-oxford-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.lc-oxford-select-container {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.lc-oxford-select-trigger {
+  width: 100%;
+  height: 48px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background: #f8fafc;
-  border-radius: 10px;
-}
-
-.student-name-highlight {
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.date-highlight {
-  color: #0284c7;
-  font-weight: 700;
-}
-
-.reason-input-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: #475569;
-  margin-bottom: 6px;
-}
-
-.reason-select-dropdown {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1.5px solid #cbd5e1;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
-  background: #ffffff;
-  outline: none;
+  justify-content: space-between;
   cursor: pointer;
-  margin-bottom: 12px;
   transition: all 0.2s ease;
-}
-
-.reason-select-dropdown:focus {
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-}
-
-.reason-custom-input {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1.5px solid #cbd5e1;
-  font-size: 13px;
-  color: #1e293b;
-  background: #ffffff;
   outline: none;
-  margin-bottom: 12px;
+  font-family: inherit;
   box-sizing: border-box;
 }
 
-.reason-custom-input:focus {
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+.lc-oxford-select-trigger:hover {
+  border-color: #94a3b8;
 }
 
-.btn-submit-reason-card {
+.lc-oxford-select-trigger.select-open {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.lc-selected-reason-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reason-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.reason-display-text {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.reason-placeholder-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.select-chevron-icon {
+  font-size: 16px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.lc-oxford-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
+  padding: 8px 0;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lc-oxford-option-item {
   width: 100%;
-  padding: 11px;
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
-  color: #ffffff;
+  padding: 11px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  text-align: left;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.lc-oxford-option-item:hover {
+  background: #f8fafc;
+}
+
+.lc-oxford-option-item.option-selected {
+  background: #f0fdf4;
+  font-weight: 700;
+}
+
+.option-label-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.lc-oxford-option-item.option-selected .option-label-text {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.lc-oxford-custom-input-wrap {
+  margin-bottom: 20px;
+}
+
+.lc-oxford-text-input {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.lc-oxford-text-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.lc-oxford-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.btn-oxford-cancel {
+  flex: 1;
+  height: 46px;
+  background: #f1f5f9;
   border: none;
   border-radius: 12px;
-  font-size: 13.5px;
-  font-weight: 800;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-submit-reason-card:hover {
+.btn-oxford-cancel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-oxford-save {
+  flex: 1;
+  height: 46px;
+  background: #0284c7;
+  border: none;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-oxford-save:hover {
+  background: #0369a1;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+}
+
+.btn-oxford-save:active {
+  transform: translateY(0);
+}
+
+/* Absent: Oxford LC-UP Dynamic Reason-Colored Flag & Badge */
+.circle-absent-dynamic {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid transparent !important;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.circle-absent-dynamic:hover {
+  transform: scale(1.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.circle-absent-dynamic .circle-flag-dynamic {
+  font-size: 15px;
+  stroke-width: 2.6;
 }
 
 /* 8-Qoida: Locked Watermark Padlock */
@@ -2685,29 +2777,6 @@ body.dark-theme .circle-absent {
   letter-spacing: 0.4px !important;
   line-height: 1 !important;
   animation: approvedGlow 1.8s infinite ease-in-out;
-}
-
-.unlock-rejected-pill {
-  display: block !important;
-  font-size: 8.5px !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  color: #b91c1c !important;
-  background: #fee2e2 !important;
-  border: 1px solid #fca5a5 !important;
-  padding: 2px 6px !important;
-  border-radius: 8px !important;
-  margin: 0 auto 3px !important;
-  width: fit-content !important;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.18) !important;
-  letter-spacing: 0.4px !important;
-  line-height: 1 !important;
-}
-
-@keyframes approvedGlow {
-  0% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
-  50% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); }
-  100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
 }
 
 @keyframes approvedGlow {

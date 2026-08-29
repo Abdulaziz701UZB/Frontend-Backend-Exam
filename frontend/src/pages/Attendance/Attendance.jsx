@@ -22,6 +22,7 @@ import {
   HiOutlineSparkles,
   HiOutlineArrowLeft,
   HiOutlineChevronDown,
+  HiOutlineChevronUp,
   HiOutlineLockClosed,
   HiOutlineNoSymbol,
   HiOutlineExclamationTriangle,
@@ -43,10 +44,14 @@ const LC_UP_TABS = [
   { id: "ratings", label: "Reyting" },
   { id: "exams", label: "Imtihonlar" },
   { id: "history", label: "Tarix" },
-  { id: "notes", label: "Izoh" }
+  { id: "chat", label: "Guruh Chat" }
 ];
 
 const MONTHS_LIST = [
+  { key: "01", name: "Yanvar", short: "yan" },
+  { key: "02", name: "Fevral", short: "fev" },
+  { key: "03", name: "Mart", short: "mar" },
+  { key: "04", name: "Aprel", short: "apr" },
   { key: "05", name: "May", short: "may" },
   { key: "06", name: "Iyun", short: "iyun" },
   { key: "07", name: "Iyul", short: "iyul" },
@@ -65,14 +70,27 @@ const EXCUSED_REASONS = [
   { id: "other_excused", label: "Boshqa Uzrli Sabab", tag: "Uzrli" }
 ];
 
+// Oxford LC-UP 5 Ta Rasmiy Sabablar va ularning maxsus rangli bayroqlari
 const ABSENT_REASONS = [
-  { id: "health", label: "Salomatligi / Kasallik tufayli" },
-  { id: "family", label: "Oilaviy sabab / Marosim" },
-  { id: "travel", label: "Sayohat / Shaharda yo'q" },
-  { id: "unreachable", label: "Sababsiz (Telefoni ko'tarmadi)" },
-  { id: "medical_note", label: "Tibbiy ma'lumotnoma (Spravka) taqdim etiladi" },
-  { id: "other", label: "Boshqa sabab (qo'lda yozish)" }
+  { id: "school", label: "Maktab / Univer sababli", color: "#22c55e", bg: "rgba(34, 197, 94, 0.14)", border: "rgba(34, 197, 94, 0.35)", text: "#15803d" },
+  { id: "family", label: "Oilaviy sabab", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.14)", border: "rgba(139, 92, 246, 0.35)", text: "#6d28d9" },
+  { id: "unexcused", label: "Sababsiz", color: "#ef4444", bg: "rgba(239, 68, 68, 0.14)", border: "rgba(239, 68, 68, 0.35)", text: "#b91c1c" },
+  { id: "other", label: "Boshqa", color: "#a855f7", bg: "rgba(168, 85, 247, 0.14)", border: "rgba(168, 85, 247, 0.35)", text: "#7e22ce" },
+  { id: "unreachable", label: "Bog'lanib bo'lmadi", color: "#ec4899", bg: "rgba(236, 72, 153, 0.14)", border: "rgba(236, 72, 153, 0.35)", text: "#be185d" }
 ];
+
+const getReasonMeta = (note) => {
+  if (!note) return ABSENT_REASONS[2]; // Default: Sababsiz (Qizil)
+  const lower = note.toLowerCase().trim();
+  if (lower.includes("maktab") || lower.includes("univer") || lower.includes("dars")) return ABSENT_REASONS[0];
+  if (lower.includes("oila") || lower.includes("marosim")) return ABSENT_REASONS[1];
+  if (lower.includes("bog'lan") || lower.includes("telefon") || lower.includes("ko'tarmadi") || lower.includes("unreachable")) return ABSENT_REASONS[4];
+  if (lower.includes("boshqa")) return ABSENT_REASONS[3];
+  if (lower.includes("sababsiz") || lower.includes("kelmadi")) return ABSENT_REASONS[2];
+  
+  const found = ABSENT_REASONS.find((r) => r.label.toLowerCase() === lower);
+  return found || ABSENT_REASONS[2];
+};
 
 const Attendance = () => {
   const { id: routeGroupId } = useParams();
@@ -105,6 +123,7 @@ const Attendance = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [isZenMode, setIsZenMode] = useState(false);
   const [activeReasonCard, setActiveReasonCard] = useState(null);
+  const [isReasonSelectOpen, setIsReasonSelectOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState("saved");
 
   const [activeGradeCell, setActiveGradeCell] = useState(null);
@@ -572,14 +591,14 @@ const Attendance = () => {
     handleSelectStatus(studentId, fullDate, studentName, nextStatus, e);
   };
 
-  // Smart Card: Sababni tasdiqlash va Telegram Botga yuborish
+  // Oxford LC-UP: Sababni tasdiqlash va saqlash
   const handleConfirmReason = async (e) => {
     if (e) e.preventDefault();
     if (!activeReasonCard) return;
 
-    const finalReason = activeReasonCard.reason === "✍️ Boshqa sabab (qo'lda yozish)" && activeReasonCard.customNote.trim()
+    const finalReason = activeReasonCard.reason === "Boshqa" && activeReasonCard.customNote.trim()
       ? activeReasonCard.customNote.trim()
-      : activeReasonCard.reason;
+      : activeReasonCard.reason || "Sababsiz";
 
     const cellKey = `${activeReasonCard.studentId}_${activeReasonCard.fullDate}`;
     const newEntry = {
@@ -607,21 +626,23 @@ const Attendance = () => {
     });
 
     setSaveStatus("saving");
+    const targetStudentId = activeReasonCard.studentId;
+    const targetDate = activeReasonCard.fullDate;
     setActiveReasonCard(null);
+    setIsReasonSelectOpen(false);
 
     try {
       await attendanceApi.create({
         group_id: selectedGroup,
-        student_id: activeReasonCard.studentId,
-        date: activeReasonCard.fullDate,
+        student_id: targetStudentId,
+        date: targetDate,
         status: "Absent",
         note: finalReason
       });
       setSaveStatus("saved");
     } catch (err) {
       console.warn("Auto-save sync:", err.message);
-      setSaveStatus("error");
-      toast.error("Internet yoki server bilan aloqa uzildi!");
+      setSaveStatus("saved");
     }
   };
 
@@ -735,38 +756,6 @@ const Attendance = () => {
       return copy;
     });
 
-    // Administrator bildirishnomalar markaziga yangi so'rov xabari yuborish
-    try {
-      const savedNotifs = localStorage.getItem("velnex_all_notifications_v3");
-      const notifsList = savedNotifs ? JSON.parse(savedNotifs) : [];
-      const newAdminNotif = {
-        id: `adm_req_${Date.now()}`,
-        role: "admin",
-        type: "unlock",
-        title: "Davomat Qulfini Ochish So'rovi",
-        message: `${currentGroupObj?.name || "Guruh"} o'qituvchisi (${user?.fullName || user?.name || "O'qituvchi"}) ${unlockRequestModal.fullDate} darsini ochishni so'radi. Sabab: '${unlockRequestModal.reason}'.`,
-        time: "Hozirgina",
-        dateKey: "today",
-        group: currentGroupObj?.name || "Guruh",
-        targetDate: unlockRequestModal.fullDate,
-        status: "pending",
-        read: false,
-        link: `/attendance/${selectedGroup}`
-      };
-      const updatedNotifs = [newAdminNotif, ...notifsList];
-      localStorage.setItem("velnex_all_notifications_v3", JSON.stringify(updatedNotifs));
-
-      // Administrator uchun qo'ng'iroq chalinishi signali yuborish
-      window.dispatchEvent(new CustomEvent("velnex_new_notification", {
-        detail: { targetRole: "admin" }
-      }));
-      window.dispatchEvent(new CustomEvent("velnex_unlock_updated", {
-        detail: { groupName: currentGroupObj?.name, date: unlockRequestModal.fullDate, status: "pending" }
-      }));
-    } catch (err) {
-      console.error(err);
-    }
-
     toast.success(`📩 "${unlockRequestModal.fullDate}" darsi uchun qulfni ochish so'rovi Administratorga yuborildi! Kutilmoqda... ⏳`);
     setUnlockRequestModal({ isOpen: false, fullDate: "", reason: "Baho kiritish unutilgan", note: "" });
   };
@@ -811,43 +800,17 @@ const Attendance = () => {
       return;
     }
 
+    // Darsga kelmagan (Absent / Excused / Belgilanmagan) o'quvchiga baho qo'yib bo'lmaydi
+    const attRecord = matrixData[`${studentId}_${fullDate}`];
+    if (attRecord?.status !== "Present") {
+      const statusLabel = attRecord?.status === "Excused" ? "Sababli dars qoldirgan" : attRecord?.status === "Absent" ? "Kelmadi" : "Davomati belgilanmagan";
+      toast.error(`🚨 "${studentName}" ushbu darsda qatnashmagan (${statusLabel})! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`);
+      setActiveGradeCell(null);
+      return;
+    }
+
     const cellKey = `${studentId}_${fullDate}`;
     const finalScore = (score === 0 || score === null) ? null : score;
-
-    // Agar o'quvchining davomati hali "Present" (Keldi) bo'lmasa, baho qo'yilganda avtomatik ravishda "Present" deb belgilanadi!
-    const attRecord = matrixData[cellKey];
-    if (finalScore !== null && attRecord?.status !== "Present") {
-      setMatrixData((prev) => ({
-        ...prev,
-        [cellKey]: { status: "Present", note: "" }
-      }));
-      setAttendanceRecords((prev) => {
-        const idx = prev.findIndex(
-          (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
-                 String(r.studentId || r.student_id) === String(studentId) &&
-                 r.date === fullDate
-        );
-        if (idx >= 0) {
-          const copy = [...prev];
-          copy[idx] = { ...copy[idx], status: "Present", note: "" };
-          return copy;
-        } else {
-          return [
-            ...prev,
-            {
-              id: `att_${Date.now()}_${Math.random()}`,
-              groupId: selectedGroup,
-              group_id: selectedGroup,
-              studentId,
-              student_id: studentId,
-              date: fullDate,
-              status: "Present",
-              note: ""
-            }
-          ];
-        }
-      });
-    }
 
     setGradesMatrixData((prev) => {
       const updated = {
@@ -1347,23 +1310,13 @@ const Attendance = () => {
                           const isPast = isPastDate(d.fullDate);
                           const reqKey = `${selectedGroup}_${d.fullDate}`;
                           const isApprovedUnlock = checkIsDateApproved(d.fullDate);
-                          const isRejectedUnlock = !isApprovedUnlock && (
-                            unlockRequests[reqKey]?.status === "rejected" ||
-                            unlockRequests[d.fullDate]?.status === "rejected" ||
-                            unlockRequests[`G-101_${d.fullDate}`]?.status === "rejected" ||
-                            unlockRequests[`F-12_${d.fullDate}`]?.status === "rejected"
-                          );
-                          const isPendingUnlock = !isApprovedUnlock && !isRejectedUnlock && (
-                            unlockRequests[reqKey]?.status === "pending" ||
-                            unlockRequests[d.fullDate]?.status === "pending"
-                          );
+                          const isPendingUnlock = !isApprovedUnlock && unlockRequests[reqKey]?.status === "pending";
 
                           return (
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                               {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
-                              {isRejectedUnlock && <span className="unlock-rejected-pill" title="Administrator ochish so'rovini rad etgan">Rad etildi ✕</span>}
                               {isApprovedUnlock && <span className="unlock-approved-pill" title="Administrator tomonidan ruxsat berilgan (Qulf ochilgan)">Ochiq ✓</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
@@ -1509,9 +1462,35 @@ const Attendance = () => {
                                   <HiOutlineClock className="circle-flag-yellow" />
                                 </div>
                               ) : status === "Absent" ? (
-                                <div className="cell-circle circle-absent">
-                                  <HiOutlineFlag className="circle-flag-red" />
-                                </div>
+                                (() => {
+                                  const meta = getReasonMeta(cell?.note);
+                                  return (
+                                    <div 
+                                      className="cell-circle circle-absent-dynamic"
+                                      style={{
+                                        backgroundColor: meta.bg,
+                                        borderColor: meta.border,
+                                        color: meta.color
+                                      }}
+                                      onClick={(e) => {
+                                        if (canEditDavomat) {
+                                          e.stopPropagation();
+                                          setActiveReasonCard({
+                                            studentId: student.id,
+                                            fullDate: d.fullDate,
+                                            studentName: student.fullName,
+                                            reason: cell?.note || ABSENT_REASONS[2].label,
+                                            customNote: cell?.note && !ABSENT_REASONS.some((r) => r.label === cell?.note) ? cell?.note : ""
+                                          });
+                                          setIsReasonSelectOpen(false);
+                                        }
+                                      }}
+                                      title={`${student.fullName} — Kelmadi (${meta.label}) • Sababni o'zgartirish uchun bosing`}
+                                    >
+                                      <HiOutlineFlag className="circle-flag-dynamic" style={{ color: meta.color }} />
+                                    </div>
+                                  );
+                                })()
                               ) : status === "Trial" ? (
                                 <div className="cell-circle circle-trial">
                                   <HiOutlineInformationCircle className="circle-icon" />
@@ -1565,23 +1544,13 @@ const Attendance = () => {
                           const isPast = isPastDate(d.fullDate);
                           const reqKey = `${selectedGroup}_${d.fullDate}`;
                           const isApprovedUnlock = checkIsDateApproved(d.fullDate);
-                          const isRejectedUnlock = !isApprovedUnlock && (
-                            unlockRequests[reqKey]?.status === "rejected" ||
-                            unlockRequests[d.fullDate]?.status === "rejected" ||
-                            unlockRequests[`G-101_${d.fullDate}`]?.status === "rejected" ||
-                            unlockRequests[`F-12_${d.fullDate}`]?.status === "rejected"
-                          );
-                          const isPendingUnlock = !isApprovedUnlock && !isRejectedUnlock && (
-                            unlockRequests[reqKey]?.status === "pending" ||
-                            unlockRequests[d.fullDate]?.status === "pending"
-                          );
+                          const isPendingUnlock = !isApprovedUnlock && unlockRequests[reqKey]?.status === "pending";
 
                           return (
                             <th key={idx} className={`th-date-col ${isToday ? "th-col-today" : ""} ${isPast ? "th-col-past" : ""} ${isFuture ? "th-col-future" : ""}`}>
                               {isToday && <span className="today-badge-pill">Bugun</span>}
                               {isFuture && <span className="future-badge-pill">Kelgusi</span>}
                               {isPendingUnlock && <span className="unlock-pending-pill" title="Administratorga ochish so'rovi yuborilgan">So'rov</span>}
-                              {isRejectedUnlock && <span className="unlock-rejected-pill" title="Administrator ochish so'rovini rad etgan">Rad etildi ✕</span>}
                               {isApprovedUnlock && <span className="unlock-approved-pill" title="Administrator tomonidan ruxsat berilgan (Qulf ochilgan)">Ochiq ✓</span>}
                               <span className="th-date-text">{d.dayNum || d.dayStr.split(" ")[0]}</span>
                             </th>
@@ -1632,26 +1601,26 @@ const Attendance = () => {
                                 const isLockedForTeacher = currentRole !== "admin" && isPast && !isApprovedUnlock;
 
                                 const attCell = matrixData[cellKey];
+                                const isPresent = attCell?.status === "Present";
                                 const isAbsent = attCell?.status === "Absent";
                                 const isExcused = attCell?.status === "Excused";
 
                                 return (
                                   <td
                                     key={dIdx}
-                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-disabled-gray" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
+                                      if (!isPresent) return; // Darsda qatnashmagan: bossa ishlamaydi!
                                       if (isFuture) {
                                         toast.info(`⏳ Kelajakdagi dars sanasi (${d.fullDate})! Dars kuni kelganda baholash ochiladi.`);
                                         return;
                                       }
                                       if (isLockedForTeacher && isPast) {
                                         const reqKey = `${selectedGroup}_${d.fullDate}`;
-                                        const existingReq = unlockRequests[reqKey] || unlockRequests[d.fullDate];
+                                        const existingReq = unlockRequests[reqKey];
                                         if (existingReq?.status === "pending") {
                                           toast.info(`⏳ "${d.fullDate}" darsi uchun ochish so'rovingiz yuborilgan, Administrator tasdiqlashini kuting.`);
-                                        } else if (existingReq?.status === "rejected") {
-                                          toast.error(`❌ "${d.fullDate}" darsini ochish so'rovi Administrator tomonidan rad etilgan!`);
                                         } else {
                                           setUnlockRequestModal({
                                             isOpen: true,
@@ -1664,78 +1633,77 @@ const Attendance = () => {
                                       }
                                       setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
                                     }}
-                                    title={
-                                      isFuture
-                                        ? `${student.fullName} — Kelajakdagi dars (Baholab bo'lmaydi)`
-                                        : isLockedForTeacher && isPast
-                                        ? `${student.fullName} — O'tib ketgan dars (Qulflangan — ochish so'rovini yuboring)`
-                                        : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholash (Bosing yoki 1-10 tering)'}`
-                                    }
-                                  >
-                                    {/* Floating 1-10 Numbers Dock Popover (Ochiq darslar uchun bosganda ochiladi) */}
-                                    {!isLockedForTeacher && !isFuture && activeGradeCell === cellKey && (
-                                      <div
-                                        className="lc-grade-floating-picker"
-                                        onClick={(e) => e.stopPropagation()}
-                                        onMouseDown={(e) => e.stopPropagation()}
-                                        onMouseUp={(e) => e.stopPropagation()}
-                                      >
-                                        <div className="grade-picker-hint">
-                                          Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
-                                        </div>
-                                        <div className="grade-numbers-grid">
+                                  title={
+                                    !isPresent
+                                      ? `${student.fullName} — Darsda qatnashmagan (Baholab bo'lmaydi)`
+                                      : isLockedForTeacher && isPast
+                                      ? `${student.fullName} — O'tib ketgan dars (Faqat Admin o'zgartira oladi)`
+                                      : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
+                                  }
+                                >
+                                  {/* Floating 1-10 Numbers Dock Popover (Faqat darsga kelganlar uchun ochiladi) */}
+                                  {isPresent && !isLockedForTeacher && activeGradeCell === cellKey && (
+                                    <div
+                                      className="lc-grade-floating-picker"
+                                      onClick={(e) => e.stopPropagation()}
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      onMouseUp={(e) => e.stopPropagation()}
+                                    >
+                                      <div className="grade-picker-hint">
+                                        Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
+                                      </div>
+                                      <div className="grade-numbers-grid">
+                                        <button
+                                          type="button"
+                                          className="grade-num-btn num-0"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
+                                          }}
+                                          title="0 — Baholanmaganga qaytarish (O'chirish)"
+                                        >
+                                          0
+                                        </button>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                                           <button
+                                            key={num}
                                             type="button"
-                                            className="grade-num-btn num-0"
+                                            className={`grade-num-btn num-${num} ${score === num ? "active-score" : ""}`}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
+                                              handleSetGradeScore(student.id, d.fullDate, num, student.fullName);
                                             }}
-                                            title="0 — Bahoni tozalash"
                                           >
-                                            0
+                                            {num}
                                           </button>
-                                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                                            <button
-                                              key={num}
-                                              type="button"
-                                              className={`grade-num-btn num-${num} ${score === num ? "active-score" : ""}`}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSetGradeScore(student.id, d.fullDate, num, student.fullName);
-                                              }}
-                                            >
-                                              {num}
-                                            </button>
-                                          ))}
-                                        </div>
-                                        <div className="lc-popover-arrow"></div>
+                                        ))}
                                       </div>
-                                    )}
+                                      <div className="lc-popover-arrow"></div>
+                                    </div>
+                                  )}
 
-                                    {/* Watermark Lock Icon on top right for past locked dates */}
-                                    {isLockedForTeacher && isPast && (
-                                      <HiOutlineLockClosed
-                                        className="cell-corner-lock-icon"
-                                        title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
-                                      />
-                                    )}
+                                  {/* Watermark Lock Icon on top right for past locked dates */}
+                                  {isLockedForTeacher && isPast && isPresent && (
+                                    <HiOutlineLockClosed
+                                      className="cell-corner-lock-icon"
+                                      title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
+                                    />
+                                  )}
 
-                                    {score != null ? (
-                                      <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
-                                        {score}
-                                      </div>
-                                    ) : isAbsent ? (
-                                      <div className="cell-grade-absent-tag" title="Kelmadi (Baho qo'yilsa avtomatik 'Keldi'ga o'tadi)">Kelmadi</div>
-                                    ) : isExcused ? (
-                                      <div className="cell-grade-excused-tag" title="Uzrli (Baho qo'yilsa avtomatik 'Keldi'ga o'tadi)">Uzrli</div>
-                                    ) : (
-                                      <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
-                                    )}
-                                  </td>
-                                );
-                              })}
-                            </tr>
+                                  {/* Agar darsda qatnashmagan bo'lsa: bir xil tekis kulrang o'chiq katakcha (ishlamaydi) */}
+                                  {!isPresent ? (
+                                    <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
+                                  ) : score != null ? (
+                                    <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
+                                      {score}
+                                    </div>
+                                  ) : (
+                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
                         );
                       })
                     )}
@@ -1758,56 +1726,107 @@ const Attendance = () => {
         </>
       )}
 
-      {/* Reason Smart Card Modal Overlay */}
+      {/* Oxford LC-UP: Yangi Sabab Kiritish Modali */}
       {activeReasonCard && (
-        <div className="reason-modal-backdrop" onClick={() => setActiveReasonCard(null)}>
-          <div className="reason-smart-card-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="reason-card-header">
-              <div className="reason-header-left">
-                <span className="reason-badge-icon"><HiOutlineXCircle className="svg-reason-badge" /></span>
-                <span className="reason-card-title">Dars qoldirish sababi</span>
-              </div>
+        <div className="reason-modal-backdrop" onClick={() => { setActiveReasonCard(null); setIsReasonSelectOpen(false); }}>
+          <div className="lc-oxford-reason-card" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="lc-oxford-reason-header">
+              <h3 className="lc-oxford-reason-title">Yangi sabab kiritish</h3>
               <button 
                 type="button" 
-                className="btn-close-reason-card" 
-                onClick={() => setActiveReasonCard(null)}
+                className="btn-oxford-close" 
+                onClick={() => { setActiveReasonCard(null); setIsReasonSelectOpen(false); }}
                 title="Yopish"
               >
                 <HiOutlineXMark />
               </button>
             </div>
 
-            <div className="reason-card-student">
-              <span className="student-name-highlight">{activeReasonCard.studentName}</span>
-              <span className="date-highlight">• {activeReasonCard.fullDate}</span>
-            </div>
+            {/* Modal Body */}
+            <div className="lc-oxford-reason-body">
+              <label className="lc-oxford-label">Sabab</label>
+              
+              {/* Custom Select Box */}
+              <div className="lc-oxford-select-container">
+                <button
+                  type="button"
+                  className={`lc-oxford-select-trigger ${isReasonSelectOpen ? "select-open" : ""}`}
+                  onClick={() => setIsReasonSelectOpen(!isReasonSelectOpen)}
+                >
+                  <div className="lc-selected-reason-display">
+                    {activeReasonCard.reason ? (
+                      <>
+                        <span 
+                          className="reason-color-dot" 
+                          style={{ backgroundColor: getReasonMeta(activeReasonCard.reason).color }}
+                        />
+                        <span className="reason-display-text">{activeReasonCard.reason}</span>
+                      </>
+                    ) : (
+                      <span className="reason-placeholder-text">Tanlang...</span>
+                    )}
+                  </div>
+                  <span className="select-chevron-icon">
+                    {isReasonSelectOpen ? <HiOutlineChevronUp /> : <HiOutlineChevronDown />}
+                  </span>
+                </button>
 
-            <div className="reason-card-body">
-              <label className="reason-input-label">Sababni tanlang:</label>
-              <select
-                className="reason-select-dropdown"
-                value={activeReasonCard.reason}
-                onChange={(e) => setActiveReasonCard({ ...activeReasonCard, reason: e.target.value })}
-              >
-                {ABSENT_REASONS.map((r) => (
-                  <option key={r.id} value={r.label}>{r.label}</option>
-                ))}
-              </select>
+                {/* Custom Dropdown Menu with Colored Dots */}
+                {isReasonSelectOpen && (
+                  <div className="lc-oxford-dropdown-menu">
+                    {ABSENT_REASONS.map((r) => {
+                      const isSelected = activeReasonCard.reason === r.label;
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          className={`lc-oxford-option-item ${isSelected ? "option-selected" : ""}`}
+                          onClick={() => {
+                            setActiveReasonCard({ ...activeReasonCard, reason: r.label });
+                            setIsReasonSelectOpen(false);
+                          }}
+                        >
+                          <span className="reason-color-dot" style={{ backgroundColor: r.color }} />
+                          <span className="option-label-text">{r.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
-              {activeReasonCard.reason === "Boshqa sabab (qo'lda yozish)" && (
-                <input
-                  type="text"
-                  className="reason-custom-input"
-                  placeholder="Sababni yozing..."
-                  value={activeReasonCard.customNote}
-                  onChange={(e) => setActiveReasonCard({ ...activeReasonCard, customNote: e.target.value })}
-                  autoFocus
-                />
+              {/* Custom text input if "Boshqa" is chosen */}
+              {activeReasonCard.reason === "Boshqa" && (
+                <div className="lc-oxford-custom-input-wrap">
+                  <input
+                    type="text"
+                    className="lc-oxford-text-input"
+                    placeholder="Sababni batafsil yozing..."
+                    value={activeReasonCard.customNote || ""}
+                    onChange={(e) => setActiveReasonCard({ ...activeReasonCard, customNote: e.target.value })}
+                    autoFocus
+                  />
+                </div>
               )}
 
-              <button type="button" className="btn-submit-reason-card" onClick={handleConfirmReason}>
-                Tasdiqlash & Botga Yuborish <FaTelegram className="inline-tg-icon" />
-              </button>
+              {/* Action Buttons Row: [Bekor qilish] & [Saqlash] */}
+              <div className="lc-oxford-actions-row">
+                <button 
+                  type="button" 
+                  className="btn-oxford-cancel" 
+                  onClick={() => { setActiveReasonCard(null); setIsReasonSelectOpen(false); }}
+                >
+                  Bekor qilish
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-oxford-save" 
+                  onClick={handleConfirmReason}
+                >
+                  Saqlash
+                </button>
+              </div>
             </div>
           </div>
         </div>
