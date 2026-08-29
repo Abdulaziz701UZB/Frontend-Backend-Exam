@@ -624,15 +624,22 @@
   height: 48px;
 }
 
+.td-grade-cell {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
 .td-grade-cell:hover {
-  background: #f0f9ff !important;
-  border-color: #38bdf8 !important;
+  background: #f8fafc !important;
 }
 
 .td-grade-cell.grade-cell-active {
-  background: #e0f2fe !important;
-  border: 1.5px solid #0284c7 !important;
-  box-shadow: 0 0 12px rgba(2, 132, 199, 0.25);
+  background: #ffffff !important;
+  border: 2px solid #0284c7 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
+  z-index: 100;
 }
 
 .cell-grade-badge {
@@ -749,132 +756,89 @@
   opacity: 1 !important;
 }
 
-/* Floating 1-10 Popover Dock (Clean LC-UP Matching Style) */
-.lc-grade-floating-picker {
+/* Oxford LC-UP Vertical Dark Pill Grade Picker (Image 1) */
+.lc-oxford-vert-grade-picker {
   position: absolute;
-  top: -85px;
+  top: -120px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 999;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 10px 14px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04);
-  white-space: nowrap;
-  animation: gradePickerPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10000;
+  width: 36px;
+  background: #2f3238;
+  border-radius: 12px;
+  padding: 5px 3px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5px;
+  animation: vertPickerPop 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
-@keyframes gradePickerPop {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.92); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+@keyframes vertPickerPop {
+  from { opacity: 0; transform: translateX(-50%) scale(0.92); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
-.grade-picker-hint {
-  font-size: 11px;
-  font-weight: 700;
-  color: #64748b;
-  margin-bottom: 6px;
-  text-align: center;
-}
-
-.grade-numbers-grid {
+.oxford-vert-header {
+  width: 100%;
+  height: 22px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 2px;
+  padding-bottom: 2px;
 }
 
-.grade-num-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #0f172a;
-  font-size: 13.5px;
-  font-weight: 800;
+.oxford-vert-check {
+  color: #94a3b8;
+  font-size: 14px;
+  stroke-width: 2.5;
+  transition: color 0.15s ease;
+}
+
+.oxford-vert-header:hover .oxford-vert-check {
+  color: #ffffff;
+}
+
+.oxford-vert-numbers-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.5px;
+}
+
+.oxford-vert-num-btn {
+  width: 100%;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.12s ease;
+  padding: 0;
+  font-family: inherit;
 }
 
-/* 1, 2 Qizil Hover & Active */
-.grade-num-btn.num-1:hover,
-.grade-num-btn.num-2:hover,
-.grade-num-btn.num-1.active-score,
-.grade-num-btn.num-2.active-score {
-  background: #ef4444 !important;
-  border-color: #dc2626 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
-  transform: scale(1.18);
+.oxford-vert-num-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
 }
 
-/* 3, 4, 5 Sariq Hover & Active */
-.grade-num-btn.num-3:hover,
-.grade-num-btn.num-4:hover,
-.grade-num-btn.num-5:hover,
-.grade-num-btn.num-3.active-score,
-.grade-num-btn.num-4.active-score,
-.grade-num-btn.num-5.active-score {
-  background: #f59e0b !important;
-  border-color: #d97706 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
-  transform: scale(1.18);
-}
-
-/* 6, 7 Ko'k Hover & Active */
-.grade-num-btn.num-6:hover,
-.grade-num-btn.num-7:hover,
-.grade-num-btn.num-6.active-score,
-.grade-num-btn.num-7.active-score {
+.oxford-vert-num-btn.vert-active-score {
   background: #0284c7 !important;
-  border-color: #0369a1 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4) !important;
-  transform: scale(1.18);
-}
-
-/* 8, 9, 10 Yashil Hover & Active */
-.grade-num-btn.num-8:hover,
-.grade-num-btn.num-9:hover,
-.grade-num-btn.num-10:hover,
-.grade-num-btn.num-8.active-score,
-.grade-num-btn.num-9.active-score,
-.grade-num-btn.num-10.active-score {
-  background: #10b981 !important;
-  border-color: #059669 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
-  transform: scale(1.18);
-}
-
-/* 0 Kulrang Hover */
-.grade-num-btn.num-0:hover {
-  background: #64748b !important;
-  border-color: #475569 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.35) !important;
-  transform: scale(1.18);
-}
-
-.grade-num-clear {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #ef4444;
-  font-size: 13px;
   font-weight: 800;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);
 }
 
 .grade-num-clear:hover {

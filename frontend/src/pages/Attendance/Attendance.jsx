@@ -127,6 +127,7 @@ const Attendance = () => {
   const [saveStatus, setSaveStatus] = useState("saved");
 
   const [activeGradeCell, setActiveGradeCell] = useState(null);
+  const [showGradePicker, setShowGradePicker] = useState(false);
   const [gradesMatrixData, setGradesMatrixData] = useState(() => {
     try {
       const saved = localStorage.getItem("velnex_grades_matrix");
@@ -200,11 +201,16 @@ const Attendance = () => {
         if (isZenMode) setIsZenMode(false);
         if (unlockRequestModal.isOpen) setUnlockRequestModal((prev) => ({ ...prev, isOpen: false }));
         if (mobileBottomSheet.isOpen) setMobileBottomSheet((prev) => ({ ...prev, isOpen: false }));
+        if (activeReasonCard) {
+          setActiveReasonCard(null);
+          setIsReasonSelectOpen(false);
+        }
+        if (showGradePicker) setShowGradePicker(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isZenMode, unlockRequestModal.isOpen, mobileBottomSheet.isOpen]);
+  }, [isZenMode, unlockRequestModal.isOpen, mobileBottomSheet.isOpen, activeReasonCard, showGradePicker]);
 
   const [matrixData, setMatrixData] = useState({});
   const [gradesData, setGradesData] = useState({});
@@ -852,10 +858,11 @@ const Attendance = () => {
           const studentName = student?.fullName || "Talaba";
           const nowTime = Date.now();
 
-          // Enter yoki Pastga o'q (ArrowDown) -> Pastdagi talabani baholashga o'tish
+          // Enter yoki Pastga o'q (ArrowDown) -> Pastdagi talabani baholashga o'tish (popover ochilmasdan)
           if (e.key === "Enter" || e.key === "ArrowDown") {
             e.preventDefault();
             gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
+            setShowGradePicker(false); // Klaviatura bilan yozganda popover ochilmaydi!
             const currentIdx = filteredStudents.findIndex((s) => String(s.id) === String(studentId));
             if (currentIdx !== -1) {
               for (let i = currentIdx + 1; i < filteredStudents.length; i++) {
@@ -864,11 +871,13 @@ const Attendance = () => {
                 const nextAtt = matrixData[nextKey];
                 if (nextAtt?.status === "Present") {
                   setActiveGradeCell(nextKey);
+                  setShowGradePicker(false);
                   return;
                 }
               }
               // Agar pastda boshqa darsga kelgan talaba qolmagan bo'lsa
               setActiveGradeCell(null);
+              setShowGradePicker(false);
             }
             return;
           }
@@ -877,6 +886,7 @@ const Attendance = () => {
           if (e.key === "ArrowUp") {
             e.preventDefault();
             gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
+            setShowGradePicker(false);
             const currentIdx = filteredStudents.findIndex((s) => String(s.id) === String(studentId));
             if (currentIdx > 0) {
               for (let i = currentIdx - 1; i >= 0; i--) {
@@ -885,6 +895,7 @@ const Attendance = () => {
                 const prevAtt = matrixData[prevKey];
                 if (prevAtt?.status === "Present") {
                   setActiveGradeCell(prevKey);
+                  setShowGradePicker(false);
                   return;
                 }
               }
@@ -897,6 +908,7 @@ const Attendance = () => {
             e.preventDefault();
             gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
             handleSetGradeScore(studentId, fullDate, null, studentName, false);
+            setShowGradePicker(false);
             return;
           }
 
@@ -904,6 +916,7 @@ const Attendance = () => {
           if (e.key === "Escape") {
             gradeInputRef.current = { buffer: "", lastKeyTime: 0 };
             setActiveGradeCell(null);
+            setShowGradePicker(false);
             return;
           }
 
@@ -916,18 +929,21 @@ const Attendance = () => {
             if (e.key === "0" && gradeInputRef.current.buffer === "1" && timeDiff < 1500) {
               gradeInputRef.current = { buffer: "10", lastKeyTime: nowTime };
               handleSetGradeScore(studentId, fullDate, 10, studentName, false);
+              setShowGradePicker(false);
               return;
             }
 
             if (e.key === "1") {
               gradeInputRef.current = { buffer: "1", lastKeyTime: nowTime };
               handleSetGradeScore(studentId, fullDate, 1, studentName, false);
+              setShowGradePicker(false);
               return;
             }
 
             if (e.key === "0") {
               gradeInputRef.current = { buffer: "0", lastKeyTime: nowTime };
               handleSetGradeScore(studentId, fullDate, null, studentName, false);
+              setShowGradePicker(false);
               return;
             }
 
@@ -935,6 +951,7 @@ const Attendance = () => {
             const numVal = parseInt(e.key, 10);
             gradeInputRef.current = { buffer: String(numVal), lastKeyTime: nowTime };
             handleSetGradeScore(studentId, fullDate, numVal, studentName, false);
+            setShowGradePicker(false);
           }
         }
       }
@@ -942,7 +959,7 @@ const Attendance = () => {
 
     window.addEventListener("keydown", handleGradeKeyDown);
     return () => window.removeEventListener("keydown", handleGradeKeyDown);
-  }, [activeGradeCell, students, filteredStudents, matrixData]);
+  }, [activeGradeCell, showGradePicker, students, filteredStudents, matrixData]);
 
   // 1, 2, 3, 6, 7, 8, 9, 10-Qoidalar: Guruhlar Hubi Uchun Professional Helperlar
 
@@ -1631,7 +1648,17 @@ const Attendance = () => {
                                         }
                                         return;
                                       }
-                                      setActiveGradeCell(activeGradeCell === cellKey ? null : cellKey);
+                                      // Toggle vertical grade picker & active focus (1-rasm va 2-rasm)
+                                      if (activeGradeCell === cellKey) {
+                                        if (showGradePicker) {
+                                          setShowGradePicker(false);
+                                        } else {
+                                          setShowGradePicker(true);
+                                        }
+                                      } else {
+                                        setActiveGradeCell(cellKey);
+                                        setShowGradePicker(true);
+                                      }
                                     }}
                                   title={
                                     !isPresent
@@ -1641,44 +1668,43 @@ const Attendance = () => {
                                       : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
                                   }
                                 >
-                                  {/* Floating 1-10 Numbers Dock Popover (Faqat darsga kelganlar uchun ochiladi) */}
-                                  {isPresent && !isLockedForTeacher && activeGradeCell === cellKey && (
+                                  {/* Vertical 0-10 Oxford LC-UP Grade Pill Popover (1-rasm) */}
+                                  {isPresent && !isLockedForTeacher && activeGradeCell === cellKey && showGradePicker && (
                                     <div
-                                      className="lc-grade-floating-picker"
+                                      className="lc-oxford-vert-grade-picker"
                                       onClick={(e) => e.stopPropagation()}
                                       onMouseDown={(e) => e.stopPropagation()}
                                       onMouseUp={(e) => e.stopPropagation()}
                                     >
-                                      <div className="grade-picker-hint">
-                                        Ballni tanlang (yoki klaviaturada 1-9 bosing, 0 — tozalash):
+                                      <div 
+                                        className="oxford-vert-header"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowGradePicker(false);
+                                        }}
+                                        title="Yopish"
+                                      >
+                                        <HiOutlineCheck className="oxford-vert-check" />
                                       </div>
-                                      <div className="grade-numbers-grid">
-                                        <button
-                                          type="button"
-                                          className="grade-num-btn num-0"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSetGradeScore(student.id, d.fullDate, null, student.fullName);
-                                          }}
-                                          title="0 — Baholanmaganga qaytarish (O'chirish)"
-                                        >
-                                          0
-                                        </button>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                                          <button
-                                            key={num}
-                                            type="button"
-                                            className={`grade-num-btn num-${num} ${score === num ? "active-score" : ""}`}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleSetGradeScore(student.id, d.fullDate, num, student.fullName);
-                                            }}
-                                          >
-                                            {num}
-                                          </button>
-                                        ))}
+                                      <div className="oxford-vert-numbers-list">
+                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
+                                          const isCurrentScore = (num === 0 && (score === 0 || score === null)) || score === num;
+                                          return (
+                                            <button
+                                              key={num}
+                                              type="button"
+                                              className={`oxford-vert-num-btn ${isCurrentScore ? "vert-active-score" : ""}`}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSetGradeScore(student.id, d.fullDate, num === 0 ? null : num, student.fullName, false);
+                                                setShowGradePicker(false);
+                                              }}
+                                            >
+                                              {num}
+                                            </button>
+                                          );
+                                        })}
                                       </div>
-                                      <div className="lc-popover-arrow"></div>
                                     </div>
                                   )}
 
