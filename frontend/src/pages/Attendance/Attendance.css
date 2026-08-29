@@ -2751,26 +2751,26 @@ body.dark-theme .circle-absent {
 /* 17-Qoida: Professional Glassmorphic Unlock Request Modal */
 .lc-unlock-request-card {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 26px 28px;
-  max-width: 460px;
-  width: 92%;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18), 0 4px 16px rgba(15, 23, 42, 0.06);
+  border-radius: 26px;
+  padding: 28px 30px;
+  max-width: 440px;
+  width: 94%;
+  box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.05);
   border: 1px solid #e2e8f0;
   animation: unlockPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 @keyframes unlockPop {
-  from { opacity: 0; transform: scale(0.92) translateY(10px); }
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .lc-unlock-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .lc-unlock-title-wrap {
@@ -2780,28 +2780,29 @@ body.dark-theme .circle-absent {
 }
 
 .lc-unlock-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #fef08a;
+  color: #854d0e;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  font-size: 24px;
+  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.25);
   flex-shrink: 0;
 }
 
 .lc-unlock-title {
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 700;
   color: #0f172a;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
 }
 
 .lc-unlock-subtitle {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   color: #64748b;
   margin: 3px 0 0 0;
@@ -2809,12 +2810,12 @@ body.dark-theme .circle-absent {
 
 .lc-unlock-info-box {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 14px 18px;
+  border: 1.5px solid #e0f2fe;
+  border-radius: 18px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
@@ -2822,7 +2823,7 @@ body.dark-theme .circle-absent {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
 .lc-unlock-info-item .info-label {
@@ -2838,10 +2839,10 @@ body.dark-theme .circle-absent {
 .lc-unlock-info-item .highlight-date {
   color: #0284c7;
   background: #e0f2fe;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-weight: 800;
-  font-size: 12.5px;
+  padding: 3px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13.5px;
 }
 
 .lc-unlock-form .reason-input-label {
@@ -2850,19 +2851,19 @@ body.dark-theme .circle-absent {
   font-weight: 800;
   color: #475569;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
 }
 
 .lc-unlock-form .reason-select-dropdown {
   width: 100%;
-  height: 44px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: #f8fafc;
-  padding: 0 14px;
-  font-size: 13.5px;
-  font-weight: 600;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
   color: #0f172a;
   outline: none;
   transition: all 0.2s ease;
@@ -2872,78 +2873,82 @@ body.dark-theme .circle-absent {
 
 .lc-unlock-form .reason-select-dropdown:focus {
   border-color: #0284c7;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+  box-shadow: 0 0 0 3.5px rgba(2, 132, 199, 0.15);
 }
 
 .lc-unlock-textarea {
   width: 100%;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: #f8fafc;
-  padding: 10px 14px;
-  font-size: 13px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  padding: 12px 16px;
+  font-size: 13.5px;
   font-weight: 500;
   color: #0f172a;
   outline: none;
   transition: all 0.2s ease;
   font-family: inherit;
-  resize: none;
+  resize: vertical;
+  min-height: 80px;
   box-sizing: border-box;
 }
 
 .lc-unlock-textarea:focus {
   border-color: #0284c7;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+  box-shadow: 0 0 0 3.5px rgba(2, 132, 199, 0.15);
 }
 
 .lc-unlock-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 22px;
+  gap: 14px;
+  margin-top: 24px;
 }
 
 .lc-btn-cancel-modal {
-  padding: 11px 20px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
+  flex: 1;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
   background: #ffffff;
-  color: #64748b;
+  color: #475569;
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .lc-btn-cancel-modal:hover {
-  background: #f1f5f9;
+  background: #f8fafc;
   color: #0f172a;
-  border-color: #cbd5e1;
+  border-color: #94a3b8;
 }
 
 .lc-btn-send-request {
-  padding: 11px 22px;
-  border-radius: 12px;
+  flex: 2;
+  height: 48px;
+  border-radius: 14px;
   border: none;
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: #0284c7;
   color: #ffffff;
-  font-weight: 800;
-  font-size: 13.5px;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lc-btn-send-request:hover {
+  background: #0369a1;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
 }
 
 .lc-btn-send-request:active {
