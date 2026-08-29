@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -34,13 +34,13 @@ import {
   HiOutlineXCircle,
   HiOutlineLockOpen
 } from "react-icons/hi2";
-import { FaTelegram, FaUserGraduate, FaChalkboardUser } from "react-icons/fa6";
+import { FaTelegram, FaUserGraduate, FaChalkboardUser, FaTrophy, FaMedal } from "react-icons/fa6";
 import "./Attendance.css";
 
 const LC_UP_TABS = [
   { id: "attendance", label: "Davomat" },
-  { id: "grades", label: "Baholash" },
-  { id: "homework", label: "Uyga vazifa" },
+  { id: "grades", label: "Ballar" },
+  { id: "homework", label: "Mashqlar" },
   { id: "ratings", label: "Reyting" },
   { id: "exams", label: "Imtihonlar" },
   { id: "history", label: "Tarix" },
@@ -125,6 +125,10 @@ const Attendance = () => {
   const [activeReasonCard, setActiveReasonCard] = useState(null);
   const [isReasonSelectOpen, setIsReasonSelectOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState("saved");
+
+  // Reyting Tab Filter States (Oxford LC-UP: [Ballar | Kristall] va [O'rta arifmetik | Umumiy])
+  const [ratingType, setRatingType] = useState("points"); // "points" | "crystal"
+  const [ratingMode, setRatingMode] = useState("average"); // "average" | "total"
 
   const [activeGradeCell, setActiveGradeCell] = useState(null);
   const [showGradePicker, setShowGradePicker] = useState(false);
@@ -791,6 +795,51 @@ const Attendance = () => {
     if (sortAsc) return a.fullName.localeCompare(b.fullName);
     return b.fullName.localeCompare(a.fullName);
   });
+
+  // Oxford LC-UP: Reyting (Leaderboard) hisoblash
+  const leaderboardStudents = useMemo(() => {
+    return activeGroupStudents.map((student) => {
+      // Shu oy darslaridagi talabaning baholari
+      const monthScores = lessonDates
+        .map((d) => gradesMatrixData[`${student.id}_${d.fullDate}`]?.score)
+        .filter((s) => typeof s === "number" && s > 0);
+
+      // Kelgan darslar soni
+      const attendedDays = lessonDates
+        .map((d) => matrixData[`${student.id}_${d.fullDate}`]?.status)
+        .filter((st) => st === "Present").length;
+
+      let displayScore = "10";
+      let numericVal = 10;
+
+      if (ratingType === "points") {
+        if (ratingMode === "average") {
+          const avg = monthScores.length > 0
+            ? monthScores.reduce((a, b) => a + b, 0) / monthScores.length
+            : 10;
+          numericVal = avg;
+          displayScore = avg % 1 === 0 ? avg.toString() : avg.toFixed(1);
+        } else {
+          const total = monthScores.length > 0
+            ? monthScores.reduce((a, b) => a + b, 0)
+            : 10;
+          numericVal = total;
+          displayScore = total.toString();
+        }
+      } else {
+        // Kristall
+        const crystals = (attendedDays * 5) + (monthScores.filter((sc) => sc >= 9).length * 10) + 20;
+        numericVal = crystals;
+        displayScore = `${crystals}`;
+      }
+
+      return {
+        ...student,
+        numericVal,
+        displayScore
+      };
+    }).sort((a, b) => b.numericVal - a.numericVal || a.fullName.localeCompare(b.fullName));
+  }, [activeGroupStudents, lessonDates, gradesMatrixData, matrixData, ratingType, ratingMode]);
 
   // Baholash (1-10 Ball) Ball qo'yish va saqlash
   const handleSetGradeScore = (studentId, fullDate, score, studentName, autoClose = true) => {
@@ -1740,8 +1789,104 @@ const Attendance = () => {
             </div>
           )}
 
-          {/* OTHER TABS (Mashqlar, Uyga vazifa, Chegirma, Reyting, Imtihonlar, Tarix, Izoh) */}
-          {activeTab !== "attendance" && activeTab !== "grades" && (
+          {/* Oxford LC-UP: REYTING TAB */}
+          {activeTab === "ratings" && (
+            <div className="oxford-ratings-container">
+              {/* Sub-Filters: [Ballar | Kristall] va [O'rta arifmetik | Umumiy] */}
+              <div className="oxford-ratings-filters-bar">
+                <div className="oxford-pills-group">
+                  <button
+                    type="button"
+                    className={`oxford-pill-btn ${ratingType === "points" ? "active" : ""}`}
+                    onClick={() => setRatingType("points")}
+                  >
+                    Ballar
+                  </button>
+                  <button
+                    type="button"
+                    className={`oxford-pill-btn ${ratingType === "crystal" ? "active" : ""}`}
+                    onClick={() => setRatingType("crystal")}
+                  >
+                    Kristall
+                  </button>
+                </div>
+
+                <div className="oxford-pills-group">
+                  <button
+                    type="button"
+                    className={`oxford-pill-btn ${ratingMode === "average" ? "active" : ""}`}
+                    onClick={() => setRatingMode("average")}
+                  >
+                    O'rta arifmetik
+                  </button>
+                  <button
+                    type="button"
+                    className={`oxford-pill-btn ${ratingMode === "total" ? "active" : ""}`}
+                    onClick={() => setRatingMode("total")}
+                  >
+                    Umumiy
+                  </button>
+                </div>
+              </div>
+
+              {/* Leaderboard Cards List */}
+              <div className="oxford-ratings-list">
+                {leaderboardStudents.length === 0 ? (
+                  <div className="empty-matrix-msg">Guruhda talabalar mavjud emas</div>
+                ) : (
+                  leaderboardStudents.map((student, idx) => {
+                    const rank = idx + 1;
+                    const isLeader = rank === 1;
+
+                    return (
+                      <div 
+                        key={student.id} 
+                        className={`oxford-rating-card ${isLeader ? "rank-1-card" : ""}`}
+                        onClick={() => setSelectedProfileStudent(student)}
+                      >
+                        {/* Rank Number */}
+                        <div className="oxford-rating-rank-num">{rank}</div>
+
+                        {/* Avatar */}
+                        <div className="oxford-rating-avatar">
+                          {student.avatar && student.avatar.length > 5 ? (
+                            <img src={student.avatar} alt="" className="oxford-avatar-img" />
+                          ) : (
+                            <span className="oxford-avatar-initial">
+                              {(student.fullName || "T").charAt(0)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Student Name & Score */}
+                        <div className="oxford-rating-info">
+                          <span className="oxford-rating-name">{student.fullName}</span>
+                          <div className="oxford-rating-score-line">
+                            {ratingType === "crystal" ? (
+                              <span className="rating-gem-icon">💎</span>
+                            ) : (
+                              <span className="rating-star-icon">⭐</span>
+                            )}
+                            <span className="rating-score-val">{student.displayScore}</span>
+                          </div>
+                        </div>
+
+                        {/* Trophy or Medal Icon */}
+                        <div className="oxford-rating-trophy-box">
+                          {rank === 1 && <span className="trophy-badge" title="1-O'rin G'olibi">🏆</span>}
+                          {rank === 2 && <span className="medal-badge" title="2-O'rin">🥈</span>}
+                          {rank === 3 && <span className="medal-badge" title="3-O'rin">🥉</span>}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* OTHER TABS (Mashqlar, Imtihonlar, Tarix, Chat) */}
+          {activeTab !== "attendance" && activeTab !== "grades" && activeTab !== "ratings" && (
             <div className="lc-empty-tab-panel">
               <HiOutlineSparkles className="empty-tab-icon" />
               <h3>{LC_UP_TABS.find((t) => t.id === activeTab)?.label} Bo'limi</h3>
