@@ -32,7 +32,12 @@ import {
   HiOutlinePaperAirplane,
   HiOutlineBolt,
   HiOutlineXCircle,
-  HiOutlineLockOpen
+  HiOutlineLockOpen,
+  HiOutlinePlus,
+  HiOutlineDocumentText,
+  HiOutlineTrash,
+  HiOutlinePencilSquare,
+  HiOutlineAcademicCap
 } from "react-icons/hi2";
 import { FaTelegram, FaUserGraduate, FaChalkboardUser, FaTrophy, FaMedal } from "react-icons/fa6";
 import "./Attendance.css";
@@ -142,6 +147,75 @@ const Attendance = () => {
   });
 
   const gradeInputRef = useRef({ buffer: "", lastKeyTime: 0 });
+
+  // Oxford LC-UP Imtihonlar Tab State
+  const [examsList, setExamsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`velnex_exams_${routeGroupId || "default"}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isNewExamModalOpen, setIsNewExamModalOpen] = useState(false);
+  const [newExamForm, setNewExamForm] = useState({
+    name: "",
+    date: new Date().toISOString().split("T")[0],
+    passingScore: "70",
+    section: "Speaking",
+    calcType: "Foiz %"
+  });
+
+  useEffect(() => {
+    if (selectedGroup) {
+      try {
+        const saved = localStorage.getItem(`velnex_exams_${selectedGroup}`);
+        setExamsList(saved ? JSON.parse(saved) : []);
+      } catch {
+        setExamsList([]);
+      }
+    }
+  }, [selectedGroup]);
+
+  const handleSaveExam = (e) => {
+    e.preventDefault();
+    if (!newExamForm.name.trim()) {
+      toast.warning("Iltimos, imtihon nomini kiriting!");
+      return;
+    }
+    const newExam = {
+      id: Date.now().toString(),
+      name: newExamForm.name.trim(),
+      date: newExamForm.date || new Date().toISOString().split("T")[0],
+      passingScore: Number(newExamForm.passingScore) || 70,
+      section: newExamForm.section || "Speaking",
+      calcType: newExamForm.calcType || "Foiz %",
+      createdAt: new Date().toISOString()
+    };
+    const updated = [newExam, ...examsList];
+    setExamsList(updated);
+    if (selectedGroup) {
+      localStorage.setItem(`velnex_exams_${selectedGroup}`, JSON.stringify(updated));
+    }
+    setIsNewExamModalOpen(false);
+    setNewExamForm({
+      name: "",
+      date: new Date().toISOString().split("T")[0],
+      passingScore: "70",
+      section: "Speaking",
+      calcType: "Foiz %"
+    });
+    toast.success(`✅ "${newExam.name}" imtihoni muvaffaqiyatli qo'shildi!`);
+  };
+
+  const handleDeleteExam = (examId, examName) => {
+    const updated = examsList.filter((ex) => ex.id !== examId);
+    setExamsList(updated);
+    if (selectedGroup) {
+      localStorage.setItem(`velnex_exams_${selectedGroup}`, JSON.stringify(updated));
+    }
+    toast.info(`🗑️ "${examName}" imtihoni o'chirildi.`);
+  };
 
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [unlockRequestModal, setUnlockRequestModal] = useState({
@@ -1885,8 +1959,85 @@ const Attendance = () => {
             </div>
           )}
 
-          {/* OTHER TABS (Mashqlar, Imtihonlar, Tarix, Chat) */}
-          {activeTab !== "attendance" && activeTab !== "grades" && activeTab !== "ratings" && (
+          {/* Oxford LC-UP: IMTIHONLAR TAB */}
+          {activeTab === "exams" && (
+            <div className="oxford-exams-container">
+              {/* Header: Title + "+ Yangi imtihon qo'shish" Button */}
+              <div className="oxford-exams-header-row">
+                <h2 className="oxford-exams-title">Imtihonlar</h2>
+                <button
+                  type="button"
+                  className="btn-oxford-add-exam"
+                  onClick={() => setIsNewExamModalOpen(true)}
+                >
+                  <HiOutlinePlus className="btn-plus-icon" />
+                  <span>Yangi imtihon qo'shish</span>
+                </button>
+              </div>
+
+              {/* Exams Table Structure */}
+              <div className="oxford-exams-table-wrap">
+                <table className="oxford-exams-table">
+                  <thead>
+                    <tr>
+                      <th className="th-exam-col th-col-name">NOMI</th>
+                      <th className="th-exam-col th-col-date">SANA</th>
+                      <th className="th-exam-col th-col-score">O'TISH BALI</th>
+                      <th className="th-exam-col th-col-section">BO'LIM</th>
+                      <th className="th-exam-col th-col-calc">HISOBLASH</th>
+                      <th className="th-exam-col th-col-actions">HARAKATLAR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {examsList.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="td-exams-empty-cell">
+                          <div className="oxford-empty-exams-state">
+                            <HiOutlineDocumentText className="oxford-empty-doc-icon" />
+                            <p className="oxford-empty-doc-text">Ma'lumot topilmadi</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      examsList.map((exam) => (
+                        <tr key={exam.id} className="tr-exam-row">
+                          <td className="td-exam-name">
+                            <div className="exam-name-box">
+                              <HiOutlineAcademicCap className="exam-row-icon" />
+                              <span className="exam-name-text">{exam.name}</span>
+                            </div>
+                          </td>
+                          <td className="td-exam-date">{exam.date}</td>
+                          <td className="td-exam-score">
+                            <span className="exam-pass-score-badge">{exam.passingScore} ball</span>
+                          </td>
+                          <td className="td-exam-section">
+                            <span className="exam-section-tag">{exam.section}</span>
+                          </td>
+                          <td className="td-exam-calc">
+                            <span className="exam-calc-pill">{exam.calcType}</span>
+                          </td>
+                          <td className="td-exam-actions">
+                            <button
+                              type="button"
+                              className="btn-exam-action-delete"
+                              onClick={() => handleDeleteExam(exam.id, exam.name)}
+                              title="O'chirish"
+                            >
+                              <HiOutlineTrash />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* OTHER TABS (Mashqlar, Tarix, Chat) */}
+          {activeTab !== "attendance" && activeTab !== "grades" && activeTab !== "ratings" && activeTab !== "exams" && (
             <div className="lc-empty-tab-panel">
               <HiOutlineSparkles className="empty-tab-icon" />
               <h3>{LC_UP_TABS.find((t) => t.id === activeTab)?.label} Bo'limi</h3>
@@ -2170,6 +2321,111 @@ const Attendance = () => {
                 })}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Oxford LC-UP: Yangi Imtihon Qo'shish Modali */}
+      {isNewExamModalOpen && (
+        <div className="reason-modal-backdrop" onClick={() => setIsNewExamModalOpen(false)}>
+          <div className="lc-oxford-reason-card" onClick={(e) => e.stopPropagation()}>
+            <div className="lc-oxford-reason-header">
+              <h3 className="lc-oxford-reason-title">Yangi imtihon qo'shish</h3>
+              <button 
+                type="button" 
+                className="btn-oxford-close" 
+                onClick={() => setIsNewExamModalOpen(false)}
+                title="Yopish"
+              >
+                <HiOutlineXMark />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveExam} className="lc-oxford-reason-body">
+              <div className="lc-oxford-input-group">
+                <label className="lc-oxford-label">Imtihon nomi:</label>
+                <input
+                  type="text"
+                  className="lc-oxford-text-input"
+                  placeholder="Masalan: Unit 1 Test, Speaking Exam..."
+                  value={newExamForm.name}
+                  onChange={(e) => setNewExamForm((prev) => ({ ...prev, name: e.target.value }))}
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <div className="lc-oxford-input-group" style={{ marginTop: "14px" }}>
+                <label className="lc-oxford-label">Sana:</label>
+                <input
+                  type="date"
+                  className="lc-oxford-text-input"
+                  value={newExamForm.date}
+                  onChange={(e) => setNewExamForm((prev) => ({ ...prev, date: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
+                <div className="lc-oxford-input-group">
+                  <label className="lc-oxford-label">O'tish bali:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="lc-oxford-text-input"
+                    value={newExamForm.passingScore}
+                    onChange={(e) => setNewExamForm((prev) => ({ ...prev, passingScore: e.target.value }))}
+                    required
+                  />
+                </div>
+
+                <div className="lc-oxford-input-group">
+                  <label className="lc-oxford-label">Bo'lim:</label>
+                  <select
+                    className="lc-oxford-text-input"
+                    value={newExamForm.section}
+                    onChange={(e) => setNewExamForm((prev) => ({ ...prev, section: e.target.value }))}
+                  >
+                    <option value="Speaking">Speaking</option>
+                    <option value="Grammar">Grammar</option>
+                    <option value="Listening">Listening</option>
+                    <option value="Reading">Reading</option>
+                    <option value="Writing">Writing</option>
+                    <option value="General">General (Umumiy)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="lc-oxford-input-group" style={{ marginTop: "14px", marginBottom: "22px" }}>
+                <label className="lc-oxford-label">Hisoblash turi:</label>
+                <select
+                  className="lc-oxford-text-input"
+                  value={newExamForm.calcType}
+                  onChange={(e) => setNewExamForm((prev) => ({ ...prev, calcType: e.target.value }))}
+                >
+                  <option value="Foiz %">Foiz %</option>
+                  <option value="Ballar (0-100)">Ballar (0-100)</option>
+                  <option value="Baho (1-5)">Baho (1-5)</option>
+                </select>
+              </div>
+
+              <div className="lc-oxford-actions-row">
+                <button
+                  type="button"
+                  className="btn-oxford-cancel"
+                  onClick={() => setIsNewExamModalOpen(false)}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn-oxford-save"
+                >
+                  Saqlash
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -3256,3 +3256,224 @@ body.dark-theme .circle-absent {
   50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
+
+/* ---------------- Oxford LC-UP Imtihonlar (Exams) Bo'limi ---------------- */
+.oxford-exams-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.2s ease-out;
+  padding-bottom: 24px;
+}
+
+.oxford-exams-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.oxford-exams-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.btn-oxford-add-exam {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+}
+
+.btn-oxford-add-exam:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.4);
+}
+
+.btn-oxford-add-exam:active {
+  transform: translateY(0);
+}
+
+.btn-plus-icon {
+  font-size: 17px;
+  stroke-width: 2.5;
+}
+
+.oxford-exams-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.oxford-exams-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.oxford-exams-table thead tr {
+  border-bottom: 1.5px solid #f1f5f9;
+}
+
+.th-exam-col {
+  padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: #ffffff;
+}
+
+.th-col-name { width: 30%; }
+.th-col-date { width: 15%; }
+.th-col-score { width: 15%; }
+.th-col-section { width: 15%; }
+.th-col-calc { width: 15%; }
+.th-col-actions { width: 10%; text-align: center; }
+
+/* Empty state in Table (Matching Screenshot) */
+.td-exams-empty-cell {
+  padding: 80px 20px !important;
+  text-align: center;
+  border: none !important;
+}
+
+.oxford-empty-exams-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.oxford-empty-doc-icon {
+  font-size: 48px;
+  color: #cbd5e1;
+  stroke-width: 1.5;
+}
+
+.oxford-empty-doc-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Exam Rows */
+.tr-exam-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+}
+
+.tr-exam-row:hover {
+  background: #f8fafc;
+}
+
+.td-exam-name,
+.td-exam-date,
+.td-exam-score,
+.td-exam-section,
+.td-exam-calc,
+.td-exam-actions {
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.exam-name-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exam-row-icon {
+  font-size: 20px;
+  color: #0284c7;
+  flex-shrink: 0;
+}
+
+.exam-name-text {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.td-exam-date {
+  font-weight: 500;
+  color: #64748b;
+}
+
+.exam-pass-score-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.exam-section-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.exam-calc-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #f0f9ff;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.td-exam-actions {
+  text-align: center;
+}
+
+.btn-exam-action-delete {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-exam-action-delete:hover {
+  background: #fef2f2;
+  color: #ef4444;
+}
