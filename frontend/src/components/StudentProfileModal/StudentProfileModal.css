@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    VELNEX Student Profile Modal (Ultra Professional Dossier)
    ========================================================================== */
 
@@ -326,25 +326,29 @@
   transform: translateY(-1px);
 }
 
-/* Telegram Bot Integration Card */
-.telegram-integration-card {
+/* Special Feature Cards (Telegram & Birthday) */
+.feature-special-card {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 16px;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  margin-top: 14px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
 }
 
-.telegram-card-top {
+.feature-special-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.telegram-card-title {
+.feature-special-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -353,34 +357,124 @@
   color: #0f172a;
 }
 
-.telegram-desc-text {
-  font-size: 13px;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.5;
+.feature-birthday-card {
+  background: linear-gradient(180deg, #fffdfa 0%, #ffffff 100%);
+  border: 1.5px solid #fde68a;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.08);
 }
 
-.btn-send-bot-invite {
+.feature-birthday-card:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.12);
+}
+
+.birthday-pill {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.btn-bday-send-action {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 9px 18px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1.5px solid #cbd5e1;
-  color: #334155;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
+  border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+  transition: all 0.18s ease;
   width: fit-content;
 }
 
-.btn-send-bot-invite:hover {
-  background: #eff6ff;
-  border-color: #0284c7;
-  color: #0284c7;
-  transform: translateY(-1px);
+.btn-bday-send-action:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+}
+
+.btn-bday-send-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.bday-loading-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spinBday 0.6s linear infinite;
+}
+
+@keyframes spinBday {
+  to { transform: rotate(360deg); }
+}
+
+/* Tug'ilgan kun tabriknomasi yuborilgach eslatma yakunlandi qatori (Eslatma yo'qoladi) */
+.bday-completed-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-top: 14px;
+  animation: bdayFadeIn 0.25s ease-out;
+}
+
+@keyframes bdayFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bday-completed-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bday-completed-check-icon {
+  font-size: 22px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.bday-completed-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bday-completed-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #15803d;
+}
+
+.bday-completed-desc {
+  font-size: 12px;
+  color: #166534;
+}
+
+.bday-completed-tag {
+  font-size: 11.5px;
+  font-weight: 800;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #86efac;
+  white-space: nowrap;
 }
 
 /* Attendance Summary */

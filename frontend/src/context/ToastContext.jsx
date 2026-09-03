@@ -12,21 +12,19 @@ const ToastContext = createContext();
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = useCallback((message, type = "success", duration = 3000) => {
-    // Xabarni takrorlanishdan saqlash (flood/spam bo'lmasligi uchun)
+  const showToast = useCallback((message, type = "success", duration = 3500) => {
     setToasts((prev) => {
-      // Agar xuddi shu xabar hozir ko'rinib turgan bo'lsa, takroran qo'shmaymiz
+      // Bir xil xabarni qayta-qayta to'plamaslik (spamdan himoya)
       if (prev.some((t) => t.message === message)) {
         return prev;
       }
       const id = Date.now() + Math.random();
-      const updated = [...prev.slice(-2), { id, message, type }];
-
       setTimeout(() => {
         setToasts((curr) => curr.filter((t) => t.id !== id));
       }, duration);
-
-      return updated;
+      // Ekranda maksimal 3 tagacha toast bo'ladi
+      const updated = [...prev, { id, message, type }];
+      return updated.slice(-3);
     });
   }, []);
 

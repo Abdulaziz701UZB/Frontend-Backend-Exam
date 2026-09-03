@@ -912,6 +912,28 @@ const Students = () => {
                       <HiOutlinePaperAirplane /> Botga Ulanish Havolasini Yuborish
                     </button>
                   </div>
+
+                  <div className="feature-special-card">
+                    <div className="feature-special-header">
+                      <span className="feature-special-title">
+                        <HiOutlineCake className="text-amber" />
+                        9. Tug'ilgan Kuni & Tabriknoma Eslatmasi
+                      </span>
+                      <span className="birthday-pill">
+                        {dossierData.birthDateDisplay} ({dossierData.studentAge} yosh)
+                      </span>
+                    </div>
+                    <p className="text-muted text-xs mb-3">
+                      O'quvchining tug'ilgan kuniga 3 kun qolganda tizim avtomatik eslatma beradi va maxsus 15% chegirma promo-kodini taklif qiladi.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => toast.success(`🎉 "${selectedDossierStudent.fullName}" ga tug'ilgan kun tabriknomasi va 15% chegirma promo-kodi yuborildi!`)}
+                    >
+                      <HiOutlineSparkles /> 🎉 Tabrik Xabarnomasi & Chegirma Yuborish
+                    </button>
+                  </div>
                 </div>
               )}
 
