@@ -757,46 +757,54 @@
 }
 
 /* Oxford LC-UP Vertical Dark Pill Grade Picker (Image 1) */
+.lc-grades-wrapper,
+.lc-grades-matrix-table,
+.lc-grades-matrix-table tbody,
+.lc-grades-matrix-table tr,
+.lc-grades-matrix-table td {
+  overflow: visible !important;
+}
+
 .lc-oxford-vert-grade-picker {
   position: absolute;
-  top: -120px;
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10000;
-  width: 36px;
-  background: #2f3238;
-  border-radius: 12px;
-  padding: 5px 3px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999999 !important;
+  width: 44px;
+  background: #2b2e35;
+  border-radius: 14px;
+  padding: 8px 4px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5px;
-  animation: vertPickerPop 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 2px;
+  animation: vertPickerPop 0.16s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 @keyframes vertPickerPop {
-  from { opacity: 0; transform: translateX(-50%) scale(0.92); }
+  from { opacity: 0; transform: translateX(-50%) scale(0.9); }
   to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
 .oxford-vert-header {
   width: 100%;
-  height: 22px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 4px;
   padding-bottom: 2px;
 }
 
 .oxford-vert-check {
   color: #94a3b8;
-  font-size: 14px;
-  stroke-width: 2.5;
+  font-size: 16px;
+  stroke-width: 2.8;
   transition: color 0.15s ease;
 }
 
@@ -808,18 +816,18 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 1.5px;
+  gap: 2px;
 }
 
 .oxford-vert-num-btn {
   width: 100%;
-  height: 22px;
+  height: 26px;
   border: none;
   background: transparent;
   color: #cbd5e1;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 7px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -830,7 +838,7 @@
 }
 
 .oxford-vert-num-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.16);
   color: #ffffff;
 }
 
@@ -838,7 +846,7 @@
   background: #0284c7 !important;
   color: #ffffff !important;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.45);
 }
 
 .grade-num-clear:hover {
