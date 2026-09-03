@@ -12,13 +12,22 @@ const ToastContext = createContext();
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = useCallback((message, type = "success", duration = 3500) => {
-    const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, message, type }]);
+  const showToast = useCallback((message, type = "success", duration = 3000) => {
+    // Xabarni takrorlanishdan saqlash (flood/spam bo'lmasligi uchun)
+    setToasts((prev) => {
+      // Agar xuddi shu xabar hozir ko'rinib turgan bo'lsa, takroran qo'shmaymiz
+      if (prev.some((t) => t.message === message)) {
+        return prev;
+      }
+      const id = Date.now() + Math.random();
+      const updated = [...prev.slice(-2), { id, message, type }];
 
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, duration);
+      setTimeout(() => {
+        setToasts((curr) => curr.filter((t) => t.id !== id));
+      }, duration);
+
+      return updated;
+    });
   }, []);
 
   const removeToast = useCallback((id) => {
