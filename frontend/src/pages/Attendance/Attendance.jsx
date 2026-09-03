@@ -1839,16 +1839,18 @@ const Attendance = () => {
                                     />
                                   )}
 
-                                  {/* Agar darsda qatnashmagan bo'lsa: bir xil tekis kulrang o'chiq katakcha (ishlamaydi) */}
-                                  {!isPresent ? (
-                                    <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
-                                  ) : score != null ? (
-                                    <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
-                                      {score}
-                                    </div>
-                                  ) : (
-                                    <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
-                                  )}
+                                  {/* Katakcha tarkibi (Ixcham quti) */}
+                                  <div className={`grade-cell-box ${activeGradeCell === cellKey ? "is-active" : ""}`}>
+                                    {!isPresent ? (
+                                      <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
+                                    ) : score != null ? (
+                                      <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
+                                        {score}
+                                      </div>
+                                    ) : (
+                                      <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
+                                    )}
+                                  </div>
                                 </td>
                               );
                             })}
