@@ -342,13 +342,51 @@ const Attendance = () => {
   const getMonthLessonDates = () => {
     const monthObj = MONTHS_LIST.find((m) => m.key === selectedMonth) || MONTHS_LIST[3];
     const monthShort = monthObj.short;
-    
-    const isOddDays = (currentGroupObj?.scheduleDays || "").toLowerCase().includes("dushanba") || (currentGroupObj?.name || "").includes("Toq");
-    const dayNumbers = isOddDays 
-      ? ["03", "05", "07", "10", "12", "14", "17", "19", "21", "24", "26", "28", "31"]
-      : ["02", "04", "06", "09", "11", "13", "16", "18", "20", "23", "25", "27", "30"];
+    const year = parseInt(selectedYear, 10) || new Date().getFullYear();
+    const month = parseInt(selectedMonth, 10) || (new Date().getMonth() + 1);
 
-    return dayNumbers.map((d) => ({
+    // Guruh kunlari: Toq (Dush-Chor-Jum), Juft (Sesh-Pay-Shan), yoki Har kuni
+    const sched = (currentGroupObj?.scheduleDays || currentGroupObj?.name || "").toLowerCase();
+    const isToq = sched.includes("dush") || sched.includes("chor") || sched.includes("jum") || sched.includes("toq");
+    const isJuft = sched.includes("sesh") || sched.includes("pay") || sched.includes("shan") || sched.includes("juft");
+    const isEveryday = sched.includes("har kun") || sched.includes("daily") || sched.includes("barcha");
+
+    // Shu oyda nechta kun bor (masalan, 30 yoki 31 kun)
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const matchedDays = [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dt = new Date(year, month - 1, day);
+      const dayOfWeek = dt.getDay(); // 0: Yakshanba, 1: Dushanba, 2: Seshanba, 3: Chorshanba, 4: Payshanba, 5: Juma, 6: Shanba
+
+      if (dayOfWeek === 0) continue; // Yakshanba kunlari dars bo'lmaydi
+
+      if (isEveryday) {
+        matchedDays.push(String(day).padStart(2, "0"));
+      } else if (isToq && (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5)) {
+        // Dushanba, Chorshanba, Juma
+        matchedDays.push(String(day).padStart(2, "0"));
+      } else if (isJuft && (dayOfWeek === 2 || dayOfWeek === 4 || dayOfWeek === 6)) {
+        // Seshanba, Payshanba, Shanba
+        matchedDays.push(String(day).padStart(2, "0"));
+      } else if (!isToq && !isJuft) {
+        // Default: Dushanba, Chorshanba, Juma
+        if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) {
+          matchedDays.push(String(day).padStart(2, "0"));
+        }
+      }
+    }
+
+    // Agar bugungi sana shu oyda bo'lsa va ro'yxatda yo'q bo'lsa, o'qituvchi bugun davomat qila olishi uchun kiritamiz
+    const today = new Date();
+    const isCurMonth = today.getFullYear() === year && (today.getMonth() + 1) === month;
+    const todayDayStr = String(today.getDate()).padStart(2, "0");
+    if (isCurMonth && !matchedDays.includes(todayDayStr)) {
+      matchedDays.push(todayDayStr);
+      matchedDays.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    }
+
+    return matchedDays.map((d) => ({
       dayStr: `${d} ${monthShort}`,
       fullDate: `${selectedYear}-${selectedMonth}-${d}`,
       dayNum: d
@@ -730,21 +768,31 @@ const Attendance = () => {
     }
   };
 
-  // Mark all students Present ONLY for TODAY's lesson date with instant auto-save
+  // Mark all students Present for TODAY (yoki eng yaqin o'tilgan dars sanasi) with instant auto-save
   const handleMarkAllPresent = async () => {
     if (!selectedGroup || activeGroupStudents.length === 0) return;
+
+    // Ko'rinayotgan jadvaldagi maqsadli sana (Bugungi sana yoki eng so'nggi dars kuni)
+    const targetDate = lessonDates.find((d) => d.fullDate === todayDateStr)?.fullDate
+      || lessonDates.filter((d) => !isFutureDate(d.fullDate)).slice(-1)[0]?.fullDate
+      || lessonDates[0]?.fullDate;
+
+    if (!targetDate) {
+      toast.warning("Ushbu oy uchun dars sanasi topilmadi!");
+      return;
+    }
 
     const updated = { ...matrixData };
     const promises = [];
 
     activeGroupStudents.forEach((student) => {
-      const cellKey = `${student.id}_${todayDateStr}`;
+      const cellKey = `${student.id}_${targetDate}`;
       updated[cellKey] = { status: "Present", note: "" };
       promises.push(
         attendanceApi.create({
           group_id: selectedGroup,
           student_id: student.id,
-          date: todayDateStr,
+          date: targetDate,
           status: "Present",
           note: ""
         }).catch(() => null)
@@ -758,45 +806,67 @@ const Attendance = () => {
         const idx = copy.findIndex(
           (r) => String(r.groupId || r.group_id) === String(selectedGroup) &&
                  String(r.studentId || r.student_id) === String(student.id) &&
-                 r.date === todayDateStr
+                 r.date === targetDate
         );
         if (idx >= 0) {
           copy[idx] = { ...copy[idx], status: "Present", note: "" };
         } else {
-          copy.unshift({ groupId: selectedGroup, studentId: student.id, date: todayDateStr, status: "Present", note: "" });
+          copy.unshift({ groupId: selectedGroup, studentId: student.id, date: targetDate, status: "Present", note: "" });
         }
       });
       return copy;
     });
 
     await Promise.all(promises);
-    toast.success(`Bugungi (${todayDateStr}) dars uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
+    toast.success(`"${targetDate}" darsi uchun barcha o'quvchilar "Keldi" qilindi va avto-saqlandi! ✅⚡`);
   };
 
-  // Bugungi dars uchun faqat darsga kelgan (Present) o'quvchilarga 10 ball qo'yish
+  // Faqat darsga kelgan (Present / Excused) o'quvchilarga 10 ball qo'yish (agar davomat qilinmagan bo'lsa avtomatik davomat qilib 10 qo'yadi)
   const handleMarkAllGradesTen = () => {
     if (activeGroupStudents.length === 0) {
       toast.warning("Guruhda faol talabalar mavjud emas!");
       return;
     }
 
-    const presentStudents = activeGroupStudents.filter((student) => {
-      const att = matrixData[`${student.id}_${todayDateStr}`];
-      return att?.status === "Present";
+    const targetDate = lessonDates.find((d) => d.fullDate === todayDateStr)?.fullDate
+      || lessonDates.filter((d) => !isFutureDate(d.fullDate)).slice(-1)[0]?.fullDate
+      || lessonDates[0]?.fullDate;
+
+    if (!targetDate) {
+      toast.warning("Ushbu oy uchun dars sanasi topilmadi!");
+      return;
+    }
+
+    let presentStudents = activeGroupStudents.filter((student) => {
+      const att = matrixData[`${student.id}_${targetDate}`];
+      return att?.status === "Present" || att?.status === "Excused";
     });
 
+    // Agar o'qituvchi hali davomatni belgilamagan bo'lsa, avtomatik ravishda barchani "Keldi" qilib 10 ball beradi
     if (presentStudents.length === 0) {
-      toast.warning("Bugungi darsda qatnashgan ('Keldi') o'quvchi topilmadi! Avval davomatni belgilang.");
-      return;
+      const updatedMatrix = { ...matrixData };
+      activeGroupStudents.forEach((student) => {
+        const cellKey = `${student.id}_${targetDate}`;
+        updatedMatrix[cellKey] = { status: "Present", note: "" };
+        attendanceApi.create({
+          group_id: selectedGroup,
+          student_id: student.id,
+          date: targetDate,
+          status: "Present",
+          note: ""
+        }).catch(() => null);
+      });
+      setMatrixData(updatedMatrix);
+      presentStudents = activeGroupStudents;
     }
 
     setGradesMatrixData((prev) => {
       let copy = { ...prev };
       presentStudents.forEach((student) => {
-        const cellKey = `${student.id}_${todayDateStr}`;
+        const cellKey = `${student.id}_${targetDate}`;
         copy[cellKey] = {
           score: 10,
-          date: todayDateStr,
+          date: targetDate,
           studentId: student.id,
           updatedAt: new Date().toISOString()
         };
@@ -812,7 +882,7 @@ const Attendance = () => {
       setSaveStatus("saved");
     }, 300);
 
-    toast.success(`Bugungi darsda qatnashgan (${presentStudents.length} ta) o'quvchiga 10 ball qo'yildi va saqlandi! 🟢💯`);
+    toast.success(`"${targetDate}" darsi uchun barcha o'quvchilarga 10 ball qo'yildi va saqlandi! 🟢💯`);
   };
 
   // 17-Qoida: O'tgan darsni ochish uchun Administratorga ruxsat so'rovi yuborish
