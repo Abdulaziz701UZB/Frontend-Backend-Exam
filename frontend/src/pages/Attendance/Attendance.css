@@ -758,12 +758,69 @@
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25) !important;
 }
 
-.td-grade-cell.grade-cell-disabled-gray {
+.td-grade-cell.grade-cell-disabled-gray,
+.td-grade-cell.grade-cell-disabled-absent {
   background: #ffffff !important;
   cursor: not-allowed !important;
-  pointer-events: none !important;
   user-select: none !important;
   opacity: 1 !important;
+}
+
+/* Darsga kelmagan: Qora katakcha (Bossa bo'lmaydi) */
+.cell-grade-absent-black {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  background: #1e293b !important;
+  border: 1.5px solid #334155 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.15s ease !important;
+}
+
+.absent-mini-dash {
+  width: 8px;
+  height: 2px;
+  background: #64748b;
+  border-radius: 2px;
+}
+
+/* Kech qolgan o'quvchi: vaqt/soat belgisi (Baho qo'ysa bo'ladi) */
+.cell-late-clock-indicator {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 14px;
+  height: 14px;
+  background: #f97316;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  box-shadow: 0 1px 4px rgba(249, 115, 22, 0.5);
+  border: 1.5px solid #ffffff;
+  z-index: 2;
+}
+
+.capsule-late {
+  border-color: #f97316 !important;
+  background: #fff7ed !important;
+  color: #ea580c !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.capsule-late-icon {
+  font-size: 13.5px;
+  color: #ea580c;
 }
 
 .cell-grade-gray-disabled {

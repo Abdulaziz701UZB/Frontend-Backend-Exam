@@ -878,10 +878,10 @@ const Attendance = () => {
         .map((d) => gradesMatrixData[`${student.id}_${d.fullDate}`]?.score)
         .filter((s) => typeof s === "number" && s > 0);
 
-      // Kelgan darslar soni
+      // Kelgan darslar soni (Present va Kech qolgan/Excused)
       const attendedDays = lessonDates
         .map((d) => matrixData[`${student.id}_${d.fullDate}`]?.status)
-        .filter((st) => st === "Present").length;
+        .filter((st) => st === "Present" || st === "Excused").length;
 
       let displayScore = "10";
       let numericVal = 10;
@@ -929,10 +929,12 @@ const Attendance = () => {
       return;
     }
 
-    // Darsga kelmagan (Absent / Excused / Belgilanmagan) o'quvchiga baho qo'yib bo'lmaydi
+    // Darsga kelmagan (Absent / Belgilanmagan) o'quvchiga baho qo'yib bo'lmaydi.
+    // Vaqt belgilangan / kech kelgan (Excused) va darsda bo'lgan (Present) o'quvchiga baho qo'yiladi!
     const attRecord = matrixData[`${studentId}_${fullDate}`];
-    if (attRecord?.status !== "Present") {
-      const statusLabel = attRecord?.status === "Excused" ? "Sababli dars qoldirgan" : attRecord?.status === "Absent" ? "Kelmadi" : "Davomati belgilanmagan";
+    const canGrade = attRecord?.status === "Present" || attRecord?.status === "Excused";
+    if (!canGrade) {
+      const statusLabel = attRecord?.status === "Absent" ? "Darsga kelmagan" : "Davomati belgilanmagan";
       toast.error(`🚨 "${studentName}" ushbu darsda qatnashmagan (${statusLabel})! Kelmagan o'quvchiga baho qo'yib bo'lmaydi.`);
       setActiveGradeCell(null);
       return;
@@ -992,7 +994,7 @@ const Attendance = () => {
                 const nextS = filteredStudents[i];
                 const nextKey = `${nextS.id}_${fullDate}`;
                 const nextAtt = matrixData[nextKey];
-                if (nextAtt?.status === "Present") {
+                if (nextAtt?.status === "Present" || nextAtt?.status === "Excused") {
                   setActiveGradeCell(nextKey);
                   setShowGradePicker(false);
                   return;
@@ -1016,7 +1018,7 @@ const Attendance = () => {
                 const prevS = filteredStudents[i];
                 const prevKey = `${prevS.id}_${fullDate}`;
                 const prevAtt = matrixData[prevKey];
-                if (prevAtt?.status === "Present") {
+                if (prevAtt?.status === "Present" || prevAtt?.status === "Excused") {
                   setActiveGradeCell(prevKey);
                   setShowGradePicker(false);
                   return;
@@ -1744,14 +1746,15 @@ const Attendance = () => {
                                 const isPresent = attCell?.status === "Present";
                                 const isAbsent = attCell?.status === "Absent";
                                 const isExcused = attCell?.status === "Excused";
+                                const canBeGraded = isPresent || isExcused;
 
                                 return (
                                   <td
                                     key={dIdx}
-                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!isPresent ? "grade-cell-disabled-gray" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
+                                    className={`td-attendance-cell td-grade-cell ${isToday ? "td-cell-today" : ""} ${isLockedForTeacher ? "grade-cell-locked" : ""} ${!canBeGraded ? "grade-cell-disabled-absent" : ""} ${activeGradeCell === cellKey ? "grade-cell-active" : ""}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (!isPresent) return; // Darsda qatnashmagan: bossa ishlamaydi!
+                                      if (!canBeGraded) return;
                                       if (isFuture) {
                                         toast.info(`⏳ Kelajakdagi dars sanasi (${d.fullDate})! Dars kuni kelganda baholash ochiladi.`);
                                         return;
@@ -1771,7 +1774,6 @@ const Attendance = () => {
                                         }
                                         return;
                                       }
-                                      // Toggle vertical grade picker & active focus (1-rasm va 2-rasm)
                                       if (activeGradeCell === cellKey) {
                                         if (showGradePicker) {
                                           setShowGradePicker(false);
@@ -1784,15 +1786,16 @@ const Attendance = () => {
                                       }
                                     }}
                                   title={
-                                    !isPresent
-                                      ? `${student.fullName} — Darsda qatnashmagan (Baholab bo'lmaydi)`
+                                    !canBeGraded
+                                      ? `${student.fullName} — Darsga kelmagan (Baholab bo'lmaydi)`
+                                      : isExcused
+                                      ? `${student.fullName} — Kech qolib kelgan (${score ? score + ' Ball' : 'Baholash uchun bosing'})`
                                       : isLockedForTeacher && isPast
                                       ? `${student.fullName} — O'tib ketgan dars (Faqat Admin o'zgartira oladi)`
                                       : `${student.fullName} — ${d.dayStr}: ${score ? score + ' Ball' : 'Baholanmagan (Bosing yoki 1-10 tering)'}`
                                   }
                                 >
-                                  {/* Vertical 0-10 Oxford LC-UP Grade Pill Popover (1-rasm) */}
-                                  {isPresent && !isLockedForTeacher && activeGradeCell === cellKey && showGradePicker && (
+                                  {canBeGraded && !isLockedForTeacher && activeGradeCell === cellKey && showGradePicker && (
                                     <div
                                       className="lc-oxford-vert-grade-picker"
                                       onClick={(e) => e.stopPropagation()}
@@ -1831,21 +1834,30 @@ const Attendance = () => {
                                     </div>
                                   )}
 
-                                  {/* Watermark Lock Icon on top right for past locked dates */}
-                                  {isLockedForTeacher && isPast && isPresent && (
+                                  {isLockedForTeacher && isPast && canBeGraded && (
                                     <HiOutlineLockClosed
                                       className="cell-corner-lock-icon"
                                       title="O'tib ketgan dars — Faqat Admin o'zgartira oladi"
                                     />
                                   )}
 
-                                  {/* Katakcha tarkibi (Ixcham quti) */}
                                   <div className={`grade-cell-box ${activeGradeCell === cellKey ? "is-active" : ""}`}>
-                                    {!isPresent ? (
-                                      <div className="cell-grade-gray-disabled" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)"></div>
+                                    {!canBeGraded ? (
+                                      <div className="cell-grade-absent-black" title="Darsga kelmagan (Baho qo'yib bo'lmaydi)">
+                                        <span className="absent-mini-dash"></span>
+                                      </div>
                                     ) : score != null ? (
                                       <div className={`cell-grade-badge score-badge-${score >= 8 ? "high" : score >= 6 ? "mid" : score >= 3 ? "yellow" : "low"}`}>
                                         {score}
+                                        {isExcused && (
+                                          <span className="cell-late-clock-indicator" title="Darsga kech qolib kelgan">
+                                            <HiOutlineClock />
+                                          </span>
+                                        )}
+                                      </div>
+                                    ) : isExcused ? (
+                                      <div className="cell-grade-empty-capsule capsule-late" title="Darsga kech qolib kelgan — Baholash uchun bosing">
+                                        <HiOutlineClock className="capsule-late-icon" />
                                       </div>
                                     ) : (
                                       <div className="cell-grade-empty-capsule" title="Baholash uchun bosing"></div>
