@@ -16,25 +16,63 @@ import {
   HiOutlineSun,
   HiOutlineMoon,
   HiOutlineSparkles,
+  HiOutlinePlus,
+  HiOutlineTrash,
+  HiOutlinePencilSquare,
+  HiOutlineLockClosed,
+  HiOutlineAcademicCap,
+  HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap } from "react-icons/fa6";
 import "./SettingsModal.css";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const toast = useToast();
-  const { user, currentRole, changePassword, updateProfile } = useEduAuth();
+  const {
+    user,
+    currentRole,
+    allTeachers,
+    adminPassword,
+    teacherPassword,
+    studentPassword,
+    teacherCustomPasswords,
+    changeAdminPassword,
+    changeTeacherPassword,
+    changeStudentPassword,
+    setTeacherIndividualPassword,
+    removeTeacherIndividualPassword,
+    updateProfile,
+  } = useEduAuth();
   const { isDark, toggleTheme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState("security"); // "security" | "profile" | "center" | "notifications"
+  // Active Tab: "admin_pass" | "teacher_pass" | "student_pass" | "profile" | "center" | "notifications"
+  const [activeTab, setActiveTab] = useState("admin_pass");
 
-  // Password state
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPass, setShowCurrentPass] = useState(false);
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
-  const [isSubmittingPass, setIsSubmittingPass] = useState(false);
+  // Admin Password state
+  const [currentAdminPass, setCurrentAdminPass] = useState("");
+  const [newAdminPass, setNewAdminPass] = useState("");
+  const [confirmAdminPass, setConfirmAdminPass] = useState("");
+  const [showCurrentAdminPass, setShowCurrentAdminPass] = useState(false);
+  const [showNewAdminPass, setShowNewAdminPass] = useState(false);
+  const [showConfirmAdminPass, setShowConfirmAdminPass] = useState(false);
+  const [isSubmittingAdminPass, setIsSubmittingAdminPass] = useState(false);
+
+  // General Teacher Password state
+  const [newTeacherGeneralPass, setNewTeacherGeneralPass] = useState("");
+  const [showTeacherGeneralPass, setShowTeacherGeneralPass] = useState(false);
+  const [isSubmittingTeacherGenPass, setIsSubmittingTeacherGenPass] = useState(false);
+
+  // Individual Teacher Password Form state
+  const [selectedTeacherId, setSelectedTeacherId] = useState(allTeachers[0]?.id || "");
+  const [customTeacherPass, setCustomTeacherPass] = useState("");
+  const [showCustomTeacherPass, setShowCustomTeacherPass] = useState(false);
+  const [isSubmittingTeacherCustom, setIsSubmittingTeacherCustom] = useState(false);
+  const [revealedTeacherPasswords, setRevealedTeacherPasswords] = useState({});
+
+  // Student Password state
+  const [newStudentGeneralPass, setNewStudentGeneralPass] = useState("");
+  const [showStudentPass, setShowStudentPass] = useState(false);
+  const [isSubmittingStudentPass, setIsSubmittingStudentPass] = useState(false);
 
   // Profile state
   const [profileName, setProfileName] = useState(user?.name || user?.fullName || "Abdulaziz Abdulhayev");
@@ -78,43 +116,134 @@ const SettingsModal = ({ isOpen, onClose }) => {
     return { score: 100, label: "Kuchli (A'lo)", colorClass: "strength-strong" };
   };
 
-  const passStrength = getPasswordStrength(newPassword);
+  const adminPassStrength = getPasswordStrength(newAdminPass);
 
-  const handlePasswordSubmit = async (e) => {
+  // 1. Admin parolini yangilash
+  const handleAdminPasswordSubmit = async (e) => {
     e.preventDefault();
 
-    if (!currentPassword) {
-      toast.warning("Hozirgi parolingizni kiriting!");
+    if (!currentAdminPass) {
+      toast.warning("Hozirgi admin parolingizni kiriting!");
       return;
     }
-    if (!newPassword || newPassword.length < 4) {
+    if (!newAdminPass || newAdminPass.length < 4) {
       toast.warning("Yangi parol kamida 4 ta belgidan iborat bo'lishi kerak!");
       return;
     }
-    if (newPassword !== confirmPassword) {
+    if (newAdminPass !== confirmAdminPass) {
       toast.error("Yangi parollar bir-biriga mos kelmadi! Qaytadan tekshiring.");
       return;
     }
 
-    setIsSubmittingPass(true);
+    setIsSubmittingAdminPass(true);
     try {
       await new Promise((r) => setTimeout(r, 400));
-      const res = changePassword(currentPassword, newPassword);
+      const res = changeAdminPassword(currentAdminPass, newAdminPass);
       if (res.success) {
-        toast.success("Parol muvaffaqiyatli yangilandi va saqlandi! 🔐✅");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
+        toast.success("Bosh Admin paroli muvaffaqiyatli yangilandi va saqlandi! 👑✅");
+        setCurrentAdminPass("");
+        setNewAdminPass("");
+        setConfirmAdminPass("");
       } else {
         toast.error(res.message);
       }
     } catch {
       toast.error("Parolni yangilashda xatolik yuz berdi!");
     } finally {
-      setIsSubmittingPass(false);
+      setIsSubmittingAdminPass(false);
     }
   };
 
+  // 2. Umumiy O'qituvchi parolini yangilash
+  const handleTeacherGeneralSubmit = async (e) => {
+    e.preventDefault();
+    if (!newTeacherGeneralPass || newTeacherGeneralPass.length < 4) {
+      toast.warning("O'qituvchi paroli kamida 4 ta belgidan iborat bo'lishi kerak!");
+      return;
+    }
+
+    setIsSubmittingTeacherGenPass(true);
+    try {
+      await new Promise((r) => setTimeout(r, 350));
+      const res = changeTeacherPassword(newTeacherGeneralPass);
+      if (res.success) {
+        toast.success("Umumiy o'qituvchi paroli saqlandi! 👨‍🏫✅");
+        setNewTeacherGeneralPass("");
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("Parolni saqlashda xatolik yuz berdi!");
+    } finally {
+      setIsSubmittingTeacherGenPass(false);
+    }
+  };
+
+  // 3. O'qituvchiga shaxsiy yangi parol biriktirish
+  const handleTeacherCustomSubmit = async (e) => {
+    e.preventDefault();
+    const teacherId = selectedTeacherId || allTeachers[0]?.id;
+    const targetTeacher = allTeachers.find((t) => String(t.id) === String(teacherId));
+    const teacherName = targetTeacher?.name || `O'qituvchi #${teacherId}`;
+
+    if (!customTeacherPass || customTeacherPass.length < 4) {
+      toast.warning("Shaxsiy parol kamida 4 ta belgidan iborat bo'lishi kerak!");
+      return;
+    }
+
+    setIsSubmittingTeacherCustom(true);
+    try {
+      await new Promise((r) => setTimeout(r, 300));
+      const res = setTeacherIndividualPassword(teacherId, teacherName, customTeacherPass);
+      if (res.success) {
+        toast.success(`${teacherName} uchun maxsus parol biriktirildi! 🔐✅`);
+        setCustomTeacherPass("");
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("O'qituvchi parolini saqlashda xatolik!");
+    } finally {
+      setIsSubmittingTeacherCustom(false);
+    }
+  };
+
+  // 4. O'qituvchi shaxsiy parolini o'chirish (Umumiy parolga qaytarish)
+  const handleRemoveTeacherCustomPass = (teacherId, teacherName) => {
+    if (window.confirm(`${teacherName} ning shaxsiy parolini o'chirib, umumiy o'qituvchi paroliga qaytaramizmi?`)) {
+      const res = removeTeacherIndividualPassword(teacherId);
+      if (res.success) {
+        toast.info(`${teacherName} umumiy parolga o'tkazildi.`);
+      }
+    }
+  };
+
+  // 5. O'quvchi parolini yangilash
+  const handleStudentGeneralSubmit = async (e) => {
+    e.preventDefault();
+    if (!newStudentGeneralPass || newStudentGeneralPass.length < 4) {
+      toast.warning("O'quvchi paroli kamida 4 ta belgidan iborat bo'lishi kerak!");
+      return;
+    }
+
+    setIsSubmittingStudentPass(true);
+    try {
+      await new Promise((r) => setTimeout(r, 300));
+      const res = changeStudentPassword(newStudentGeneralPass);
+      if (res.success) {
+        toast.success("O'quvchi paroli muvaffaqiyatli saqlandi! 🎓✅");
+        setNewStudentGeneralPass("");
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("O'quvchi parolini saqlashda xatolik!");
+    } finally {
+      setIsSubmittingStudentPass(false);
+    }
+  };
+
+  // 6. Profilni saqlash
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     if (!profileName.trim()) {
@@ -139,6 +268,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // 7. O'quv markazi sozlamalarini saqlash
   const handleCenterSubmit = (e) => {
     e.preventDefault();
     try {
@@ -163,6 +293,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
     setTgAlertsEnabled(next);
     localStorage.setItem("velnex_tg_alerts_enabled", String(next));
     toast.info(next ? "Telegram bildirishnomalar faol 🤖" : "Telegram bildirishnomalar o'chirildi");
+  };
+
+  const toggleTeacherPassVisibility = (teacherId) => {
+    setRevealedTeacherPasswords((prev) => ({
+      ...prev,
+      [teacherId]: !prev[teacherId],
+    }));
   };
 
   return (
@@ -190,17 +327,31 @@ const SettingsModal = ({ isOpen, onClose }) => {
         <div className="settings-tabs-bar">
           <button
             type="button"
-            className={`settings-tab-btn ${activeTab === "security" ? "active" : ""}`}
-            onClick={() => setActiveTab("security")}
+            className={`settings-tab-btn ${activeTab === "admin_pass" ? "active" : ""}`}
+            onClick={() => setActiveTab("admin_pass")}
           >
-            <HiOutlineKey /> Xavfsizlik & Parol
+            <FaCrown className="tab-crown-icon" /> Admin Paroli
+          </button>
+          <button
+            type="button"
+            className={`settings-tab-btn ${activeTab === "teacher_pass" ? "active" : ""}`}
+            onClick={() => setActiveTab("teacher_pass")}
+          >
+            <FaChalkboardUser className="tab-teacher-icon" /> O'qituvchi Paroli
+          </button>
+          <button
+            type="button"
+            className={`settings-tab-btn ${activeTab === "student_pass" ? "active" : ""}`}
+            onClick={() => setActiveTab("student_pass")}
+          >
+            <FaGraduationCap className="tab-student-icon" /> O'quvchi Paroli
           </button>
           <button
             type="button"
             className={`settings-tab-btn ${activeTab === "profile" ? "active" : ""}`}
             onClick={() => setActiveTab("profile")}
           >
-            <HiOutlineUser /> Profil Ma'lumotlari
+            <HiOutlineUser /> Profil
           </button>
           <button
             type="button"
@@ -214,84 +365,84 @@ const SettingsModal = ({ isOpen, onClose }) => {
             className={`settings-tab-btn ${activeTab === "notifications" ? "active" : ""}`}
             onClick={() => setActiveTab("notifications")}
           >
-            <HiOutlineBell /> Bildirishnoma & Tizim
+            <HiOutlineBell /> Tizim & Ovoz
           </button>
         </div>
 
         {/* Content Body */}
         <div className="settings-modal-body">
-          {/* TAB 1: XAVFSIZLIK & YANGI PAROL */}
-          {activeTab === "security" && (
-            <form onSubmit={handlePasswordSubmit} className="settings-form">
+          {/* TAB 1: ADMIN PAROLI */}
+          {activeTab === "admin_pass" && (
+            <form onSubmit={handleAdminPasswordSubmit} className="settings-form">
               <div className="settings-info-alert">
-                <HiOutlineShieldCheck className="alert-shield-icon" />
+                <FaCrown className="alert-shield-icon text-amber" />
                 <div>
-                  <strong>Parolni Yangilash Xavfsizligi</strong>
+                  <strong>Bosh Administrator Xavfsizlik Paroli</strong>
                   <p>
-                    Yangi parolingiz saqlangandan so'ng, keyingi barcha kirishlarda va ruxsat berishlarda aynan yangi parolingiz amal qiladi.
+                    Admin panel, guruhlarni boshqarish, o'qituvchilar va to'lovlarni nazorat qilish uchun asosiy admin parolini yangilang.
                   </p>
                 </div>
               </div>
 
               <div className="settings-form-group">
                 <label className="settings-label">
-                  Hozirgi Parol: <span className="text-danger">*</span>
+                  Hozirgi Admin Paroli: <span className="text-danger">*</span>
                 </label>
                 <div className="settings-input-wrap">
                   <input
-                    type={showCurrentPass ? "text" : "password"}
+                    type={showCurrentAdminPass ? "text" : "password"}
                     className="settings-input"
-                    placeholder="Hozirgi parolingizni kiriting"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Hozirgi admin parolingizni kiriting"
+                    value={currentAdminPass}
+                    onChange={(e) => setCurrentAdminPass(e.target.value)}
                     required
                   />
                   <button
                     type="button"
                     className="btn-eye-toggle"
-                    onClick={() => setShowCurrentPass(!showCurrentPass)}
+                    onClick={() => setShowCurrentAdminPass(!showCurrentAdminPass)}
                     tabIndex={-1}
                   >
-                    {showCurrentPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                    {showCurrentAdminPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
                   </button>
                 </div>
-                <small className="settings-hint">Standart dastlabki parol: <code>10102013</code></small>
+                <small className="settings-hint">Standart boshlang'ich admin paroli: <code>10102013</code></small>
               </div>
 
               <div className="settings-form-row">
                 <div className="settings-form-group flex-1">
                   <label className="settings-label">
-                    Yangi Parol: <span className="text-danger">*</span>
+                    Yangi Admin Paroli: <span className="text-danger">*</span>
                   </label>
                   <div className="settings-input-wrap">
                     <input
-                      type={showNewPass ? "text" : "password"}
+                      type={showNewAdminPass ? "text" : "password"}
                       className="settings-input"
                       placeholder="Kamida 4 ta belgi"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      value={newAdminPass}
+                      onChange={(e) => setNewAdminPass(e.target.value)}
                       required
                     />
                     <button
                       type="button"
                       className="btn-eye-toggle"
-                      onClick={() => setShowNewPass(!showNewPass)}
+                      onClick={() => setShowNewAdminPass(!showNewAdminPass)}
                       tabIndex={-1}
                     >
-                      {showNewPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                      {showNewAdminPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
                     </button>
                   </div>
 
-                  {newPassword && (
+                  {newAdminPass && (
                     <div className="password-strength-container">
                       <div className="strength-bar-bg">
                         <div
-                          className={`strength-bar-fill ${passStrength.colorClass}`}
-                          style={{ width: `${passStrength.score}%` }}
+                          className={`strength-bar-fill ${adminPassStrength.colorClass}`}
+                          style={{ width: `${adminPassStrength.score}%` }}
                         ></div>
                       </div>
-                      <span className={`strength-label ${passStrength.colorClass}`}>
-                        Daraja: {passStrength.label}
+                      <span className={`strength-label ${adminPassStrength.colorClass}`}>
+                        Daraja: {adminPassStrength.label}
                       </span>
                     </div>
                   )}
@@ -303,27 +454,27 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   </label>
                   <div className="settings-input-wrap">
                     <input
-                      type={showConfirmPass ? "text" : "password"}
+                      type={showConfirmAdminPass ? "text" : "password"}
                       className="settings-input"
-                      placeholder="Yangi parolni tasdiqlang"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Yangi admin parolini tasdiqlang"
+                      value={confirmAdminPass}
+                      onChange={(e) => setConfirmAdminPass(e.target.value)}
                       required
                     />
                     <button
                       type="button"
                       className="btn-eye-toggle"
-                      onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      onClick={() => setShowConfirmAdminPass(!showConfirmAdminPass)}
                       tabIndex={-1}
                     >
-                      {showConfirmPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                      {showConfirmAdminPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
                     </button>
                   </div>
 
-                  {confirmPassword && (
+                  {confirmAdminPass && (
                     <div className="match-status-hint">
-                      {newPassword === confirmPassword ? (
-                        <span className="text-emerald font-semibold">✓ Parollar mos keldi</span>
+                      {newAdminPass === confirmAdminPass ? (
+                        <span className="text-emerald font-semibold">✓ Parollar bir-biriga mos keldi</span>
                       ) : (
                         <span className="text-danger font-semibold">✕ Parollar bir xil emas</span>
                       )}
@@ -336,20 +487,299 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <button
                   type="submit"
                   className="btn btn-primary settings-submit-btn"
-                  disabled={isSubmittingPass || (newPassword && newPassword !== confirmPassword)}
+                  disabled={isSubmittingAdminPass || (newAdminPass && newAdminPass !== confirmAdminPass)}
                 >
-                  {isSubmittingPass ? (
+                  {isSubmittingAdminPass ? (
                     <>
                       <span className="settings-mini-spinner"></span> Saqlanmoqda...
                     </>
                   ) : (
                     <>
-                      <HiOutlineKey /> Yangi Parolni Saqlash
+                      <FaCrown /> Admin Parolini Saqlash
                     </>
                   )}
                 </button>
               </div>
             </form>
+          )}
+
+          {/* TAB 2: O'QITUVCHI PAROLLARI & YANGI PAROL QO'SHISH */}
+          {activeTab === "teacher_pass" && (
+            <div className="settings-form">
+              {/* 1. Umumiy O'qituvchi Paroli */}
+              <div className="teacher-password-section-box">
+                <div className="section-box-header">
+                  <div className="box-header-title">
+                    <FaChalkboardUser className="header-box-icon text-indigo" />
+                    <div>
+                      <h4 className="box-title">Barcha O'qituvchilar Uchun Umumiy Parol</h4>
+                      <p className="box-desc">
+                        Maxsus shaxsiy parol biriktirilmagan barcha o'qituvchilar ushbu parol orqali tizimga kiradilar.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="current-password-badge">
+                    <span className="badge-caption">Joriy umumiy parol:</span>
+                    <strong className="badge-value">
+                      {showTeacherGeneralPass ? teacherPassword : "••••••••"}
+                    </strong>
+                    <button
+                      type="button"
+                      className="btn-mini-eye"
+                      onClick={() => setShowTeacherGeneralPass(!showTeacherGeneralPass)}
+                      title={showTeacherGeneralPass ? "Yashirish" : "Ko'rsatish"}
+                    >
+                      {showTeacherGeneralPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <form onSubmit={handleTeacherGeneralSubmit} className="section-box-form">
+                  <div className="form-inline-group">
+                    <input
+                      type="text"
+                      className="settings-input"
+                      placeholder="Yangi umumiy o'qituvchi paroli (masalan: ustoz2026)"
+                      value={newTeacherGeneralPass}
+                      onChange={(e) => setNewTeacherGeneralPass(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-save-inline"
+                      disabled={isSubmittingTeacherGenPass || !newTeacherGeneralPass}
+                    >
+                      {isSubmittingTeacherGenPass ? "Saqlanmoqda..." : "Umumiy Parolni Saqlash"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* 2. O'qituvchiga Yangi Shaxsiy Parol Qo'shish / Biriktirish */}
+              <div className="teacher-password-section-box add-custom-pass-box">
+                <div className="section-box-header">
+                  <div className="box-header-title">
+                    <HiOutlinePlus className="header-box-icon text-emerald" />
+                    <div>
+                      <h4 className="box-title">O'qituvchiga Yangi Maxsus Parol Biriktirish</h4>
+                      <p className="box-desc">
+                        Tanlangan o'qituvchi uchun individual shaxsiy parol o'rnating. U faqat o'ziga tegishli parol bilan kiradi.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleTeacherCustomSubmit} className="section-box-form">
+                  <div className="settings-form-row">
+                    <div className="settings-form-group flex-1">
+                      <label className="settings-label">O'qituvchini Tanlang:</label>
+                      <select
+                        className="settings-input settings-select"
+                        value={selectedTeacherId}
+                        onChange={(e) => setSelectedTeacherId(e.target.value)}
+                        required
+                      >
+                        {allTeachers.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name} — {t.subject || "Ustoz"} ({t.phone || "Aloqa mavjud"})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="settings-form-group flex-1">
+                      <label className="settings-label">Ushbu O'qituvchi Uchun Yangi Parol:</label>
+                      <div className="settings-input-wrap">
+                        <input
+                          type={showCustomTeacherPass ? "text" : "password"}
+                          className="settings-input"
+                          placeholder="Shaxsiy yangi parol kiritish"
+                          value={customTeacherPass}
+                          onChange={(e) => setCustomTeacherPass(e.target.value)}
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="btn-eye-toggle"
+                          onClick={() => setShowCustomTeacherPass(!showCustomTeacherPass)}
+                          tabIndex={-1}
+                        >
+                          {showCustomTeacherPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="box-action-row">
+                    <button
+                      type="submit"
+                      className="btn btn-emerald settings-submit-btn"
+                      disabled={isSubmittingTeacherCustom || !customTeacherPass}
+                    >
+                      {isSubmittingTeacherCustom ? (
+                        <>
+                          <span className="settings-mini-spinner"></span> Saqlanmoqda...
+                        </>
+                      ) : (
+                        <>
+                          <HiOutlinePlus /> O'qituvchiga Parol Qo'shish & Saqlash
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* 3. Mavjud O'qituvchilar Parollari Ro'yxati */}
+              <div className="teacher-passwords-list-wrap">
+                <div className="list-wrap-header">
+                  <h4 className="list-title">
+                    <HiOutlineLockClosed className="text-indigo" /> O'qituvchilar Parollari Holati
+                  </h4>
+                  <span className="teachers-count-pill">{allTeachers.length} ta o'qituvchi</span>
+                </div>
+
+                <div className="teacher-pass-cards-grid">
+                  {allTeachers.map((teacher) => {
+                    const customData = teacherCustomPasswords[teacher.id];
+                    const hasCustom = Boolean(customData);
+                    const currentPassVal = typeof customData === "string" ? customData : customData?.password;
+                    const isPassVisible = revealedTeacherPasswords[teacher.id];
+
+                    return (
+                      <div key={teacher.id} className={`teacher-pass-card ${hasCustom ? "has-custom-pass" : "has-general-pass"}`}>
+                        <div className="card-top-row">
+                          <div className="teacher-info-block">
+                            <div className="teacher-avatar-sq">
+                              <FaChalkboardUser />
+                            </div>
+                            <div>
+                              <strong className="teacher-card-name">{teacher.name}</strong>
+                              <span className="teacher-card-subject">{teacher.subject || "O'qituvchi"}</span>
+                            </div>
+                          </div>
+
+                          <div className="pass-status-pill">
+                            {hasCustom ? (
+                              <span className="badge-custom-active">Shaxsiy Parol</span>
+                            ) : (
+                              <span className="badge-general-active">Umumiy Parol</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="card-pass-row">
+                          <span className="pass-key-label">Kirish Paroli:</span>
+                          <div className="pass-val-container">
+                            <span className="pass-code-text">
+                              {hasCustom
+                                ? (isPassVisible ? currentPassVal : "••••••••")
+                                : (isPassVisible ? teacherPassword : "••••••••")}
+                            </span>
+                            <button
+                              type="button"
+                              className="btn-pass-peek"
+                              onClick={() => toggleTeacherPassVisibility(teacher.id)}
+                              title={isPassVisible ? "Parolni yashirish" : "Parolni ko'rish"}
+                            >
+                              {isPassVisible ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="card-actions-row">
+                          {hasCustom ? (
+                            <button
+                              type="button"
+                              className="btn-revert-general"
+                              onClick={() => handleRemoveTeacherCustomPass(teacher.id, teacher.name)}
+                              title="Shaxsiy parolni o'chirib, umumiy parolga o'tkazish"
+                            >
+                              <HiOutlineTrash /> Umumiyga Qaytarish
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn-assign-quick"
+                              onClick={() => {
+                                setSelectedTeacherId(teacher.id);
+                                const addBox = document.querySelector(".add-custom-pass-box");
+                                if (addBox) addBox.scrollIntoView({ behavior: "smooth" });
+                              }}
+                            >
+                              <HiOutlinePlus /> Shaxsiy Parol Qo'yish
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: O'QUVCHI PAROLI */}
+          {activeTab === "student_pass" && (
+            <div className="settings-form">
+              <div className="settings-info-alert">
+                <FaGraduationCap className="alert-shield-icon text-emerald" />
+                <div>
+                  <strong>O'quvchilar Kabineti Kirish Paroli</strong>
+                  <p>
+                    O'quvchilar va talabalar shaxsiy kabinetiga, o'z baholari va to'lovlarini ko'rish uchun kiradigan umumiy parol.
+                  </p>
+                </div>
+              </div>
+
+              <div className="teacher-password-section-box">
+                <div className="section-box-header">
+                  <div className="box-header-title">
+                    <FaGraduationCap className="header-box-icon text-emerald" />
+                    <div>
+                      <h4 className="box-title">O'quvchilar Uchun Umumiy Parol</h4>
+                      <p className="box-desc">
+                        O'quvchilar tizimga kirishida talab qilinadigan kirish paroli.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="current-password-badge">
+                    <span className="badge-caption">Joriy parol:</span>
+                    <strong className="badge-value">
+                      {showStudentPass ? studentPassword : "••••••••"}
+                    </strong>
+                    <button
+                      type="button"
+                      className="btn-mini-eye"
+                      onClick={() => setShowStudentPass(!showStudentPass)}
+                      title={showStudentPass ? "Yashirish" : "Ko'rsatish"}
+                    >
+                      {showStudentPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <form onSubmit={handleStudentGeneralSubmit} className="section-box-form">
+                  <div className="form-inline-group">
+                    <input
+                      type="text"
+                      className="settings-input"
+                      placeholder="Yangi o'quvchi paroli (masalan: talaba2026)"
+                      value={newStudentGeneralPass}
+                      onChange={(e) => setNewStudentGeneralPass(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="btn btn-emerald btn-save-inline"
+                      disabled={isSubmittingStudentPass || !newStudentGeneralPass}
+                    >
+                      {isSubmittingStudentPass ? "Saqlanmoqda..." : "O'quvchi Parolini Saqlash"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           )}
 
           {/* TAB 2: PROFIL MA'LUMOTLARI */}
