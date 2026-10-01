@@ -28,11 +28,13 @@ import {
   HiOutlineChevronDown,
   HiOutlineArrowPath,
   HiSun,
-  HiMoon
+  HiMoon,
+  HiOutlineCog6Tooth
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap, FaTelegram } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
 import { useTheme } from "../../context/ThemeContext";
+import SettingsModal from "../SettingsModal/SettingsModal";
 import "./Header.css";
 const DEFAULT_TEST_NOTIFICATIONS = [
   {
@@ -124,6 +126,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
 
   const { isDark, toggleTheme } = useTheme();
 
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [targetRole, setTargetRole] = useState("admin");
   const [targetUserId, setTargetUserId] = useState(201);
@@ -395,32 +398,7 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               <code className="cmd-kbd">Ctrl + K</code>
             </button>
 
-            <div className="role-switcher-container desktop-only-roles">
-              <div className="role-buttons">
-                <button
-                  className={`role-btn ${currentRole === "admin" ? "active" : ""}`}
-                  onClick={() => openAuthModal("admin")}
-                  title="Admin sifatida kiring"
-                >
-                  <FaCrown /> <span>Admin</span>
-                </button>
-                <button
-                  className={`role-btn ${currentRole === "teacher" ? "active" : ""}`}
-                  onClick={() => openAuthModal("teacher")}
-                  title="O'qituvchi sifatida kiring"
-                >
-                  <FaChalkboardUser /> <span>O'qituvchi</span>
-                </button>
-                <button
-                  className={`role-btn ${currentRole === "student" ? "active" : ""}`}
-                  onClick={() => openAuthModal("student")}
-                  title="O'quvchi sifatida kiring"
-                >
-                  <FaGraduationCap /> <span>O'quvchi</span>
-                </button>
-              </div>
-            </div>
-
+            {/* Bildirishnomalar markazi */}
             <button
               type="button"
               className={`crm-notif-btn ${isNotifModalOpen ? "active" : ""}`}
@@ -446,6 +424,17 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
               )}
             </button>
 
+            {/* Nastroyka / Sozlamalar & Parol yangilash */}
+            <button
+              type="button"
+              className="crm-settings-btn"
+              onClick={() => setIsSettingsModalOpen(true)}
+              title="Tizim sozlamalari & Yangi parol o'rnatish"
+              aria-label="Sozlamalar"
+            >
+              <HiOutlineCog6Tooth className="settings-btn-icon" />
+            </button>
+
             <button
               className="crm-logout-btn"
               onClick={handleLogout}
@@ -453,31 +442,6 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             >
               <HiOutlineArrowRightOnRectangle className="logout-icon" />
             </button>
-          </div>
-        </div>
-
-        <div className="header-mobile-roles-row">
-          <div className="role-switcher-container mobile-role-container">
-            <div className="role-buttons">
-              <button
-                className={`role-btn ${currentRole === "admin" ? "active" : ""}`}
-                onClick={() => openAuthModal("admin")}
-              >
-                <FaCrown /> <span>Admin</span>
-              </button>
-              <button
-                className={`role-btn ${currentRole === "teacher" ? "active" : ""}`}
-                onClick={() => openAuthModal("teacher")}
-              >
-                <FaChalkboardUser /> <span>O'qituvchi</span>
-              </button>
-              <button
-                className={`role-btn ${currentRole === "student" ? "active" : ""}`}
-                onClick={() => openAuthModal("student")}
-              >
-                <FaGraduationCap /> <span>O'quvchi</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -976,6 +940,12 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
           </div>
         </div>
       )}
+
+      {/* Nastroyka / Sozlamalar & Yangi Parol Modali */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </header>
   );
 };

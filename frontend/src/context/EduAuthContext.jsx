@@ -51,6 +51,19 @@ export const EduAuthProvider = ({ children }) => {
     fetchAuthUsers();
   }, []);
 
+  const [customPassword, setCustomPassword] = useState(() => {
+    return localStorage.getItem("velnex_custom_password") || "10102013";
+  });
+
+  const [profileOverride, setProfileOverride] = useState(() => {
+    try {
+      const saved = localStorage.getItem("velnex_user_profile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const getUserObject = (role, userId) => {
     let found;
     if (role === "admin") {
@@ -60,10 +73,39 @@ export const EduAuthProvider = ({ children }) => {
     } else {
       found = liveStudents.find((s) => s.id === userId) || liveStudents[0];
     }
-    return found || DEFAULT_USER;
+    const base = found || DEFAULT_USER;
+    return profileOverride ? { ...base, ...profileOverride } : base;
   };
 
   const user = getUserObject(currentRole, selectedUserId);
+
+  const getValidPasswords = () => {
+    return [customPassword, "10102013", "1010201300"];
+  };
+
+  const changePassword = (currentPass, newPass) => {
+    const validList = getValidPasswords();
+    if (!validList.includes(currentPass.trim())) {
+      return { success: false, message: "Hozirgi parol noto'g'ri kiritildi!" };
+    }
+    if (!newPass || newPass.trim().length < 4) {
+      return { success: false, message: "Yangi parol kamida 4 ta belgidan iborat bo'lishi kerak!" };
+    }
+    setCustomPassword(newPass.trim());
+    try {
+      localStorage.setItem("velnex_custom_password", newPass.trim());
+    } catch {}
+    return { success: true, message: "Parol muvaffaqiyatli yangilandi!" };
+  };
+
+  const updateProfile = (profileData) => {
+    const updated = { ...user, ...profileData };
+    setProfileOverride(updated);
+    try {
+      localStorage.setItem("velnex_user_profile", JSON.stringify(updated));
+    } catch {}
+    return { success: true, message: "Profil ma'lumotlari muvaffaqiyatli saqlandi!" };
+  };
 
   const login = (identifier, password, roleHint = "admin") => {
     setAuthError("");
@@ -73,7 +115,7 @@ export const EduAuthProvider = ({ children }) => {
       return false;
     }
 
-    if (!password || !VALID_PASSWORDS.includes(password.trim())) {
+    if (!password || !getValidPasswords().includes(password.trim())) {
       setAuthError("Noto'g'ri parol kiritildi! Iltimos qaytadan urinib ko'ring.");
       return false;
     }
@@ -121,7 +163,7 @@ export const EduAuthProvider = ({ children }) => {
   const switchRoleWithPassword = (newRole, password, targetUserId) => {
     setAuthError("");
 
-    if (VALID_PASSWORDS.includes(password.trim())) {
+    if (getValidPasswords().includes(password.trim())) {
       setCurrentRole(newRole);
       const newUserId =
         targetUserId ||
@@ -166,6 +208,9 @@ export const EduAuthProvider = ({ children }) => {
         canManageStudents,
         canMarkAttendance,
         canManagePayments,
+        changePassword,
+        updateProfile,
+        customPassword,
         allAdmins: INITIAL_ADMINS,
         allTeachers: liveTeachers.length > 0 ? liveTeachers : [{ id: 101, name: "Abdulaziz Abdulhayev", subject: "Frontend ReactJS" }],
         allStudents: liveStudents.length > 0 ? liveStudents : [{ id: 1, name: "Abdulaziz Abdulhayev", groupName: "F-12 Guruh" }],
