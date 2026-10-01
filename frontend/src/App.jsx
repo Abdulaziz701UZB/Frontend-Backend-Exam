@@ -24,6 +24,7 @@ import Landing from "./pages/Landing/Landing";
 
 import { EduAuthProvider, useEduAuth } from "./context/EduAuthContext";
 import { ToastProvider } from "./context/ToastContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import "./App.css";
 
 function ProtectedApp() {
@@ -122,13 +123,15 @@ function MainRoutes() {
 
 function App() {
   return (
-    <ToastProvider>
-      <EduAuthProvider>
-        <Router>
-          <MainRoutes />
-        </Router>
-      </EduAuthProvider>
-    </ToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <EduAuthProvider>
+          <Router>
+            <MainRoutes />
+          </Router>
+        </EduAuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 

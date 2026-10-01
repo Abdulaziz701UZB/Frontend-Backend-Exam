@@ -26,10 +26,13 @@ import {
   HiOutlineChatBubbleLeftRight,
   HiOutlineCheckBadge,
   HiOutlineChevronDown,
-  HiOutlineArrowPath
+  HiOutlineArrowPath,
+  HiSun,
+  HiMoon
 } from "react-icons/hi2";
 import { FaCrown, FaChalkboardUser, FaGraduationCap, FaTelegram } from "react-icons/fa6";
 import { MdWavingHand } from "react-icons/md";
+import { useTheme } from "../../context/ThemeContext";
 import "./Header.css";
 const DEFAULT_TEST_NOTIFICATIONS = [
   {
@@ -118,6 +121,8 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
     allTeachers,
     allStudents,
   } = useEduAuth();
+
+  const { isDark, toggleTheme } = useTheme();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [targetRole, setTargetRole] = useState("admin");
@@ -424,6 +429,21 @@ const Header = ({ onToggleMobileMenu, onOpenCmdPalette }) => {
             >
               <HiOutlineBell className="notif-icon" />
               {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
+            </button>
+
+            {/* Yorug' / Qorong'u Rejim (Theme Switcher) */}
+            <button
+              type="button"
+              className={`crm-theme-btn ${isDark ? "theme-dark" : "theme-light"}`}
+              onClick={toggleTheme}
+              title={isDark ? "Yorug' rejimga o'tish (Light Mode)" : "Qorong'u rejimga o'tish (Dark Mode)"}
+              aria-label="Mavzuni o'zgartirish"
+            >
+              {isDark ? (
+                <HiSun className="theme-toggle-icon theme-sun-icon" />
+              ) : (
+                <HiMoon className="theme-toggle-icon theme-moon-icon" />
+              )}
             </button>
 
             <button

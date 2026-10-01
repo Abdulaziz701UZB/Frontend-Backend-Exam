@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEduAuth } from "../../context/EduAuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import {
   HiLockClosed,
   HiOutlineDevicePhoneMobile,
@@ -92,19 +93,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [localError, setLocalError] = useState("");
   const [showQrModal, setShowQrModal] = useState(false);
-  const [isDarkTheme, setIsDarkTheme] = useState(() => {
-    return localStorage.getItem("velnex_theme") === "dark" || document.body.classList.contains("dark-theme");
-  });
-
-  useEffect(() => {
-    if (isDarkTheme) {
-      document.body.classList.add("dark-theme");
-      localStorage.setItem("velnex_theme", "dark");
-    } else {
-      document.body.classList.remove("dark-theme");
-      localStorage.setItem("velnex_theme", "light");
-    }
-  }, [isDarkTheme]);
+  const { isDark: isDarkTheme, toggleTheme } = useTheme();
 
   const handleLangChange = (selectedLang) => {
     setLang(selectedLang);
@@ -112,10 +101,6 @@ const Login = () => {
   };
 
   const t = TRANSLATIONS[lang] || TRANSLATIONS.uz;
-
-  const toggleTheme = () => {
-    setIsDarkTheme((prev) => !prev);
-  };
 
   const format9DigitsOnly = (input) => {
     let digits = input.replace(/\D/g, "");
